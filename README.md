@@ -1,0 +1,39 @@
+# GetGogi Admin Dashboard
+
+Angular 17 standalone dashboard used to orchestrate menus, marketing, orders, and customer signals for the GetGogi team. The shell ships with a responsive sidebar, insight band, quick actions, and dedicated pages for each workflow.
+
+## Quick start
+
+```bash
+npm install
+npm start
+```
+
+The dev server runs at http://localhost:4200 and reloads on save.
+
+## Available scripts
+
+| Command | Description |
+| --- | --- |
+| `npm start` | Run the dev server with live reload (includes API proxy for CMS calls). |
+| `npm run build` | Produce an optimized production build in `dist/`. |
+| `npm test` | Execute unit tests with Karma. |
+| `npm run watch` | Build in watch mode for rapid previews. |
+
+## Feature map
+
+- **Overview** – KPI cards, readiness checks, and kitchen pipeline status.
+- **Menu Manager** – Inventory grid, upcoming drops, and bulk utilities.
+- **Marketing** – Campaign pacing plus channel insights.
+- **Orders** – Live fulfillment timeline and zone capacity board.
+- **Customers** – Segment snapshots and feedback queue.
+- **Settings** – Automation rules and access overview.
+
+## Architecture notes
+
+- Standalone Angular components with lazy loaded routes keep each page isolated.
+- SCSS styling relies on shared design tokens in `src/styles.scss` for consistent theming.
+- Navigation, highlight metrics, and action pads are driven by typed data in `app.component.ts` for easy updates.
+- Menu data can fall back to the mock set in `environment.useMockMenuApi`; flip it off once the live CMS endpoint is stable.
+
+Feel free to scaffold additional components with `ng generate component path/my-component --standalone --style=scss --skip-tests` to stay consistent with the current setup.

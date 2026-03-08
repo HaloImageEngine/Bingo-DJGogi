@@ -1,0 +1,44 @@
+<section class="page orders">
+	<header class="page__header">
+		<span class="tag accent-teal">Orders</span>
+		<h2>Order Fulfillment</h2>
+		<p>Track live batches, courier coverage, and delivery promises.</p>
+	</header>
+
+	<div class="panels">
+		<article class="surface-card">
+			<header>
+				<p class="eyebrow">Live timeline</p>
+				<h3>Recent order signals</h3>
+			</header>
+			<ul class="timeline">
+				<li *ngFor="let event of timeline" [attr.data-status]="event.status">
+					<div class="time">{{ event.time }}</div>
+					<div class="event-content">
+						<p class="area">{{ event.useralias }}</p>
+						<p class="detail">{{ event.detail }}</p>
+						<div class="event-meta">
+							<p class="amount">{{ event.amount }}</p>
+							<p class="status" [attr.data-status]="event.status">{{ event.status }}</p>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</article>
+
+		<article class="surface-card">
+			<header>
+				<p class="eyebrow">Capacity board</p>
+				<h3>Zones + riders</h3>
+			</header>
+			<div class="capacity-grid">
+				<div class="capacity" *ngFor="let slot of upcoming" [attr.data-risk]="slot.risk">
+					<p class="zone">{{ slot.zone }}</p>
+					<p class="load">{{ slot.load }}</p>
+					<p class="couriers">{{ slot.couriers }}</p>
+					<p class="eta">ETA {{ slot.eta }}</p>
+				</div>
+			</div>
+		</article>
+	</div>
+</section>

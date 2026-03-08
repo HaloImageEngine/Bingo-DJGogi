@@ -1,0 +1,69 @@
+<div class="app-shell" [class.sidebar-open]="isSidebarOpen">
+  <aside class="sidebar" [class.sidebar--open]="isSidebarOpen">
+    <div class="brand-card surface-card">
+      <p class="eyebrow">{{ controlRoomLabel }}</p>
+      <h1>GogiTime Control</h1>
+      <p>Direct menus, marketing, and service velocity from one cockpit.</p>
+    </div>
+
+    <button type="button" class="sidebar__close" (click)="toggleSidebar()" aria-label="Close navigation">
+      Close
+    </button>
+
+    <nav class="sidebar__nav">
+      <ng-container *ngFor="let section of navSections">
+        <p class="nav-section__label">{{ section.title }}</p>
+        <a
+          *ngFor="let item of section.items"
+          class="nav-link"
+          [routerLink]="item.path"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          (click)="closeSidebar()"
+        >
+          <span class="nav-link__icon" [attr.data-accent]="item.accent">{{ item.icon }}</span>
+          <span class="nav-link__body">
+            <span class="nav-link__title">{{ item.label }}</span>
+            <span class="nav-link__helper">{{ item.helper }}</span>
+          </span>
+          <span *ngIf="item.badge" class="nav-link__badge">{{ item.badge }}</span>
+        </a>
+      </ng-container>
+    </nav>
+
+    <div class="sidebar__footer surface-card">
+      <p class="eyebrow">Escalations</p>
+      <p class="footer__name">{{ liaison.name }}</p>
+      <p class="footer__availability">{{ liaison.availability }}</p>
+      <button type="button" class="footer__button">Message Liaison</button>
+    </div>
+  </aside>
+
+  <section class="workspace">
+    <header class="topbar surface-card">
+      <div class="topbar__left">
+        <button type="button" class="topbar__menu" (click)="toggleSidebar()">Menu</button>
+      </div>
+      <div class="topbar__right">
+      </div>
+
+      <div class="insight-band">
+        <article
+          class="insight-card surface-card"
+          *ngFor="let highlight of utilityHighlights"
+          [attr.data-accent]="highlight.accent"
+        >
+          <p class="eyebrow">{{ highlight.title }}</p>
+          <div class="insight-card__value">
+            <span>{{ highlight.value }}</span>
+            <span class="trend" [attr.data-trend]="highlight.trend">{{ highlight.detail }}</span>
+          </div>
+        </article>
+      </div>
+    </header>
+
+    <div class="router-surface surface-card">
+      <router-outlet />
+    </div>
+  </section>
+</div>
