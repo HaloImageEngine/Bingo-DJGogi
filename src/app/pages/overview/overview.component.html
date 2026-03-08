@@ -1,0 +1,64 @@
+<section class="page overview">
+	<header class="page__header">
+		<span class="tag accent-iris">Overview</span>
+		<h2>Live health snapshot</h2>
+		<p>Track GogiTime service quality, demand curves, and readiness at a glance.</p>
+	</header>
+
+	<div class="metrics-grid">
+		<article class="surface-card metric-card" *ngFor="let metric of metrics" [attr.data-trend]="metric.trend">
+			<p class="metric-card__label">{{ metric.label }}</p>
+			<p class="metric-card__value">{{ metric.value }}</p>
+			<p class="metric-card__change">{{ metric.change }}</p>
+			<p class="metric-card__note">{{ metric.note }}</p>
+		</article>
+	</div>
+
+	<div class="panels-grid">
+		<article class="surface-card activity">
+			<header>
+				<p class="eyebrow">Latest signals</p>
+				<h3>Operational feed</h3>
+			</header>
+			<ul>
+				<li *ngFor="let item of activityFeed">
+					<div class="activity__time">{{ item.time }}</div>
+					<div>
+						<p class="activity__owner">{{ item.owner }}</p>
+						<p class="activity__detail">{{ item.detail }}</p>
+					</div>
+				</li>
+			</ul>
+		</article>
+
+		<article class="surface-card readiness">
+			<header>
+				<p class="eyebrow">Service readiness</p>
+				<h3>Today's checkpoints</h3>
+			</header>
+			<ul>
+				<li *ngFor="let item of readinessChecks" [attr.data-status]="item.status">
+					<div>
+						<p class="readiness__label">{{ item.label }}</p>
+						<p class="readiness__note">{{ item.note }}</p>
+					</div>
+					<span class="readiness__status">{{ item.status }}</span>
+				</li>
+			</ul>
+		</article>
+	</div>
+
+	<article class="surface-card pipeline">
+		<header>
+			<p class="eyebrow">Kitchen pipeline</p>
+			<h3>Prep to courier flow</h3>
+		</header>
+		<div class="pipeline__grid">
+			<div *ngFor="let step of pipeline">
+				<p class="pipeline__stage">{{ step.stage }}</p>
+				<p class="pipeline__status">{{ step.status }}</p>
+				<p class="pipeline__detail">{{ step.detail }}</p>
+			</div>
+		</div>
+	</article>
+</section>
