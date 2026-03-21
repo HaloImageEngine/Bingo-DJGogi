@@ -1,0 +1,154 @@
+.order-detail {
+  background: #dbeeff;
+  color: #222;
+  border: 1px solid #8ec1f2;
+  border-radius: 8px;
+  padding: 1rem;
+  min-height: 220px;
+}
+
+.order-detail-empty {
+  color: #888;
+  border: 1px dashed #c8c8c8;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #ffe6f0;
+}
+
+.order-detail-loading,
+.order-detail-error {
+  margin-bottom: 0.8rem;
+}
+
+.order-detail-error {
+  color: #b42318;
+}
+
+.order-detail-empty-inline {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.head-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 0.8rem;
+  align-items: start;
+  margin-bottom: 0.8rem;
+}
+
+.head-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.head-list li {
+  margin-bottom: 0.35rem;
+}
+
+.right-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.order-id-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+
+.order-id-label {
+  font-weight: 700;
+  color: #ff2f92;
+}
+
+.order-id-value {
+  font-size: 1.55rem;
+  line-height: 1;
+  font-weight: 800;
+  color: #ff2f92;
+  letter-spacing: 0.02em;
+}
+
+.amount-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #9ec7ec;
+  border-radius: 8px;
+  background: #f7fbff;
+}
+
+.amount-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  text-align: right;
+  margin-bottom: 0.35rem;
+}
+
+.amount-row:last-child {
+  margin-bottom: 0;
+}
+
+.amount-value {
+  min-width: 88px;
+  text-align: right;
+  font-weight: 600;
+}
+
+.amount-row--total {
+  border-top: 1px solid #9ec7ec;
+  padding-top: 0.35rem;
+}
+
+.details-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fafafa;
+  border: 1px solid #d7d7d7;
+}
+
+.details-table th,
+.details-table td {
+  border: 1px solid #dfdfdf;
+  padding: 0.45rem;
+  text-align: left;
+  font-size: 0.86rem;
+}
+
+.details-table th {
+  background: #ffd9e8;
+}
+
+.details-table .numeric-col {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.detail-note-row td {
+  border-top: none;
+  background: #fff6fa;
+}
+
+.detail-note-row td:first-child {
+  background: transparent;
+}
+
+.special-instructions-cell {
+  text-align: right;
+}
+
+.special-label {
+  font-weight: 600;
+  margin-right: 0.35rem;
+}
+
+@media (max-width: 920px) {
+  .head-layout {
+    grid-template-columns: 1fr;
+  }
+}

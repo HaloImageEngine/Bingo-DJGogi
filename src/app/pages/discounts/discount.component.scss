@@ -1,0 +1,201 @@
+.discount-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.discount-shell__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.discount-shell__header p {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ── Table ── */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 0.75rem;
+}
+
+.discount-grid {
+  display: grid;
+  grid-template-columns: 48px 100px minmax(180px, 1fr) 90px 60px 90px minmax(130px, 1fr) 72px;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+}
+
+.discount-grid--header {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.discount-grid--row {
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text-primary);
+}
+
+.discount-grid--row:last-child {
+  border-bottom: none;
+}
+
+.code-cell {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--text-accent, #7c6af7);
+}
+
+/* ── Badges ── */
+.badge {
+  display: inline-block;
+  border-radius: 0.4rem;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.badge--active {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+}
+
+.badge--inactive {
+  background: rgba(244, 114, 114, 0.12);
+  color: #f47272;
+}
+
+/* ── Buttons ── */
+.btn-edit {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--border-soft);
+  background: var(--panel-muted);
+  color: var(--text-primary);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-edit:hover {
+  background: var(--surface-card, #1e1f2e);
+  color: var(--accent-amber, #f59e0b);
+}
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  width: min(480px, 95vw);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal__header h3 {
+  margin: 0.35rem 0 0;
+  font-size: 1.05rem;
+}
+
+/* ── Form Grid ── */
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.form-field input[type='text'],
+.form-field input[type='number'] {
+  border: 1px solid var(--border-soft);
+  background: var(--panel-muted);
+  color: var(--text-primary);
+  border-radius: 0.6rem;
+  padding: 0.45rem 0.65rem;
+  font: inherit;
+}
+
+.form-field--checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-primary);
+}
+
+.field-error {
+  color: #f47272;
+  font-size: 0.75rem;
+}
+
+/* ── Modal feedback + footer ── */
+.modal__feedback {
+  min-height: 1.5rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.btn-cancel {
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--border-soft);
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 0.6rem;
+  cursor: pointer;
+}
+
+.btn-save {
+  padding: 0.45rem 1.25rem;
+  border: none;
+  background: var(--accent-amber, #f59e0b);
+  color: #111;
+  border-radius: 0.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-save:disabled,
+.btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

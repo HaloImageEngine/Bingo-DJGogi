@@ -1,10 +1,14 @@
-<div class="app-shell" [class.sidebar-open]="isSidebarOpen">
+<div class="app-shell" [class.sidebar-open]="isSidebarOpen" [class.sidebar-collapsed]="isSidebarCollapsed">
   <aside class="sidebar" [class.sidebar--open]="isSidebarOpen">
     <div class="brand-card surface-card">
       <p class="eyebrow">{{ controlRoomLabel }}</p>
       <h1>GogiTime Control</h1>
       <p>Direct menus, marketing, and service velocity from one cockpit.</p>
     </div>
+
+    <button type="button" class="sidebar__collapse-btn" (click)="toggleSidebarCollapse()" aria-label="Collapse navigation">
+      &#8249; Hide panel
+    </button>
 
     <button type="button" class="sidebar__close" (click)="toggleSidebar()" aria-label="Close navigation">
       Close
@@ -38,6 +42,15 @@
       <button type="button" class="footer__button">Message Liaison</button>
     </div>
   </aside>
+
+  <button
+    type="button"
+    class="sidebar-reveal-tab"
+    *ngIf="isSidebarCollapsed"
+    (click)="toggleSidebarCollapse()"
+    aria-label="Expand navigation">
+    &#8250;
+  </button>
 
   <section class="workspace">
     <header class="topbar surface-card">

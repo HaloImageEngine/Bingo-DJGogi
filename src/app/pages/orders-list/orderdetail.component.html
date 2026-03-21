@@ -1,0 +1,93 @@
+<div *ngIf="!orderId" class="order-detail-empty">
+  <p>Select an order to view details.</p>
+</div>
+
+<div *ngIf="orderId" class="order-detail">
+  <div *ngIf="loading" class="order-detail-loading">Loading order details...</div>
+  <div *ngIf="error" class="order-detail-error">{{ error }}</div>
+
+  <ng-container *ngIf="!loading && !error && orderDetail">
+    <h3>Order Detail</h3>
+
+    <section class="head-layout">
+      <ul class="head-list">
+        <li class="order-id-row">
+          <span class="order-id-label">OrderID:</span>
+          <span class="order-id-value">{{ orderDetail.Head.OrderID }}</span>
+        </li>
+        <li><strong>OrderNumber:</strong> {{ orderDetail.Head.OrderNumber }}</li>
+        <li><strong>Status:</strong> {{ orderDetail.Head.StatusName || orderDetail.Head.StatusCode }}</li>
+        <li class="order-id-row">
+          <span class="order-id-label">Customer:</span>
+          <span class="order-id-value">{{ orderDetail.Head.CustomerName }}</span>
+        </li>
+        <li class="order-id-row">
+          <span class="order-id-label">Phone:</span>
+          <span class="order-id-value">{{ orderDetail.Head.CustomerPhone }}</span>
+        </li>
+        <li><strong>Email:</strong> {{ orderDetail.Head.CustomerEmail }}</li>
+        <li><strong>OrderType:</strong> {{ orderDetail.Head.OrderType }}</li>
+        <li><strong>Notes:</strong> {{ orderDetail.Head.OrderNotes || '-' }}</li>
+        <li><strong>Items:</strong> {{ orderDetail.Head.ItemCount }}</li>
+      </ul>
+
+      <aside class="right-rail">
+        <app-status-change
+          [orderId]="orderDetail.Head.OrderID"
+          [currentStatus]="orderDetail.Head.StatusCode"
+          (statusChanged)="onStatusChanged($event)">
+        </app-status-change>
+
+        <ul class="amount-list">
+          <li class="amount-row">
+            <span class="amount-label"><strong>SubTotal:</strong></span>
+            <span class="amount-value">{{ orderDetail.Head.SubTotal | currency }}</span>
+          </li>
+          <li class="amount-row">
+            <span class="amount-label"><strong>Tax:</strong></span>
+            <span class="amount-value">{{ orderDetail.Head.TaxAmount | currency }}</span>
+          </li>
+          <li class="amount-row amount-row--total">
+            <span class="amount-label"><strong>Total:</strong></span>
+            <span class="amount-value">{{ orderDetail.Head.TotalAmount | currency }}</span>
+          </li>
+        </ul>
+      </aside>
+    </section>
+
+    <h4>Items</h4>
+    <table class="details-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Category</th>
+          <th class="numeric-col">Qty</th>
+          <th class="numeric-col">UnitPrice</th>
+          <th class="numeric-col">LineTotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let item of orderDetail.OrderDetailsList">
+          <tr class="detail-main-row">
+            <td>{{ item.ItemName }}</td>
+            <td>{{ item.ItemCategory }}</td>
+            <td class="numeric-col">{{ item.Quantity }}</td>
+            <td class="numeric-col">{{ item.UnitPrice | currency }}</td>
+            <td class="numeric-col">{{ item.LineTotal | currency }}</td>
+          </tr>
+          <tr class="detail-note-row">
+            <td colspan="2"></td>
+            <td colspan="3" class="special-instructions-cell">
+              <span class="special-label">Special Instructions:</span>
+              <span>{{ item.SpecialInstructions || '-' }}</span>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </ng-container>
+
+  <div *ngIf="!loading && !error && !orderDetail" class="order-detail-empty-inline">
+    No detail data returned for OrderID {{ orderId }}.
+  </div>
+</div>

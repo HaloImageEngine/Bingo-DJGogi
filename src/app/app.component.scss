@@ -8,6 +8,31 @@
 	grid-template-columns: 320px minmax(0, 1fr);
 	gap: 1.5rem;
 	padding: 1.5rem;
+	transition: grid-template-columns 0.3s ease, gap 0.3s ease;
+}
+
+.app-shell.sidebar-collapsed {
+	grid-template-columns: 0px minmax(0, 1fr);
+	gap: 0;
+}
+
+.app-shell.sidebar-collapsed .sidebar {
+	padding: 0;
+	border-width: 0;
+	opacity: 0;
+	pointer-events: none;
+}
+
+body.workspace-expanded .app-shell {
+	grid-template-columns: 0px minmax(0, 1fr);
+}
+
+body.workspace-expanded .sidebar {
+	overflow: hidden;
+	padding: 0;
+	border-width: 0;
+	opacity: 0;
+	pointer-events: none;
 }
 
 .sidebar {
@@ -21,6 +46,55 @@
 	position: sticky;
 	top: 1.5rem;
 	height: calc(100vh - 3rem);
+	transition: padding 0.3s ease, opacity 0.25s ease, border-width 0.3s ease;
+	overflow: hidden;
+	min-width: 0;
+}
+
+/* ── Collapse button (inside sidebar) ── */
+.sidebar__collapse-btn {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	background: transparent;
+	border: 1px solid var(--border-soft);
+	color: var(--text-muted);
+	border-radius: 0.6rem;
+	padding: 0.35rem 0.75rem;
+	font-size: 0.8rem;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: border-color 0.15s, color 0.15s;
+	align-self: flex-start;
+}
+
+.sidebar__collapse-btn:hover {
+	border-color: var(--accent-iris);
+	color: var(--accent-iris);
+}
+
+/* ── Reveal tab (floats at left edge when sidebar is hidden) ── */
+.sidebar-reveal-tab {
+	position: fixed;
+	top: 50%;
+	left: 0;
+	transform: translateY(-50%);
+	background: var(--panel-elevated);
+	border: 1px solid var(--border-soft);
+	border-left: none;
+	border-radius: 0 0.75rem 0.75rem 0;
+	color: var(--accent-iris);
+	font-size: 1.2rem;
+	padding: 0.75rem 0.45rem;
+	cursor: pointer;
+	z-index: 200;
+	transition: background 0.15s, color 0.15s;
+	line-height: 1;
+}
+
+.sidebar-reveal-tab:hover {
+	background: var(--panel-base);
+	color: #fff;
 }
 
 .brand-card {

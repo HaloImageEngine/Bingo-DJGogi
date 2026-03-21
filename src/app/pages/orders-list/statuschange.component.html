@@ -1,0 +1,21 @@
+<section class="status-change-card">
+  <header>
+    <p class="status-change-title">Status Change</p>
+    <p class="status-change-meta">OrderID: <strong>{{ orderId || '-' }}</strong></p>
+    <p class="status-change-meta">Current: <strong>{{ currentStatus || '-' }}</strong></p>
+  </header>
+
+  <div class="status-change-actions">
+    <button
+      type="button"
+      class="status-action"
+      *ngFor="let action of actions"
+      [disabled]="!orderId || updating || isCurrentStatus(action.value)"
+      (click)="changeStatus(action.value)">
+      {{ action.label }}
+    </button>
+  </div>
+
+  <p class="status-change-msg status-change-msg--ok" *ngIf="success">{{ success }}</p>
+  <p class="status-change-msg status-change-msg--error" *ngIf="error">{{ error }}</p>
+</section>

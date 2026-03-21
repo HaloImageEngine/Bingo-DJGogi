@@ -1,0 +1,75 @@
+<section class="orders-list-shell" [class.is-fullscreen]="fullscreen()">
+  <header class="orders-list-shell__header">
+    <div>
+      <span class="tag accent-teal">Order-List</span>
+      <h2>Orders by status</h2>
+      <p>Track orders by workflow status and monitor sales totals in real time.</p>
+    </div>
+
+    <label class="status-filter" for="statusSelect">
+      <span>Status</span>
+      <select id="statusSelect" [(ngModel)]="selectedStatus" (change)="onStatusChange()">
+        <option *ngFor="let option of statusOptions" [ngValue]="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </label>
+
+    <button type="button" class="btn-fullscreen" (click)="toggleFullscreen()" [title]="fullscreen() ? 'Exit full screen' : 'Full screen'">
+      {{ fullscreen() ? '⤡' : '⤢' }}
+      <span>{{ fullscreen() ? 'Exit' : 'Expand' }}</span>
+    </button>
+  </header>
+
+  <div class="status-row">
+    <span class="tag">{{ selectedStatus().toUpperCase() }}</span>
+    <span class="tag" *ngIf="loading()">Loading...</span>
+    <span class="tag accent-rose" *ngIf="error()">{{ error() }}</span>
+  </div>
+
+  <div class="master-detail-grid" *ngIf="orders().length; else emptyState">
+    <div class="master table-wrap surface-card">
+      <div class="orders-grid orders-grid--header">
+        <div>OrderID</div>
+        <div>CustomerName</div>
+        <div>CustomerPhone</div>
+        <div>TotalAmount</div>
+        <div>Count</div>
+        <div>CreatedAt</div>
+        <div>OrderNotes</div>
+      </div>
+
+      <button
+        type="button"
+        class="orders-grid orders-grid--row"
+        *ngFor="let order of orders(); trackBy: trackByOrderId"
+        [class.selected]="selectedOrder()?.OrderID === order.OrderID"
+        (click)="selectOrder(order)">
+        <div>{{ order.OrderID }}</div>
+        <div>{{ order.CustomerName }}</div>
+        <div>{{ order.CustomerPhone }}</div>
+        <div>{{ order.TotalAmount | currency }}</div>
+        <div>{{ order.ItemCount }}</div>
+        <div>{{ formatCreatedAt(order) }}</div>
+        <div>{{ order.OrderNotes || '-' }}</div>
+      </button>
+
+      <footer class="orders-summary">
+        <p>Total Orders: <strong>{{ totalOrders() }}</strong></p>
+        <p>Total Items: <strong>{{ totalItems() }}</strong></p>
+        <p>Total Sales: <strong>{{ totalSales() | currency }}</strong></p>
+      </footer>
+    </div>
+
+    <div class="detail">
+      <app-orderdetail
+        [orderId]="selectedOrder()?.OrderID ?? null"
+        (completeStatusApplied)="onCompleteStatusApplied()">
+      </app-orderdetail>
+    </div>
+  </div>
+
+  <ng-template #emptyState>
+    <p class="muted" *ngIf="!loading()">No orders found for the selected status.</p>
+  </ng-template>
+</section>

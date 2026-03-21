@@ -51,6 +51,12 @@ export const routes: Routes = [
 		canActivate: [AuthGuard]
 	},
 	{
+		path: 'order-list.components',
+		loadComponent: () =>
+			import('./pages/orders-list/orders-list.component').then(m => m.OrdersListComponent),
+		canActivate: [AuthGuard]
+	},
+	{
 		path: 'customers',
 		loadComponent: () =>
 			import('./pages/customers/customers.component').then(m => m.CustomersComponent),
@@ -60,6 +66,12 @@ export const routes: Routes = [
 		path: 'customer-list',
 		loadComponent: () =>
 			import('./pages/customers/customer.component').then(m => m.CustomerComponent),
+		canActivate: [AuthGuard]
+	},
+	{
+		path: 'discounts',
+		loadComponent: () =>
+			import('./pages/discounts/discount.component').then(m => m.DiscountComponent),
 		canActivate: [AuthGuard]
 	},
 	{
