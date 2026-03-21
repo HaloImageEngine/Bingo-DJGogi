@@ -24,10 +24,17 @@ The dev server runs at http://localhost:4200 and reloads on save.
 
 - **Overview** – KPI cards, readiness checks, and kitchen pipeline status.
 - **Menu Manager** – Inventory grid, upcoming drops, and bulk utilities.
+- **Menu List** – Full browsable list of all menu items.
+- **Discount List** – View and edit all discount codes via modal form; calls `Get_All_Discounts` and `CRUD_Discounts` REST endpoints.
 - **Marketing** – Campaign pacing plus channel insights.
 - **Orders** – Live fulfillment timeline and zone capacity board.
+- **Order List** – Filterable orders-by-status grid with master/detail view. Supports full-screen expand mode that collapses the sidebar.
 - **Customers** – Segment snapshots and feedback queue.
 - **Settings** – Automation rules and access overview.
+
+## Sidebar collapse
+
+A **‹ Hide panel** button at the top of the left navigation collapses the entire sidebar with an animated transition. A **›** reveal tab appears at the left edge to restore it. This works globally across all pages and is independent of the mobile sidebar toggle.
 
 ## Architecture notes
 
