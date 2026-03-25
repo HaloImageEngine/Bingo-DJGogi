@@ -7,11 +7,6 @@ import { OrdersListService } from '../../services/orders-list.service';
 
 type ChangeableOrderStatus = Extract<OrderStatus, 'complete' | 'ready'>;
 
-interface StatusAction {
-  label: string;
-  value: ChangeableOrderStatus;
-}
-
 @Component({
   selector: 'app-status-change',
   standalone: true,
@@ -25,11 +20,6 @@ export class StatusChangeComponent {
   @Input() orderId: number | null = null;
   @Input() currentStatus = '';
   @Output() statusChanged = new EventEmitter<ChangeableOrderStatus>();
-
-  readonly actions: StatusAction[] = [
-    { label: 'Complete', value: 'complete' },
-    { label: 'Ready', value: 'ready' }
-  ];
 
   updating = false;
   error: string | null = null;

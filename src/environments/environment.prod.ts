@@ -1,6 +1,7 @@
 export const environment = {
   production: true,
   version: '26.03.16.P', // Update this value as needed
+  ordersRefreshIntervalSeconds: 20,
   useMockMenuApi: false,
   menuApiBaseUrl: 'https://api.getgogi.com/api/CMSDemo/Menu',
   ordersApiBaseUrl: 'https://api.getgogi.com/api/CMSDemo/Orders',

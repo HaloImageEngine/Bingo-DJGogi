@@ -47,6 +47,30 @@
   margin-bottom: 0.35rem;
 }
 
+.notes-field-row {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.2rem;
+}
+
+.notes-field-label {
+  font-weight: 700;
+  color: #274a66;
+}
+
+.notes-field {
+  width: 100%;
+  min-height: 84px;
+  resize: vertical;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #9ec7ec;
+  border-radius: 8px;
+  background: #f7fbff;
+  color: #17324d;
+  font: inherit;
+  line-height: 1.45;
+}
+
 .right-rail {
   display: flex;
   flex-direction: column;

@@ -257,6 +257,47 @@ body.workspace-expanded .sidebar {
 	padding: 0.75rem;
 }
 
+.insight-panel {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 0.5rem;
+	background: rgba(255, 255, 255, 0.02);
+}
+
+.insight-panel.is-collapsed {
+	padding-bottom: 0.35rem;
+}
+
+.insight-panel__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0 0.1rem;
+}
+
+.insight-panel__header .eyebrow {
+	margin: 0;
+}
+
+.insight-panel__toggle {
+	border: 1px solid var(--border-soft);
+	background: transparent;
+	color: var(--text-muted);
+	border-radius: 999px;
+	padding: 0.35rem 0.85rem;
+	font-size: 0.78rem;
+	cursor: pointer;
+	transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.insight-panel__toggle:hover {
+	border-color: var(--accent-teal);
+	color: var(--text-primary);
+	background: rgba(255, 255, 255, 0.04);
+}
+
 .topbar__left {
 	flex: 1;
 }

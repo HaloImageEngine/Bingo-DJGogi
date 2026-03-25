@@ -2,11 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, finalize, of } from 'rxjs';
+import { catchError, finalize, interval, of } from 'rxjs';
 
 import { OrderListItem, OrderStatus } from '../../models/order-list-item.model';
+import { DashboardSummaryService } from '../../services/dashboard-summary.service';
 import { OrdersListService } from '../../services/orders-list.service';
 import { OrderDetailComponent } from './orderdetail.component';
+import { environment } from '../../../environments/environment';
 
 interface StatusOption {
   label: string;
@@ -22,7 +24,10 @@ interface StatusOption {
 })
 export class OrdersListComponent implements OnInit, OnDestroy {
   private readonly ordersListService = inject(OrdersListService);
+  private readonly dashboardSummaryService = inject(DashboardSummaryService);
   private readonly destroyRef = inject(DestroyRef);
+  private isRefreshing = false;
+  private readonly ordersRefreshIntervalMs = environment.ordersRefreshIntervalSeconds * 1000;
 
   readonly statusOptions: StatusOption[] = [
     { label: 'Pending', value: 'pending' },
@@ -47,6 +52,10 @@ export class OrdersListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadOrders();
+
+    interval(this.ordersRefreshIntervalMs)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadOrders(false));
   }
 
   onStatusChange(): void {
@@ -101,8 +110,17 @@ export class OrdersListComponent implements OnInit, OnDestroy {
     this.loadOrders();
   }
 
-  private loadOrders(): void {
-    this.loading.set(true);
+  private loadOrders(showLoading = true): void {
+    if (this.isRefreshing) {
+      return;
+    }
+
+    this.isRefreshing = true;
+
+    if (showLoading) {
+      this.loading.set(true);
+    }
+
     this.error.set(null);
 
     this.ordersListService
@@ -114,11 +132,26 @@ export class OrdersListComponent implements OnInit, OnDestroy {
           this.error.set('Unable to load orders. Please try again.');
           return of<OrderListItem[]>([]);
         }),
-        finalize(() => this.loading.set(false))
+        finalize(() => {
+          this.isRefreshing = false;
+          if (showLoading) {
+            this.loading.set(false);
+          }
+        })
       )
       .subscribe(items => {
-        this.orders.set(items);
-        this.selectedOrder.set(items.length ? items[0] : null);
+        const list = Array.isArray(items) ? items : [];
+        const selectedOrderId = this.selectedOrder()?.OrderID ?? null;
+        this.orders.set(list);
+        this.dashboardSummaryService.updateOrders(list);
+
+        if (selectedOrderId === null) {
+          this.selectedOrder.set(list.length ? list[0] : null);
+          return;
+        }
+
+        const matchingOrder = list.find(order => order.OrderID === selectedOrderId);
+        this.selectedOrder.set(matchingOrder ?? (list.length ? list[0] : null));
       });
   }
 }

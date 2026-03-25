@@ -27,8 +27,16 @@
         </li>
         <li><strong>Email:</strong> {{ orderDetail.Head.CustomerEmail }}</li>
         <li><strong>OrderType:</strong> {{ orderDetail.Head.OrderType }}</li>
-        <li><strong>Notes:</strong> {{ orderDetail.Head.OrderNotes || '-' }}</li>
         <li><strong>Items:</strong> {{ orderDetail.Head.ItemCount }}</li>
+        <li class="notes-field-row">
+          <label class="notes-field-label" for="orderNotes">Notes</label>
+          <textarea
+            id="orderNotes"
+            class="notes-field"
+            [value]="orderDetail.Head.OrderNotes || '-'"
+            readonly>
+          </textarea>
+        </li>
       </ul>
 
       <aside class="right-rail">

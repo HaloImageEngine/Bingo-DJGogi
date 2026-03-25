@@ -60,19 +60,33 @@
       <div class="topbar__right">
       </div>
 
-      <div class="insight-band">
-        <article
-          class="insight-card surface-card"
-          *ngFor="let highlight of utilityHighlights"
-          [attr.data-accent]="highlight.accent"
-        >
-          <p class="eyebrow">{{ highlight.title }}</p>
-          <div class="insight-card__value">
-            <span>{{ highlight.value }}</span>
-            <span class="trend" [attr.data-trend]="highlight.trend">{{ highlight.detail }}</span>
-          </div>
-        </article>
-      </div>
+      <section class="insight-panel surface-card" [class.is-collapsed]="isInsightBandCollapsed">
+        <div class="insight-panel__header">
+          <p class="eyebrow">Quick Snapshot</p>
+          <button
+            type="button"
+            class="insight-panel__toggle"
+            (click)="toggleInsightBand()"
+            [attr.aria-expanded]="!isInsightBandCollapsed"
+            [attr.aria-label]="isInsightBandCollapsed ? 'Expand quick snapshot' : 'Collapse quick snapshot'">
+            {{ isInsightBandCollapsed ? 'Show' : 'Hide' }}
+          </button>
+        </div>
+
+        <div class="insight-band" *ngIf="!isInsightBandCollapsed">
+          <article
+            class="insight-card surface-card"
+            *ngFor="let highlight of utilityHighlights()"
+            [attr.data-accent]="highlight.accent"
+          >
+            <p class="eyebrow">{{ highlight.title }}</p>
+            <div class="insight-card__value">
+              <span>{{ highlight.value }}</span>
+              <span class="trend" [attr.data-trend]="highlight.trend">{{ highlight.detail }}</span>
+            </div>
+          </article>
+        </div>
+      </section>
     </header>
 
     <div class="router-surface surface-card">

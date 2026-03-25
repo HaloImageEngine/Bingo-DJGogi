@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, finalize, of } from 'rxjs';
 
 import { Discount } from '../../models/discount.model';
+import { DashboardSummaryService } from '../../services/dashboard-summary.service';
 import { DiscountService } from '../../services/discount.service';
 
 @Component({
@@ -16,6 +17,7 @@ import { DiscountService } from '../../services/discount.service';
 })
 export class DiscountComponent implements OnInit {
   private readonly discountService = inject(DiscountService);
+  private readonly dashboardSummaryService = inject(DashboardSummaryService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
 
@@ -50,6 +52,7 @@ export class DiscountComponent implements OnInit {
       .subscribe(data => {
         const list = Array.isArray(data) ? data : [];
         this.discounts.set(list);
+        this.updateActiveDiscountSummary(list);
       });
   }
 
@@ -98,14 +101,21 @@ export class DiscountComponent implements OnInit {
       .subscribe(result => {
         if (result !== null || !this.saveError()) {
           this.saveSuccess.set(true);
-          this.discounts.update(list =>
-            list.map(d => (d.ItemDiscountID === payload.ItemDiscountID ? payload : d))
-          );
+          this.discounts.update(list => {
+            const updatedList = list.map(d => (d.ItemDiscountID === payload.ItemDiscountID ? payload : d));
+            this.updateActiveDiscountSummary(updatedList);
+            return updatedList;
+          });
           setTimeout(() => {
             this.editingDiscount.set(null);
             this.saveSuccess.set(false);
           }, 1200);
         }
       });
+  }
+
+  private updateActiveDiscountSummary(discounts: Discount[]): void {
+    const activeCount = discounts.filter(discount => !!discount.IsActive).length;
+    this.dashboardSummaryService.updateActiveDiscountsCount(activeCount);
   }
 }
