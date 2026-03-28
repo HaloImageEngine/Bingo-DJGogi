@@ -101,6 +101,33 @@ body.workspace-expanded .sidebar {
 	background: var(--gradient-brand);
 	color: #fff;
 	border: 1px solid rgba(255, 255, 255, 0.25);
+	transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+	max-height: 200px;
+	overflow: hidden;
+}
+
+.brand-card--showing-image {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.brand-card__image {
+	display: block;
+	width: 100%;
+	height: auto;
+	max-height: 168px;
+	object-fit: contain;
+	border-radius: 1rem;
+}
+
+.brand-card--hidden {
+	max-height: 0;
+	opacity: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+	margin: 0;
+	border-width: 0;
 }
 
 .eyebrow {
@@ -138,6 +165,24 @@ body.workspace-expanded .sidebar {
 	display: flex;
 	flex-direction: column;
 	gap: 0.5rem;
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	scrollbar-color: var(--border-strong) transparent;
+}
+
+.sidebar__nav::-webkit-scrollbar {
+	width: 4px;
+}
+
+.sidebar__nav::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.sidebar__nav::-webkit-scrollbar-thumb {
+	background: var(--border-strong);
+	border-radius: 999px;
 }
 
 .nav-section__label {
@@ -221,7 +266,6 @@ body.workspace-expanded .sidebar {
 }
 
 .sidebar__footer {
-	margin-top: auto;
 	display: flex;
 	flex-direction: column;
 	gap: 0.3rem;

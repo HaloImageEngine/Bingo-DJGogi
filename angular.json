@@ -34,6 +34,11 @@
                 "input": ".",
                 "output": "/"
               },
+                {
+                  "glob": "GogiTimeAdmin.jpg",
+                  "input": "src/assets/images",
+                  "output": "/"
+                },
               "src/favicon.ico",
               "src/assets"
             ],

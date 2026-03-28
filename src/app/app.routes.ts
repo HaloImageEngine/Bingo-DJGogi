@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './services/auth.guard';
 
 export const routes: Routes = [
-	{ path: '', pathMatch: 'full', redirectTo: 'overview' },
+	{ path: '', pathMatch: 'full', redirectTo: 'order-list.components' },
 	{
 		path: 'login',
 		loadComponent: () =>

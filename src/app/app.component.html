@@ -1,9 +1,14 @@
 <div class="app-shell" [class.sidebar-open]="isSidebarOpen" [class.sidebar-collapsed]="isSidebarCollapsed">
   <aside class="sidebar" [class.sidebar--open]="isSidebarOpen">
-    <div class="brand-card surface-card">
-      <p class="eyebrow">{{ controlRoomLabel }}</p>
-      <h1>GogiTime Control</h1>
-      <p>Direct menus, marketing, and service velocity from one cockpit.</p>
+    <div class="brand-card surface-card" [class.brand-card--hidden]="isBrandCardHidden" [class.brand-card--showing-image]="showBrandCardImage">
+      <ng-container *ngIf="showBrandCardImage; else brandCardContent">
+        <img class="brand-card__image" [src]="brandCardImagePath" alt="GogiTime Admin" />
+      </ng-container>
+      <ng-template #brandCardContent>
+        <p class="eyebrow">{{ controlRoomLabel }}</p>
+        <h1>GogiTime Control</h1>
+        <p>Direct menus, marketing, and service velocity from one cockpit.</p>
+      </ng-template>
     </div>
 
     <button type="button" class="sidebar__collapse-btn" (click)="toggleSidebarCollapse()" aria-label="Collapse navigation">
@@ -14,8 +19,9 @@
       Close
     </button>
 
-    <nav class="sidebar__nav">
+    <nav class="sidebar__nav" (scroll)="onNavScroll($event)">
       <ng-container *ngFor="let section of navSections">
+        <ng-container *ngIf="!section.hidden">
         <p class="nav-section__label">{{ section.title }}</p>
         <a
           *ngFor="let item of section.items"
@@ -32,15 +38,16 @@
           </span>
           <span *ngIf="item.badge" class="nav-link__badge">{{ item.badge }}</span>
         </a>
+        </ng-container>
       </ng-container>
     </nav>
 
-    <div class="sidebar__footer surface-card">
+    <!-- <div class="sidebar__footer surface-card">
       <p class="eyebrow">Escalations</p>
       <p class="footer__name">{{ liaison.name }}</p>
       <p class="footer__availability">{{ liaison.availability }}</p>
       <button type="button" class="footer__button">Message Liaison</button>
-    </div>
+    </div> -->
   </aside>
 
   <button

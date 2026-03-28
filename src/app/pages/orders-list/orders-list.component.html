@@ -1,9 +1,8 @@
 <section class="orders-list-shell" [class.is-fullscreen]="fullscreen()">
   <header class="orders-list-shell__header">
-    <div>
+    <div class="orders-list-shell__intro">
       <span class="tag accent-teal">Order-List</span>
       <h2>Orders by status</h2>
-      <p>Track orders by workflow status and monitor sales totals in real time.</p>
     </div>
 
     <label class="status-filter" for="statusSelect">
@@ -30,13 +29,13 @@
   <div class="master-detail-grid" *ngIf="orders().length; else emptyState">
     <div class="master table-wrap surface-card">
       <div class="orders-grid orders-grid--header">
-        <div>OrderID</div>
-        <div>CustomerName</div>
-        <div>CustomerPhone</div>
-        <div>TotalAmount</div>
-        <div>Count</div>
-        <div>CreatedAt</div>
-        <div>OrderNotes</div>
+        <div>OID</div>
+        <div>Name</div>
+        <div>Phone</div>
+        <div>Amount</div>
+        <div>#</div>
+        <div>Time</div>
+        <div>Notes</div>
       </div>
 
       <button

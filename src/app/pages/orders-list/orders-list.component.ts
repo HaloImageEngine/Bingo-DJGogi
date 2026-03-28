@@ -80,7 +80,7 @@ export class OrdersListComponent implements OnInit, OnDestroy {
     if (order.CreatedAt && !order.CreatedAt.startsWith('0001-01-01')) {
       const createdAt = new Date(order.CreatedAt);
       if (!Number.isNaN(createdAt.getTime())) {
-        return createdAt.toLocaleString();
+        return this.formatTimeDate(createdAt);
       }
     }
 
@@ -103,7 +103,17 @@ export class OrdersListComponent implements OnInit, OnDestroy {
       return '-';
     }
 
-    return parsed.toLocaleString();
+    return this.formatTimeDate(parsed);
+  }
+
+  private formatTimeDate(value: Date): string {
+    const hh = String(value.getHours()).padStart(2, '0');
+    const mm = String(value.getMinutes()).padStart(2, '0');
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    const year = String(value.getFullYear()).slice(-2);
+
+    return `${hh}:${mm} ${month}/${day}/${year}`;
   }
 
   onCompleteStatusApplied(): void {

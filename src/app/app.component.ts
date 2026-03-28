@@ -22,6 +22,7 @@ interface NavItem {
 interface NavSection {
   title: string;
   items: NavItem[];
+  hidden?: boolean;
 }
 
 interface Highlight {
@@ -44,18 +45,20 @@ export class AppComponent implements OnInit {
   private readonly dashboardSummaryService = inject(DashboardSummaryService);
   private readonly discountService = inject(DiscountService);
   private readonly destroyRef = inject(DestroyRef);
+  private brandCardTimerId: number | undefined;
   readonly controlRoomLabel = 'GogiTime Admin Dock';
+  readonly brandCardImagePath = 'assets/images/GogiTimeAdmin.jpg';
 
   readonly navSections: NavSection[] = [
 
     {
       title: 'Operations',
       items: [
-        { label: 'Menu Manager', helper: 'Dishes, bundles, pricing', path: '/menu-manager', accent: 'amber', icon: 'MM' },
+        { label: 'Order-List', helper: 'Orders by status', path: '/order-list.components', accent: 'teal', icon: 'OL' },
         { label: 'Menu List', helper: 'List of All Items', path: '/menu-list', accent: 'teal', icon: 'ML' },
         { label: 'Discount List', helper: 'Discount codes & offers', path: '/discounts', accent: 'amber', icon: 'DC' },
+        { label: 'Menu Manager', helper: 'Dishes, bundles, pricing', path: '/menu-manager', accent: 'amber', icon: 'MM' },
         { label: 'Orders', helper: 'Orders In Queue', path: '/orders', accent: 'teal', icon: 'OR' },
-        { label: 'Order-List', helper: 'Orders by status', path: '/order-list.components', accent: 'teal', icon: 'OL' },
         { label: 'Customers', helper: 'Community + loyalty', path: '/customers', accent: 'iris', icon: 'CU' },
         { label: 'Customer List', helper: 'Browse all customers', path: '/customer-list', accent: 'iris', icon: 'CL' },
         { label: 'Settings', helper: 'Automation + access', path: '/settings', accent: 'rose', icon: 'ST' }
@@ -64,6 +67,7 @@ export class AppComponent implements OnInit {
     ,
     {
       title: 'Intelligence',
+      hidden: true,
       items: [
         { label: 'Overview', helper: 'Live KPIs & signals', path: '/overview', accent: 'iris', icon: 'OV' },
         { label: 'Marketing', helper: 'Campaign pacing & pulse', path: '/marketing', accent: 'rose', icon: 'MK', badge: 'LIVE' }
@@ -103,8 +107,25 @@ export class AppComponent implements OnInit {
   isSidebarOpen = false;
   isSidebarCollapsed = false;
   isInsightBandCollapsed = false;
+  isBrandCardHidden = false;
+  showBrandCardImage = true;
+
+  onNavScroll(event: Event): void {
+    const nav = event.target as HTMLElement;
+    this.isBrandCardHidden = nav.scrollTop > 10;
+  }
 
   ngOnInit(): void {
+    this.brandCardTimerId = window.setTimeout(() => {
+      this.showBrandCardImage = false;
+    }, 4000);
+
+    this.destroyRef.onDestroy(() => {
+      if (this.brandCardTimerId !== undefined) {
+        window.clearTimeout(this.brandCardTimerId);
+      }
+    });
+
     this.loadActiveDiscounts();
   }
 
