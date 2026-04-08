@@ -80,5 +80,17 @@ export const routes: Routes = [
 			import('./pages/settings/settings.component').then(m => m.SettingsComponent),
 		canActivate: [AuthGuard]
 	},
+	{
+		path: 'thumbnails',
+		loadComponent: () =>
+			import('./pages/thumbnails/thumbnails.component').then(m => m.ThumbnailsComponent),
+		canActivate: [AuthGuard]
+	},
+	{
+		path: 'thumbnail-detail/:id',
+		loadComponent: () =>
+			import('./pages/thumbnail-detail/thumbnail-detail.component').then(m => m.ThumbnailDetailComponent),
+		canActivate: [AuthGuard]
+	},
 	{ path: '**', redirectTo: 'overview' }
 ];
