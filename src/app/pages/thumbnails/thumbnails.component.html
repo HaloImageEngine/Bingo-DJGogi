@@ -26,6 +26,19 @@
     <button class="btn-retry" (click)="loadImages()">Retry</button>
   </div>
 
+  <div class="state-message state-message--success" *ngIf="rowSuccess() as approvalResponse">
+    <span class="state-message__icon">✓</span>
+    <span>
+      {{ approvalResponse.message }}
+      (imageId={{ approvalResponse.imageId }}, approved={{ approvalResponse.approved }})
+    </span>
+  </div>
+
+  <div class="state-message state-message--error" *ngIf="rowError()">
+    <span class="state-message__icon">⚠</span>
+    <span>{{ rowError() }}</span>
+  </div>
+
   <!-- Empty state -->
   <div class="state-message" *ngIf="!loading() && !error() && images().length === 0">
     <span class="state-message__icon">🖼</span>
@@ -39,14 +52,13 @@
       *ngFor="let img of images(); trackBy: trackById"
       (click)="navigateToDetail(img)"
       [class.thumb-card--inactive]="!img.Active"
-      [class.thumb-card--unapproved]="!img.Approved"
-      role="button"
-      [attr.aria-label]="'View ' + img.ImageType + ' image ' + img.ImageId">
+      [class.thumb-card--unapproved]="!img.Approved">
 
       <div class="thumb-card__img-wrap">
         <img
           [src]="img.ImageLocationTN"
           [alt]="img.ImageType + ' thumbnail'"
+          title="thumbnail image"
           loading="lazy"
           class="thumb-card__img" />
 
@@ -63,6 +75,14 @@
           {{ img.DimWidth }}&times;{{ img.DimHeight }}
           <span *ngIf="img.ImageOrientation">&nbsp;· {{ img.ImageOrientation }}</span>
         </span>
+
+        <button
+          class="btn-approve"
+          *ngIf="!img.Approved"
+          (click)="approveImage(img, $event)"
+          [disabled]="isApproving(img.ImageId)">
+          {{ isApproving(img.ImageId) ? 'Approving...' : 'Approve' }}
+        </button>
       </div>
     </article>
   </div>

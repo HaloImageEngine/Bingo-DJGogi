@@ -1,0 +1,98 @@
+<section class="order-magnified-shell">
+  <header class="order-magnified-header">
+    <div>
+      <p class="order-magnified-eyebrow">MAG ORDER</p>
+      <p class="order-magnified-subtitle">Same order data with compact 3-panel alignment.</p>
+    </div>
+  </header>
+
+  <div *ngIf="!orderId()" class="order-detail-empty">
+    <p>Select an order from Order-List to populate MAG ORDER.</p>
+  </div>
+
+  <div *ngIf="orderId()" class="order-detail">
+    <div *ngIf="loading()" class="order-detail-loading">Loading order details...</div>
+    <div *ngIf="error()" class="order-detail-error">{{ error() }}</div>
+
+    <ng-container *ngIf="orderDetail() as detail">
+      <div class="three-pane-layout">
+        <aside class="pane pane--status">
+          <h3>Status Change</h3>
+          <app-status-change
+            [orderId]="detail.Head.OrderID"
+            [currentStatus]="detail.Head.StatusCode"
+            (statusChanged)="onStatusChanged($event)">
+          </app-status-change>
+
+          <ul class="amount-list">
+            <li class="amount-row">
+              <span class="amount-label">SubTotal</span>
+              <span class="amount-value">{{ detail.Head.SubTotal | currency }}</span>
+            </li>
+            <li class="amount-row">
+              <span class="amount-label">Tax</span>
+              <span class="amount-value">{{ detail.Head.TaxAmount | currency }}</span>
+            </li>
+            <li class="amount-row amount-row--total">
+              <span class="amount-label">Total</span>
+              <span class="amount-value">{{ detail.Head.TotalAmount | currency }}</span>
+            </li>
+          </ul>
+        </aside>
+
+        <section class="pane pane--basic">
+          <h3>Basic Info</h3>
+          <ul class="info-list">
+            <li class="order-id-row">
+              <span class="order-id-label">OrderID</span>
+              <span class="order-id-value">{{ detail.Head.OrderID }}</span>
+            </li>
+            <li><strong>Order #:</strong> {{ detail.Head.OrderNumber }}</li>
+            <li><strong>Status:</strong> {{ detail.Head.StatusName || detail.Head.StatusCode }}</li>
+            <li><strong>Customer:</strong> {{ detail.Head.CustomerName }}</li>
+            <li><strong>Phone:</strong> {{ detail.Head.CustomerPhone }}</li>
+            <li><strong>Email:</strong> {{ detail.Head.CustomerEmail || '-' }}</li>
+            <li><strong>Order Type:</strong> {{ detail.Head.OrderType }}</li>
+            <li><strong>Items:</strong> {{ detail.Head.ItemCount }}</li>
+            <li>
+              <strong>Notes:</strong>
+              <div class="notes-block">{{ detail.Head.OrderNotes || '-' }}</div>
+            </li>
+          </ul>
+        </section>
+
+        <section class="pane pane--items">
+          <h3>Items Detail</h3>
+          <table class="details-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Cat</th>
+                <th class="numeric-col">Qty</th>
+                <th class="numeric-col">Unit</th>
+                <th class="numeric-col">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let item of detail.OrderDetailsList">
+                <tr class="detail-main-row">
+                  <td>{{ item.ItemName }}</td>
+                  <td>{{ item.ItemCategory }}</td>
+                  <td class="numeric-col">{{ item.Quantity }}</td>
+                  <td class="numeric-col">{{ item.UnitPrice | currency }}</td>
+                  <td class="numeric-col">{{ item.LineTotal | currency }}</td>
+                </tr>
+                <tr class="detail-note-row">
+                  <td colspan="5">
+                    <span class="special-label">Special:</span>
+                    <span>{{ item.SpecialInstructions || '-' }}</span>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </ng-container>
+  </div>
+</section>

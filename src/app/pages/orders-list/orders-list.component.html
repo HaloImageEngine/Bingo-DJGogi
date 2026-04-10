@@ -1,4 +1,16 @@
 <section class="orders-list-shell" [class.is-fullscreen]="fullscreen()">
+  <div class="new-order-popup" *ngIf="showNewOrderPopup()" role="alert" aria-live="assertive">
+    <div class="new-order-popup__content">
+      <p class="new-order-popup__eyebrow">Incoming Order Alert</p>
+      <h3>{{ newOrderCount() === 1 ? '1 new order just arrived' : newOrderCount() + ' new orders just arrived' }}</h3>
+      <p>Kitchen queue changed. Review the latest orders now.</p>
+    </div>
+
+    <button type="button" class="new-order-popup__dismiss" (click)="dismissNewOrderPopup()" aria-label="Dismiss new order alert">
+      Dismiss
+    </button>
+  </div>
+
   <header class="orders-list-shell__header">
     <div class="orders-list-shell__intro">
       <span class="tag accent-teal">Order-List</span>
@@ -61,10 +73,10 @@
     </div>
 
     <div class="detail">
-      <app-orderdetail
+      <app-order-detail
         [orderId]="selectedOrder()?.OrderID ?? null"
         (completeStatusApplied)="onCompleteStatusApplied()">
-      </app-orderdetail>
+      </app-order-detail>
     </div>
   </div>
 

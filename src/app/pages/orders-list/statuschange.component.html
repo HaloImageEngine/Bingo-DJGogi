@@ -1,11 +1,20 @@
 <section class="status-change-card">
   <header>
-    <p class="status-change-title">Status Change</p>
-    <p class="status-change-meta">OrderID: <strong>{{ orderId || '-' }}</strong></p>
-    <p class="status-change-meta">Current: <strong>{{ currentStatus || '-' }}</strong></p>
+    <p class="status-change-meta">
+      OrderID: <strong>{{ orderId || '-' }}</strong>
+      &nbsp;|&nbsp;
+      Current: <strong>{{ currentStatus || '-' }}</strong>
+    </p>
   </header>
 
   <div class="status-change-actions">
+    <button
+      type="button"
+      class="status-action status-action--view-toggle"
+      (click)="goToAlternateView()">
+      {{ viewToggleLabel }}
+    </button>
+
     <button
       type="button"
       class="status-action"

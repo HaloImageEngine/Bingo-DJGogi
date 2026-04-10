@@ -13,3 +13,10 @@ export interface ThumbnailImage {
   ImageOrientation: string | null;
   Approved: boolean;
 }
+
+export interface ThumbnailApprovalResponse {
+  ok: boolean;
+  imageId: number;
+  approved: boolean;
+  message: string;
+}

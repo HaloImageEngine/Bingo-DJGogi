@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
-import { catchError, finalize, of } from 'rxjs';
+import { Component, DestroyRef, EventEmitter, Input, Output, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router } from '@angular/router';
+import { catchError, filter, finalize, of } from 'rxjs';
 
 import { OrderStatus } from '../../models/order-list-item.model';
 import { OrdersListService } from '../../services/orders-list.service';
@@ -16,6 +18,8 @@ type ChangeableOrderStatus = Extract<OrderStatus, 'complete' | 'ready'>;
 })
 export class StatusChangeComponent {
   private readonly ordersListService = inject(OrdersListService);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   @Input() orderId: number | null = null;
   @Input() currentStatus = '';
@@ -24,9 +28,29 @@ export class StatusChangeComponent {
   updating = false;
   error: string | null = null;
   success: string | null = null;
+  readonly onMagnifiedPage = signal(this.isMagnifiedUrl(this.router.url));
+
+  constructor() {
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(event => {
+        this.onMagnifiedPage.set(this.isMagnifiedUrl(event.urlAfterRedirects));
+      });
+  }
+
+  get viewToggleLabel(): string {
+    return this.onMagnifiedPage() ? 'List View' : 'Mag View';
+  }
 
   isCurrentStatus(status: ChangeableOrderStatus): boolean {
     return this.currentStatus.toUpperCase() === status.toUpperCase();
+  }
+
+  goToAlternateView(): void {
+    void this.router.navigateByUrl(this.onMagnifiedPage() ? '/order-list' : '/order-magnified');
   }
 
   changeStatus(status: ChangeableOrderStatus): void {
@@ -142,5 +166,9 @@ export class StatusChangeComponent {
     }
 
     return 'Status update failed: API response was not valid.';
+  }
+
+  private isMagnifiedUrl(url: string): boolean {
+    return url.startsWith('/order-magnified') || url.startsWith('/mag-order');
   }
 }

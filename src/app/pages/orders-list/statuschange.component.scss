@@ -38,6 +38,12 @@
   cursor: pointer;
 }
 
+.status-action--view-toggle {
+  background: #dff8ef;
+  border-color: #8ed1b5;
+  color: #0b6a47;
+}
+
 .status-action:disabled {
   opacity: 0.55;
   cursor: not-allowed;

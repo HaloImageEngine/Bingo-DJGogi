@@ -5,9 +5,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, finalize, interval, of } from 'rxjs';
 
 import { OrderListItem, OrderStatus } from '../../models/order-list-item.model';
+import { CurrentOrderService } from '../../services/current-order.service';
 import { DashboardSummaryService } from '../../services/dashboard-summary.service';
 import { OrdersListService } from '../../services/orders-list.service';
-import { OrderDetailComponent } from './orderdetail.component';
+import { OrderDetailComponent } from './order-detail.component';
 import { environment } from '../../../environments/environment';
 
 interface StatusOption {
@@ -24,10 +25,12 @@ interface StatusOption {
 })
 export class OrdersListComponent implements OnInit, OnDestroy {
   private readonly ordersListService = inject(OrdersListService);
+  private readonly currentOrderService = inject(CurrentOrderService);
   private readonly dashboardSummaryService = inject(DashboardSummaryService);
   private readonly destroyRef = inject(DestroyRef);
   private isRefreshing = false;
   private readonly ordersRefreshIntervalMs = environment.ordersRefreshIntervalSeconds * 1000;
+  private newOrderPopupTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly statusOptions: StatusOption[] = [
     { label: 'Pending', value: 'pending' },
@@ -43,6 +46,8 @@ export class OrdersListComponent implements OnInit, OnDestroy {
   readonly orders = signal<OrderListItem[]>([]);
   readonly selectedOrder = signal<OrderListItem | null>(null);
   readonly fullscreen = signal(false);
+  readonly newOrderCount = signal(0);
+  readonly showNewOrderPopup = signal(false);
 
   readonly totalOrders = computed(() => this.orders().length);
   readonly totalItems = computed(() => this.orders().reduce((sum, order) => sum + (order.ItemCount || 0), 0));
@@ -70,10 +75,11 @@ export class OrdersListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     document.body.classList.remove('workspace-expanded');
+    this.clearNewOrderPopupTimer();
   }
 
   selectOrder(order: OrderListItem): void {
-    this.selectedOrder.set(order);
+    this.updateSelectedOrder(order);
   }
 
   formatCreatedAt(order: OrderListItem): string {
@@ -120,6 +126,12 @@ export class OrdersListComponent implements OnInit, OnDestroy {
     this.loadOrders();
   }
 
+  dismissNewOrderPopup(): void {
+    this.showNewOrderPopup.set(false);
+    this.newOrderCount.set(0);
+    this.clearNewOrderPopupTimer();
+  }
+
   private loadOrders(showLoading = true): void {
     if (this.isRefreshing) {
       return;
@@ -151,17 +163,49 @@ export class OrdersListComponent implements OnInit, OnDestroy {
       )
       .subscribe(items => {
         const list = Array.isArray(items) ? items : [];
-        const selectedOrderId = this.selectedOrder()?.OrderID ?? null;
+        const previousOrderIds = new Set(this.orders().map(order => order.OrderID));
+        const incomingOrderCount = showLoading
+          ? 0
+          : list.filter(order => !previousOrderIds.has(order.OrderID)).length;
+        const selectedOrderId = this.currentOrderService.currentOrderId() ?? this.selectedOrder()?.OrderID ?? null;
+
+        if (incomingOrderCount > 0) {
+          this.triggerNewOrderPopup(incomingOrderCount);
+        }
+
         this.orders.set(list);
         this.dashboardSummaryService.updateOrders(list);
 
         if (selectedOrderId === null) {
-          this.selectedOrder.set(list.length ? list[0] : null);
+          this.updateSelectedOrder(list.length ? list[0] : null);
           return;
         }
 
         const matchingOrder = list.find(order => order.OrderID === selectedOrderId);
-        this.selectedOrder.set(matchingOrder ?? (list.length ? list[0] : null));
+        this.updateSelectedOrder(matchingOrder ?? (list.length ? list[0] : null));
       });
+  }
+
+  private updateSelectedOrder(order: OrderListItem | null): void {
+    this.selectedOrder.set(order);
+    this.currentOrderService.setCurrentOrderId(order?.OrderID ?? null);
+  }
+
+  private triggerNewOrderPopup(incomingOrderCount: number): void {
+    this.newOrderCount.set(incomingOrderCount);
+    this.showNewOrderPopup.set(true);
+    this.clearNewOrderPopupTimer();
+    this.newOrderPopupTimer = setTimeout(() => {
+      this.showNewOrderPopup.set(false);
+      this.newOrderCount.set(0);
+      this.newOrderPopupTimer = null;
+    }, 12000);
+  }
+
+  private clearNewOrderPopupTimer(): void {
+    if (this.newOrderPopupTimer !== null) {
+      clearTimeout(this.newOrderPopupTimer);
+      this.newOrderPopupTimer = null;
+    }
   }
 }

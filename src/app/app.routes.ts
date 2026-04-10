@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './services/auth.guard';
 
 export const routes: Routes = [
-	{ path: '', pathMatch: 'full', redirectTo: 'order-list.components' },
+	{ path: '', pathMatch: 'full', redirectTo: 'order-list' },
 	{
 		path: 'login',
 		loadComponent: () =>
@@ -51,11 +51,19 @@ export const routes: Routes = [
 		canActivate: [AuthGuard]
 	},
 	{
-		path: 'order-list.components',
+		path: 'order-list',
 		loadComponent: () =>
 			import('./pages/orders-list/orders-list.component').then(m => m.OrdersListComponent),
 		canActivate: [AuthGuard]
 	},
+	{
+		path: 'order-magnified',
+		loadComponent: () =>
+			import('./pages/order-magnified/order-magnified.component').then(m => m.OrderMagnifiedComponent),
+		canActivate: [AuthGuard]
+	},
+	{ path: 'order-list.components', pathMatch: 'full', redirectTo: 'order-list' },
+	{ path: 'mag-order', pathMatch: 'full', redirectTo: 'order-magnified' },
 	{
 		path: 'customers',
 		loadComponent: () =>

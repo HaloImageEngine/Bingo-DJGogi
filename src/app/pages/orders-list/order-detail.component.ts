@@ -3,20 +3,22 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, injec
 import { catchError, finalize, of } from 'rxjs';
 
 import { OrderFullDetailResponse, OrderStatus } from '../../models/order-list-item.model';
+import { CurrentOrderService } from '../../services/current-order.service';
 import { OrdersListService } from '../../services/orders-list.service';
 import { StatusChangeComponent } from './statuschange.component';
 
 type ChangeableOrderStatus = Extract<OrderStatus, 'complete' | 'preparing' | 'ready'>;
 
 @Component({
-  selector: 'app-orderdetail',
+  selector: 'app-order-detail',
   standalone: true,
   imports: [CommonModule, StatusChangeComponent],
-  templateUrl: './orderdetail.component.html',
-  styleUrl: './orderdetail.component.scss'
+  templateUrl: './order-detail.component.html',
+  styleUrl: './order-detail.component.scss'
 })
 export class OrderDetailComponent implements OnChanges {
   private readonly ordersListService = inject(OrdersListService);
+  private readonly currentOrderService = inject(CurrentOrderService);
 
   @Input() orderId: number | null = null;
   @Output() completeStatusApplied = new EventEmitter<void>();
@@ -27,6 +29,7 @@ export class OrderDetailComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if ('orderId' in changes) {
+      this.currentOrderService.setCurrentOrderId(this.orderId);
       this.loadOrderDetail();
     }
   }
@@ -41,6 +44,7 @@ export class OrderDetailComponent implements OnChanges {
           StatusName: status.charAt(0).toUpperCase() + status.slice(1)
         }
       };
+      this.currentOrderService.setCurrentOrderDetail(this.orderDetail);
     }
 
     this.loadOrderDetail();
@@ -54,7 +58,13 @@ export class OrderDetailComponent implements OnChanges {
     if (!this.orderId) {
       this.orderDetail = null;
       this.error = null;
+      this.currentOrderService.setCurrentOrderDetail(null);
       return;
+    }
+
+    const stored = this.currentOrderService.getStoredOrderDetailFor(this.orderId);
+    if (stored) {
+      this.orderDetail = stored;
     }
 
     this.loading = true;
@@ -73,7 +83,15 @@ export class OrderDetailComponent implements OnChanges {
         })
       )
       .subscribe(result => {
-        this.orderDetail = result;
+        if (result?.Head?.OrderID) {
+          this.orderDetail = result;
+          this.currentOrderService.setCurrentOrderDetail(result);
+          return;
+        }
+
+        if (!this.orderDetail) {
+          this.error = `No detail data returned for OrderID ${this.orderId}.`;
+        }
       });
   }
 }

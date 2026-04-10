@@ -7,8 +7,6 @@
   <div *ngIf="error" class="order-detail-error">{{ error }}</div>
 
   <ng-container *ngIf="!loading && !error && orderDetail">
-    <h3>Order Detail</h3>
-
     <section class="head-layout">
       <ul class="head-list">
         <li class="order-id-row">
@@ -62,8 +60,6 @@
         </ul>
       </aside>
     </section>
-
-    <h4>Items</h4>
     <table class="details-table">
       <thead>
         <tr>

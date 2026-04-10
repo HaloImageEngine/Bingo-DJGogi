@@ -54,7 +54,8 @@ export class AppComponent implements OnInit {
     {
       title: 'Operations',
       items: [
-        { label: 'Order-List', helper: 'Orders by status', path: '/order-list.components', accent: 'teal', icon: 'OL' },
+        { label: 'Order-List', helper: 'Orders by status', path: '/order-list', accent: 'teal', icon: 'OL' },
+        { label: 'MAG ORDER', helper: 'Current order detail workspace', path: '/order-magnified', accent: 'rose', icon: 'MO' },
         { label: 'Menu List', helper: 'List of All Items', path: '/menu-list', accent: 'teal', icon: 'ML' },
         { label: 'Discount List', helper: 'Discount codes & offers', path: '/discounts', accent: 'amber', icon: 'DC' },
         { label: 'Menu Manager', helper: 'Dishes, bundles, pricing', path: '/menu-manager', accent: 'amber', icon: 'MM' },

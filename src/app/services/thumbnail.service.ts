@@ -1,8 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { ThumbnailImage } from '../models/thumbnail.model';
+import { ThumbnailApprovalResponse, ThumbnailImage } from '../models/thumbnail.model';
 
 @Injectable({ providedIn: 'root' })
 export class ThumbnailService {
@@ -21,6 +21,14 @@ export class ThumbnailService {
         }));
       })
     );
+  }
+
+  updateImageApproval(imageId: number, approved: boolean): Observable<ThumbnailApprovalResponse> {
+    const params = new HttpParams()
+      .set('imageId', imageId)
+      .set('approved', approved);
+
+    return this.http.post<ThumbnailApprovalResponse>(environment.thumbnailApprovalApiUrl, null, { params });
   }
 
   private resolveUrl(path: string, baseUrl: string): string {
