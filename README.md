@@ -1,4 +1,4 @@
-# GetGogi Admin Dashboard
+# Bingo-DJGogi
 
 Angular 17 standalone dashboard used to orchestrate menus, marketing, orders, and customer signals for the GetGogi team. The shell ships with a responsive sidebar, insight band, quick actions, and dedicated pages for each workflow.
 
