@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎧 DJ Gogi Bingo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="logo-area">
+        <span class="dj-icon">🎧</span>
+        <h1>DJ Gogi<br /><span class="subtitle">BINGO</span></h1>
+        <span class="dj-icon">🎶</span>
+      </div>
+      <p class="tagline">Drop the beat — mark your card!</p>
+    </header>
+
+    <main>
+      <!-- Caller Section -->
+      <section class="caller-section">
+        <div class="caller-box" id="callerBox">
+          <span id="callerText">Press <strong>Draw!</strong> to start</span>
+        </div>
+        <div class="caller-controls">
+          <button id="drawBtn" class="btn btn-primary">🎲 Draw!</button>
+          <button id="newGameBtn" class="btn btn-secondary">🔄 New Game</button>
+        </div>
+        <div class="called-list-wrapper">
+          <h3>Called Items <span id="calledCount">(0)</span></h3>
+          <div id="calledList" class="called-list"></div>
+        </div>
+      </section>
+
+      <!-- Bingo Card -->
+      <section class="card-section">
+        <div class="bingo-header-row">
+          <div class="bingo-letter">B</div>
+          <div class="bingo-letter">I</div>
+          <div class="bingo-letter">N</div>
+          <div class="bingo-letter">G</div>
+          <div class="bingo-letter">O</div>
+        </div>
+        <div class="bingo-grid" id="bingoGrid"></div>
+        <div id="winBanner" class="win-banner hidden">🎉 BINGO! 🎉</div>
+      </section>
+    </main>
+
+    <!-- Win Modal -->
+    <div id="winModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-emoji">🎧</div>
+        <h2>BINGO!</h2>
+        <p id="winMessage">You got a Bingo!</p>
+        <button id="keepPlayingBtn" class="btn btn-primary">Keep Playing</button>
+        <button id="newGameModalBtn" class="btn btn-secondary">New Game</button>
+      </div>
+    </div>
+    <div id="modalOverlay" class="modal-overlay hidden"></div>
+  </div>
+
+  <script src="bingo.js"></script>
+</body>
+</html>
