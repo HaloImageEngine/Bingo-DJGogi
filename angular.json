@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "admin-getgogi": {
+    "bingo-djgogi": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -20,7 +20,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/admin-getgogi",
+            "outputPath": "dist/bingo-djgogi",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -81,10 +81,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "admin-getgogi:build:production"
+              "buildTarget": "bingo-djgogi:build:production"
             },
             "development": {
-              "buildTarget": "admin-getgogi:build:development"
+              "buildTarget": "bingo-djgogi:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -92,7 +92,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "admin-getgogi:build"
+            "buildTarget": "bingo-djgogi:build"
           }
         },
         "test": {

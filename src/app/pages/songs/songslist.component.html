@@ -1,0 +1,56 @@
+<section class="songs-page">
+  <header class="songs-page__header">
+    <div>
+      <a routerLink="/console" class="songs-page__back">&larr; Back to Console</a>
+      <h1>Song Library</h1>
+      <p class="songs-page__copy">Browse the API-backed catalog. This view shows a subset of display fields for quick scanning.</p>
+    </div>
+    <div class="songs-page__stats">
+      <div class="songs-stat">
+        <span class="songs-stat__value">{{ totalCount() }}</span>
+        <span class="songs-stat__label">Total Songs</span>
+      </div>
+      <div class="songs-stat">
+        <span class="songs-stat__value">{{ activeCount() }}</span>
+        <span class="songs-stat__label">Active</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="songs-board">
+    <div class="songs-board__state" *ngIf="loading()">Loading songs...</div>
+    <div class="songs-board__state songs-board__state--error" *ngIf="error() as errorMessage">{{ errorMessage }}</div>
+
+    <div class="songs-table" *ngIf="!loading() && !error() && songs().length > 0">
+      <div class="songs-table__head">
+        <span>Song</span>
+        <span>Genre</span>
+        <span>Difficulty</span>
+        <span>Duration</span>
+        <span>Status</span>
+      </div>
+
+      <a
+        class="songs-table__row"
+        *ngFor="let song of songs(); trackBy: trackBySong"
+        [routerLink]="songDetailLink(song)">
+        <span class="songs-table__song">
+          <strong>{{ song.Title || 'Untitled song' }}</strong>
+          <small>{{ song.Artist || 'Unknown artist' }} • {{ song.Decade || 'Unknown decade' }}</small>
+        </span>
+        <span>{{ song.Genre || 'Unknown' }}</span>
+        <span>
+          <span class="songs-pill songs-pill--difficulty" [attr.data-difficulty]="(song.Difficulty || 'unknown').toLowerCase()">
+            {{ song.Difficulty || 'Unknown' }}
+          </span>
+        </span>
+        <span>{{ formatDuration(song.DurationSeconds) }}</span>
+        <span>
+          <span class="songs-pill" [class.songs-pill--inactive]="!song.Active">{{ song.Active ? 'Active' : 'Inactive' }}</span>
+        </span>
+      </a>
+    </div>
+
+    <div class="songs-board__state" *ngIf="!loading() && !error() && songs().length === 0">No songs returned from the API.</div>
+  </section>
+</section>

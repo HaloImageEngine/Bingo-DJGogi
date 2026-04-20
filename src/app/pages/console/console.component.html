@@ -1,0 +1,186 @@
+<div class="console-container">
+
+  <!-- Header -->
+  <header class="console-header">
+    <a routerLink="/" class="back-link">&larr; Back</a>
+    <h1>Master Console</h1>
+    <div class="game-badge" [class]="gameStatus()">
+      {{ gameStatus() | uppercase }}
+    </div>
+  </header>
+
+  <!-- Now Playing -->
+  <section class="now-playing" *ngIf="currentSong() as song">
+    <div class="now-playing-label">NOW PLAYING</div>
+    <div class="now-playing-info">
+      <span class="now-playing-title">{{ song.title }}</span>
+      <span class="now-playing-artist">{{ song.artist }}</span>
+    </div>
+    <div class="now-playing-meta">
+      <span class="meta-chip">{{ song.genre }}</span>
+      <span class="meta-chip">{{ song.decade }}</span>
+      <span class="meta-chip">{{ song.bingo_category }}</span>
+      <span class="meta-chip">{{ formatDuration(song.duration_seconds) }}</span>
+    </div>
+  </section>
+
+  <!-- Game Controls -->
+  <section class="game-controls">
+    <div class="control-row">
+      @if (gameStatus() === 'idle' || gameStatus() === 'finished') {
+        <button class="ctrl-btn start" (click)="startGame()" [disabled]="playlist().length === 0">
+          Start Game
+        </button>
+      }
+      @if (gameStatus() === 'active') {
+        <button class="ctrl-btn call" (click)="callNextSong()">
+          Call Next Song
+        </button>
+        <button class="ctrl-btn pause" (click)="pauseGame()">Pause</button>
+        <button class="ctrl-btn end" (click)="endGame()">End Game</button>
+      }
+      @if (gameStatus() === 'paused') {
+        <button class="ctrl-btn start" (click)="resumeGame()">Resume</button>
+        <button class="ctrl-btn end" (click)="endGame()">End Game</button>
+      }
+      @if (gameStatus() !== 'idle') {
+        <button class="ctrl-btn reset" (click)="resetGame()">Reset</button>
+      }
+    </div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value">{{ playlist().length }}</div>
+        <div class="stat-label">In Playlist</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ calledCount() }}</div>
+        <div class="stat-label">Called</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ remainingCount() }}</div>
+        <div class="stat-label">Remaining</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ roundNumber() }}</div>
+        <div class="stat-label">Round</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main panels -->
+  <div class="panels">
+
+    <!-- Song Library -->
+    <section class="panel library-panel">
+      <h2>Song Library</h2>
+      <div class="filters">
+        <input
+          type="text"
+          placeholder="Search title or artist..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+          class="filter-input"
+        />
+        <select [ngModel]="genreFilter()" (ngModelChange)="genreFilter.set($event)" class="filter-select" aria-label="Filter by genre">
+          <option value="">All Genres</option>
+          @for (g of uniqueGenres(); track g) {
+            <option [value]="g">{{ g }}</option>
+          }
+        </select>
+        <select [ngModel]="decadeFilter()" (ngModelChange)="decadeFilter.set($event)" class="filter-select" aria-label="Filter by decade">
+          <option value="">All Decades</option>
+          @for (d of uniqueDecades(); track d) {
+            <option [value]="d">{{ d }}</option>
+          }
+        </select>
+        <select [ngModel]="difficultyFilter()" (ngModelChange)="difficultyFilter.set($event)" class="filter-select" aria-label="Filter by difficulty">
+          <option value="">All Difficulties</option>
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+        <button class="filter-btn" (click)="addAllFiltered()">Add All Filtered</button>
+      </div>
+      <div class="song-list">
+        @for (song of filteredSongs(); track song.song_id) {
+          <div class="song-row" [class.in-playlist]="isInPlaylist(song)">
+            <div class="song-info">
+              <span class="song-title">{{ song.title }}</span>
+              <span class="song-artist">{{ song.artist }}</span>
+            </div>
+            <div class="song-tags">
+              <span class="tag genre">{{ song.genre }}</span>
+              <span class="tag decade">{{ song.decade }}</span>
+              <span class="tag diff" [attr.data-diff]="song.difficulty">{{ song.difficulty }}</span>
+            </div>
+            <div class="song-actions">
+              @if (!isInPlaylist(song)) {
+                <button class="action-btn add" (click)="addToPlaylist(song)" title="Add to playlist">+</button>
+              } @else {
+                <button class="action-btn remove" (click)="removeFromPlaylist(song)" title="Remove from playlist">&minus;</button>
+              }
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-msg">No songs match your filters.</div>
+        }
+      </div>
+    </section>
+
+    <!-- Playlist -->
+    <section class="panel playlist-panel">
+      <div class="playlist-header">
+        <h2>Playlist</h2>
+        <div class="playlist-actions">
+          <button class="filter-btn" (click)="shufflePlaylist()" [disabled]="playlist().length === 0">Shuffle</button>
+          <button class="filter-btn danger" (click)="clearPlaylist()" [disabled]="playlist().length === 0">Clear</button>
+        </div>
+      </div>
+      <div class="song-list">
+        @for (song of playlist(); track song.song_id; let i = $index) {
+          <div class="song-row" [class.called]="isCalled(song)" [class.current]="currentSong()?.song_id === song.song_id">
+            <span class="song-index">{{ i + 1 }}</span>
+            <div class="song-info">
+              <span class="song-title">{{ song.title }}</span>
+              <span class="song-artist">{{ song.artist }}</span>
+            </div>
+            <div class="song-tags">
+              <span class="tag category">{{ song.bingo_category }}</span>
+              <span class="tag time">{{ formatDuration(song.duration_seconds) }}</span>
+            </div>
+            <div class="song-actions">
+              @if (gameStatus() === 'active' && !isCalled(song)) {
+                <button class="action-btn call" (click)="callSpecificSong(song)" title="Call this song">&#9654;</button>
+              }
+              @if (gameStatus() === 'idle') {
+                <button class="action-btn remove" (click)="removeFromPlaylist(song)" title="Remove">&times;</button>
+              }
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-msg">Add songs from the library to build your playlist.</div>
+        }
+      </div>
+    </section>
+
+    <!-- Called Songs History -->
+    <section class="panel history-panel">
+      <h2>Called Songs</h2>
+      <div class="song-list">
+        @for (song of calledSongs(); track song.song_id; let i = $index) {
+          <div class="song-row history-row">
+            <span class="song-index">#{{ i + 1 }}</span>
+            <div class="song-info">
+              <span class="song-title">{{ song.title }}</span>
+              <span class="song-artist">{{ song.artist }}</span>
+            </div>
+            <span class="tag category">{{ song.bingo_category }}</span>
+          </div>
+        } @empty {
+          <div class="empty-msg">No songs called yet.</div>
+        }
+      </div>
+    </section>
+
+  </div>
+</div>

@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './services/auth.guard';
 
 export const routes: Routes = [
-	{ path: '', pathMatch: 'full', redirectTo: 'order-list' },
+	{ path: '', pathMatch: 'full', redirectTo: 'overview' },
 	{
 		path: 'login',
 		loadComponent: () =>
@@ -14,56 +14,6 @@ export const routes: Routes = [
 			import('./pages/overview/overview.component').then(m => m.OverviewComponent),
 		canActivate: [AuthGuard]
 	},
-	{
-		path: 'menu-manager',
-		loadComponent: () =>
-			import('./pages/menu-manager/menu-manager.component').then(m => m.MenuManagerComponent),
-		canActivate: [AuthGuard]
-	},
-	{
-		path: 'menu-list',
-		loadComponent: () =>
-			import('./pages/menu-list/menu-list.component').then(m => m.MenuListComponent),
-		canActivate: [AuthGuard]
-	},
-	{
-		path: 'menu-listps',
-		loadComponent: () =>
-			import('./pages/menu-listps/menu-listps.component').then(m => m.MenuListpsComponent),
-		canActivate: [AuthGuard]
-	},
-	{
-		path: 'menu-listbv',
-		loadComponent: () =>
-			import('./pages/menu-listbv/menu-listbv.component').then(m => m.MenuListbvComponent),
-		canActivate: [AuthGuard]
-	},
-	{
-		path: 'marketing',
-		loadComponent: () =>
-			import('./pages/marketing/marketing.component').then(m => m.MarketingComponent),
-		canActivate: [AuthGuard]
-	},
-	{
-		path: 'orders',
-		loadComponent: () =>
-			import('./pages/orders/orders.component').then(m => m.OrdersComponent),
-		canActivate: [AuthGuard]
-	},
-	{
-		path: 'order-list',
-		loadComponent: () =>
-			import('./pages/orders-list/orders-list.component').then(m => m.OrdersListComponent),
-		canActivate: [AuthGuard]
-	},
-	{
-		path: 'order-magnified',
-		loadComponent: () =>
-			import('./pages/order-magnified/order-magnified.component').then(m => m.OrderMagnifiedComponent),
-		canActivate: [AuthGuard]
-	},
-	{ path: 'order-list.components', pathMatch: 'full', redirectTo: 'order-list' },
-	{ path: 'mag-order', pathMatch: 'full', redirectTo: 'order-magnified' },
 	{
 		path: 'customers',
 		loadComponent: () =>
@@ -77,15 +27,33 @@ export const routes: Routes = [
 		canActivate: [AuthGuard]
 	},
 	{
-		path: 'discounts',
-		loadComponent: () =>
-			import('./pages/discounts/discount.component').then(m => m.DiscountComponent),
-		canActivate: [AuthGuard]
-	},
-	{
 		path: 'settings',
 		loadComponent: () =>
 			import('./pages/settings/settings.component').then(m => m.SettingsComponent),
+		canActivate: [AuthGuard]
+	},
+	{
+		path: 'cards',
+		loadComponent: () =>
+			import('./pages/cards/cards.component').then(m => m.CardsComponent),
+		canActivate: [AuthGuard]
+	},
+	{
+		path: 'console/songs',
+		loadComponent: () =>
+			import('./pages/songs/songslist.component').then(m => m.SongsListComponent),
+		canActivate: [AuthGuard]
+	},
+	{
+		path: 'console/songs/:songId',
+		loadComponent: () =>
+			import('./pages/songs/songdetail.component').then(m => m.SongDetailComponent),
+		canActivate: [AuthGuard]
+	},
+	{
+		path: 'console',
+		loadComponent: () =>
+			import('./pages/console/console.component').then(m => m.ConsoleComponent),
 		canActivate: [AuthGuard]
 	},
 	{

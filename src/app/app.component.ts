@@ -54,16 +54,11 @@ export class AppComponent implements OnInit {
     {
       title: 'Operations',
       items: [
-        { label: 'Order-List', helper: 'Orders by status', path: '/order-list', accent: 'teal', icon: 'OL' },
-        { label: 'MAG ORDER', helper: 'Current order detail workspace', path: '/order-magnified', accent: 'rose', icon: 'MO' },
-        { label: 'Menu List', helper: 'List of All Items', path: '/menu-list', accent: 'teal', icon: 'ML' },
-        { label: 'Discount List', helper: 'Discount codes & offers', path: '/discounts', accent: 'amber', icon: 'DC' },
-        { label: 'Menu Manager', helper: 'Dishes, bundles, pricing', path: '/menu-manager', accent: 'amber', icon: 'MM' },
-        { label: 'Orders', helper: 'Orders In Queue', path: '/orders', accent: 'teal', icon: 'OR' },
-        { label: 'Thumbnails', helper: 'Image thumbnail grid', path: '/thumbnails', accent: 'teal', icon: 'TN' },
-        { label: 'Customers', helper: 'Community + loyalty', path: '/customers', accent: 'iris', icon: 'CU' },
-        { label: 'Customer List', helper: 'Browse all customers', path: '/customer-list', accent: 'iris', icon: 'CL' },
-        { label: 'Settings', helper: 'Automation + access', path: '/settings', accent: 'rose', icon: 'ST' }
+
+        { label: 'Cards', helper: 'Two bingo cards view', path: '/cards', accent: 'amber', icon: 'CD' },
+        { label: 'Songs', helper: 'Browse bingo song library', path: '/console/songs', accent: 'teal', icon: 'SG' },
+        { label: 'Console', helper: 'Bingo game console', path: '/console', accent: 'rose', icon: 'BC' },
+        //{ label: 'Settings', helper: 'Automation + access', path: '/settings', accent: 'rose', icon: 'ST' }
       ]
     }
     ,
