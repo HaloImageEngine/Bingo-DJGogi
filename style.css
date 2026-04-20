@@ -1,0 +1,382 @@
+/* ============================================================
+   DJ Gogi Bingo – Styles
+   ============================================================ */
+
+:root {
+  --bg:          #0d0d1a;
+  --surface:     #1a1a2e;
+  --card-bg:     #16213e;
+  --accent1:     #e94560;  /* hot pink-red  */
+  --accent2:     #0f3460;  /* deep blue     */
+  --accent3:     #533483;  /* purple        */
+  --highlight:   #f5a623;  /* gold/orange   */
+  --text-main:   #f0f0f0;
+  --text-muted:  #9090aa;
+  --cell-size:   clamp(52px, 11vw, 80px);
+  --radius:      10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text-main);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+#app {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+header {
+  text-align: center;
+  padding: 1rem 0 .5rem;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+}
+
+.dj-icon { font-size: 2.5rem; }
+
+h1 {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, var(--accent1), var(--highlight), var(--accent3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: clamp(2rem, 7vw, 4rem);
+  letter-spacing: 8px;
+}
+
+.tagline {
+  color: var(--text-muted);
+  font-size: .9rem;
+  margin-top: .4rem;
+  letter-spacing: 1px;
+}
+
+/* ── Layout ──────────────────────────────────────────────── */
+main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+/* ── Caller Section ──────────────────────────────────────── */
+.caller-section {
+  flex: 1 1 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.caller-box {
+  background: linear-gradient(135deg, var(--accent2), var(--accent3));
+  border: 2px solid var(--accent1);
+  border-radius: var(--radius);
+  width: 100%;
+  min-height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+  font-size: clamp(.95rem, 2.5vw, 1.1rem);
+  line-height: 1.4;
+  box-shadow: 0 0 20px rgba(233, 69, 96, .4);
+  transition: box-shadow .3s;
+}
+
+.caller-box.flash {
+  animation: callerFlash .5s ease;
+}
+
+@keyframes callerFlash {
+  0%   { box-shadow: 0 0 40px rgba(245,166,35,.9); }
+  100% { box-shadow: 0 0 20px rgba(233, 69, 96, .4); }
+}
+
+.caller-controls {
+  display: flex;
+  gap: .75rem;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn {
+  padding: .6rem 1.2rem;
+  border: none;
+  border-radius: var(--radius);
+  font-size: .95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .15s, filter .15s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn:hover  { filter: brightness(1.2); transform: translateY(-2px); }
+.btn:active { transform: translateY(0); filter: brightness(.95); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent1), #c0392b);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(233,69,96,.5);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text-main);
+  border: 1px solid var(--accent3);
+}
+
+.btn:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+
+/* ── Called List ─────────────────────────────────────────── */
+.called-list-wrapper {
+  width: 100%;
+}
+
+.called-list-wrapper h3 {
+  font-size: .85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: .4rem;
+}
+
+.called-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: .5rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--accent2);
+}
+
+.called-chip {
+  background: var(--accent2);
+  color: var(--text-main);
+  font-size: .7rem;
+  padding: .25rem .5rem;
+  border-radius: 20px;
+  white-space: nowrap;
+  animation: chipIn .25s ease;
+}
+
+@keyframes chipIn {
+  from { opacity: 0; transform: scale(.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Bingo Card ──────────────────────────────────────────── */
+.card-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  position: relative;
+}
+
+.bingo-header-row {
+  display: grid;
+  grid-template-columns: repeat(5, var(--cell-size));
+  gap: 4px;
+}
+
+.bingo-letter {
+  width: var(--cell-size);
+  height: calc(var(--cell-size) * .55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(1.1rem, 3vw, 1.6rem);
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: var(--highlight);
+  text-shadow: 0 0 10px var(--highlight);
+}
+
+.bingo-grid {
+  display: grid;
+  grid-template-columns: repeat(5, var(--cell-size));
+  grid-template-rows:    repeat(5, var(--cell-size));
+  gap: 4px;
+}
+
+.cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  background: var(--card-bg);
+  border: 1px solid #2a2a4a;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: clamp(.5rem, 1.5vw, .72rem);
+  line-height: 1.2;
+  padding: 4px;
+  cursor: pointer;
+  user-select: none;
+  transition: background .2s, transform .15s, border-color .2s;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.cell:hover:not(.marked):not(.free) {
+  border-color: var(--accent1);
+  background: #202040;
+  transform: scale(1.05);
+}
+
+.cell.marked {
+  background: linear-gradient(135deg, var(--accent1), var(--accent3));
+  border-color: var(--highlight);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(233,69,96,.6);
+  transform: scale(1.04);
+  animation: markIn .3s ease;
+}
+
+@keyframes markIn {
+  0%   { transform: scale(1.25); }
+  100% { transform: scale(1.04); }
+}
+
+.cell.free {
+  background: linear-gradient(135deg, var(--highlight), #e67e22);
+  color: #000;
+  font-weight: 900;
+  font-size: clamp(.6rem, 1.6vw, .8rem);
+  cursor: default;
+  border-color: var(--highlight);
+}
+
+.cell.winning {
+  animation: winPulse 1s infinite alternate;
+  border-color: var(--highlight) !important;
+  z-index: 2;
+}
+
+@keyframes winPulse {
+  from { box-shadow: 0 0 8px var(--highlight); }
+  to   { box-shadow: 0 0 24px var(--highlight), 0 0 4px #fff; }
+}
+
+/* ── Win Banner ──────────────────────────────────────────── */
+.win-banner {
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-weight: 900;
+  color: var(--highlight);
+  text-shadow: 0 0 20px var(--highlight);
+  letter-spacing: 4px;
+  animation: bannerPop .5s ease;
+  margin-top: .5rem;
+}
+
+@keyframes bannerPop {
+  0%   { transform: scale(.5); opacity: 0; }
+  70%  { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Modal ───────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.65);
+  z-index: 100;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 101;
+  background: var(--surface);
+  border: 2px solid var(--accent1);
+  border-radius: 14px;
+  padding: 2rem 2.5rem;
+  text-align: center;
+  min-width: 280px;
+  box-shadow: 0 0 40px rgba(233,69,96,.5);
+  animation: modalIn .35s ease;
+}
+
+@keyframes modalIn {
+  from { transform: translate(-50%, -50%) scale(.7); opacity: 0; }
+  to   { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.modal-emoji { font-size: 3.5rem; margin-bottom: .5rem; }
+
+.modal h2 {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--highlight);
+  text-shadow: 0 0 15px var(--highlight);
+  letter-spacing: 4px;
+  margin-bottom: .5rem;
+}
+
+.modal p {
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+  font-size: 1rem;
+}
+
+.modal .btn { margin: .3rem; }
+
+.hidden { display: none !important; }
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--accent3); border-radius: 3px; }
+
+/* ── Confetti canvas ─────────────────────────────────────── */
+#confettiCanvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 520px) {
+  main { flex-direction: column-reverse; }
+  .caller-section { width: 100%; }
+  .called-list { max-height: 120px; }
+}
