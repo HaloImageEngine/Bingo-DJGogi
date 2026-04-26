@@ -1,9 +1,31 @@
 <section class="page overview">
 	<header class="page__header">
-		<span class="tag accent-iris">Overview</span>
-		<h2>Live health snapshot</h2>
-		<p>Track GogiTime service quality, demand curves, and readiness at a glance.</p>
+		<span class="tag accent-rose">Music Bingo HQ</span>
+		<h2>Run the room like a headline set</h2>
+		<p>Monitor the live round, crowd momentum, and prize flow from one music-bingo control board.</p>
 	</header>
+
+	<section class="surface-card hero-panel">
+		<div class="hero-panel__lead">
+			<p class="eyebrow">Quick snapshot</p>
+			<h3>Music Bingo is live and the room is locked in</h3>
+			<p class="hero-panel__copy">
+				The current game is running as a high-energy music bingo session with steady card play, sing-along momentum,
+				and enough wildcard tracks in reserve to keep the blackout finale competitive.
+			</p>
+			<div class="hero-panel__chips" aria-label="Music bingo highlights">
+				<span>Live caller cues</span>
+				<span>Player boards active</span>
+				<span>Prize round approaching</span>
+			</div>
+		</div>
+		<div class="hero-panel__spotlights">
+			<div class="hero-panel__spotlight" *ngFor="let item of spotlightStats">
+				<p>{{ item.label }}</p>
+				<strong>{{ item.value }}</strong>
+			</div>
+		</div>
+	</section>
 
 	<div class="metrics-grid">
 		<article class="surface-card metric-card" *ngFor="let metric of metrics" [attr.data-trend]="metric.trend">
@@ -17,8 +39,8 @@
 	<div class="panels-grid">
 		<article class="surface-card activity">
 			<header>
-				<p class="eyebrow">Latest signals</p>
-				<h3>Operational feed</h3>
+				<p class="eyebrow">Live booth log</p>
+				<h3>Caller timeline</h3>
 			</header>
 			<ul>
 				<li *ngFor="let item of activityFeed">
@@ -33,8 +55,8 @@
 
 		<article class="surface-card readiness">
 			<header>
-				<p class="eyebrow">Service readiness</p>
-				<h3>Today's checkpoints</h3>
+				<p class="eyebrow">Room check</p>
+				<h3>Show essentials</h3>
 			</header>
 			<ul>
 				<li *ngFor="let item of readinessChecks" [attr.data-status]="item.status">
@@ -50,8 +72,8 @@
 
 	<article class="surface-card pipeline">
 		<header>
-			<p class="eyebrow">Kitchen pipeline</p>
-			<h3>Prep to courier flow</h3>
+			<p class="eyebrow">Game progression</p>
+			<h3>Round flow</h3>
 		</header>
 		<div class="pipeline__grid">
 			<div *ngFor="let step of pipeline">

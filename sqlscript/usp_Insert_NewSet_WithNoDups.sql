@@ -1,26 +1,21 @@
--- ================================================
--- Template generated from Template Explorer using:
--- Create Procedure (New Menu).SQL
---
--- Use the Specify Values for Template Parameters 
--- command (Ctrl-Shift-M) to fill in the parameter 
--- values below.
---
--- This block of comments will not be included in
--- the definition of the procedure.
--- ================================================
+USE [haloimag_djgogi]
+GO
+
+/****** Object:  StoredProcedure [dbo].[usp_Insert_NewSet_WithNoDups]    Script Date: 4/25/2026 8:58:51 PM ******/
 SET ANSI_NULLS ON
 GO
+
 SET QUOTED_IDENTIFIER ON
 GO
+
 -- =============================================
 -- Author:		<Author,,Name>
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-CREATE PROCEDURE usp_InsertNewSetWithNoDups 
+CREATE PROCEDURE [dbo].[usp_Insert_NewSet_WithNoDups]
 	-- Add the parameters for the stored procedure here
-	--<@Param1, sysname, @p1> <Datatype_For_Param1, , int> = <Default_Value_For_Param1, , 0>, 
+	--<@Param1, sysname, @p1> <Datatype_For_Param1, , int> = <Default_Value_For_Param1, , 0>,
 	--<@Param2, sysname, @p2> <Datatype_For_Param2, , int> = <Default_Value_For_Param2, , 0>
 AS
 BEGIN
@@ -42,7 +37,7 @@ FROM (VALUES
     -- Adele breakout hit
     ('Rolling in the Deep', 'Adele',             'solo',   'Pop',  'Soul Pop',     'Powerful',  'medium', 2010, '10s', 'Modern',  'Wedding Classic',  'easy',   1,  'UK', 88, 228, 1),
 
-    -- Pharrell’s upbeat global hit
+    -- Pharrell's upbeat global hit
     ('Happy',               'Pharrell Williams', 'solo',   'Pop',  'Neo Soul',     'Happy',     'fast',   2013, '10s', 'Modern',  'Dancefloor Filler','easy',   1,  'US', 85, 233, 1),
 
     -- Synth-pop hit by The Weeknd
@@ -71,4 +66,7 @@ WHERE NOT EXISTS (
 
 
 END
+
 GO
+
+

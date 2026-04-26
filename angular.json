@@ -34,6 +34,16 @@
                 "input": ".",
                 "output": "/"
               },
+              {
+                "glob": "music_bingo_schema.html",
+                "input": "src/legacy-routes/app",
+                "output": "/app"
+              },
+              {
+                "glob": "music_bingo_schema.html",
+                "input": "src/app",
+                "output": "/assets"
+              },
                 {
                   "glob": "GogiTimeAdmin.jpg",
                   "input": "src/assets/images",
@@ -105,6 +115,21 @@
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [
+              {
+                "glob": "music_bingo_schema.html",
+                "input": "src/legacy-routes/app",
+                "output": "/app"
+              },
+              {
+                "glob": "music_bingo_schema.html",
+                "input": "src/legacy-routes/app",
+                "output": "/app"
+              },
+              {
+                "glob": "music_bingo_schema.html",
+                "input": "src/app",
+                "output": "/assets"
+              },
               "src/favicon.ico",
               "src/assets"
             ],

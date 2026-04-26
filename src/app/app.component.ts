@@ -1,12 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, computed, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, of } from 'rxjs';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-
-import { DashboardSummaryService } from './services/dashboard-summary.service';
-import { DiscountService } from './services/discount.service';
-import { Discount } from './models/discount.model';
 
 type NavAccent = 'iris' | 'teal' | 'amber' | 'rose';
 
@@ -25,14 +19,6 @@ interface NavSection {
   hidden?: boolean;
 }
 
-interface Highlight {
-  title: string;
-  value: string;
-  detail: string;
-  trend: 'up' | 'down' | 'flat';
-  accent: NavAccent;
-}
-
 
 @Component({
   selector: 'app-root',
@@ -42,12 +28,10 @@ interface Highlight {
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
-  private readonly dashboardSummaryService = inject(DashboardSummaryService);
-  private readonly discountService = inject(DiscountService);
   private readonly destroyRef = inject(DestroyRef);
   private brandCardTimerId: number | undefined;
-  readonly controlRoomLabel = 'GogiTime Admin Dock';
-  readonly brandCardImagePath = 'assets/images/GogiTimeAdmin.jpg';
+  readonly controlRoomLabel = 'Music Bingo Admin';
+  readonly brandCardImagePath = 'assets/images/DJGogi.png';
 
   readonly navSections: NavSection[] = [
 
@@ -56,7 +40,10 @@ export class AppComponent implements OnInit {
       items: [
 
         { label: 'Cards', helper: 'Two bingo cards view', path: '/cards', accent: 'amber', icon: 'CD' },
+      { label: 'Slide Cards', helper: 'Landscape swipe card pairs', path: '/slidecards', accent: 'teal', icon: 'SC' },
         { label: 'Songs', helper: 'Browse bingo song library', path: '/console/songs', accent: 'teal', icon: 'SG' },
+        { label: 'MB Schema', helper: 'Music bingo data map', path: '/music-bingo-schema', accent: 'iris', icon: 'DB' },
+        { label: 'MB Guidelines', helper: 'Music bingo chat transcript', path: '/music-bingo-guideline', accent: 'iris', icon: 'MG' },
         { label: 'Console', helper: 'Bingo game console', path: '/console', accent: 'rose', icon: 'BC' },
         //{ label: 'Settings', helper: 'Automation + access', path: '/settings', accent: 'rose', icon: 'ST' }
       ]
@@ -72,38 +59,8 @@ export class AppComponent implements OnInit {
     },
   ];
 
-  readonly utilityHighlights = computed<Highlight[]>(() => [
-    {
-      title: 'Live Orders',
-      value: String(this.dashboardSummaryService.liveOrders()),
-      detail: 'Current orders in the active list',
-      trend: 'up',
-      accent: 'teal'
-    },
-    {
-      title: 'Avg. Ticket',
-      value: this.formatCurrency(this.dashboardSummaryService.avgTicket()),
-      detail: 'Total sales divided by live orders',
-      trend: 'up',
-      accent: 'amber'
-    },
-    {
-      title: 'Marketing Push',
-      value: `${this.dashboardSummaryService.marketingPushCount()} active`,
-      detail: 'Active discounts from the discounts API',
-      trend: 'flat',
-      accent: 'rose'
-    }
-  ]);
-
-  readonly liaison = {
-    name: 'Ops Liaison · Riley',
-    availability: 'On-call · response under 5m'
-  };
-
   isSidebarOpen = false;
   isSidebarCollapsed = false;
-  isInsightBandCollapsed = false;
   isBrandCardHidden = false;
   showBrandCardImage = true;
 
@@ -122,8 +79,6 @@ export class AppComponent implements OnInit {
         window.clearTimeout(this.brandCardTimerId);
       }
     });
-
-    this.loadActiveDiscounts();
   }
 
   toggleSidebar(): void {
@@ -136,34 +91,5 @@ export class AppComponent implements OnInit {
 
   toggleSidebarCollapse(): void {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
-  }
-
-  toggleInsightBand(): void {
-    this.isInsightBandCollapsed = !this.isInsightBandCollapsed;
-  }
-
-  private loadActiveDiscounts(): void {
-    this.discountService
-      .getAllDiscounts()
-      .pipe(
-        catchError(err => {
-          console.error('Active discounts load failed', err);
-          this.dashboardSummaryService.updateActiveDiscountsCount(0);
-          return of<Discount[]>([]);
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe(discounts => {
-        const list = Array.isArray(discounts) ? discounts : [];
-        const activeCount = list.filter(discount => !!discount.IsActive).length;
-        this.dashboardSummaryService.updateActiveDiscountsCount(activeCount);
-      });
-  }
-
-  private formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
   }
 }

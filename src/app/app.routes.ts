@@ -39,6 +39,12 @@ export const routes: Routes = [
 		canActivate: [AuthGuard]
 	},
 	{
+		path: 'slidecards',
+		loadComponent: () =>
+			import('./pages/slidecardsw/slidecardsw.component').then(m => m.SlidecardswComponent),
+		canActivate: [AuthGuard]
+	},
+	{
 		path: 'console/songs',
 		loadComponent: () =>
 			import('./pages/songs/songslist.component').then(m => m.SongsListComponent),
@@ -68,5 +74,19 @@ export const routes: Routes = [
 			import('./pages/thumbnail-detail/thumbnail-detail.component').then(m => m.ThumbnailDetailComponent),
 		canActivate: [AuthGuard]
 	},
+	{
+		path: 'music-bingo-schema',
+		loadComponent: () =>
+			import('./pages/music-bingo-schema/music-bingo-schema.component').then(m => m.MusicBingoSchemaComponent),
+		canActivate: [AuthGuard]
+	},
+	{
+		path: 'music-bingo-guideline',
+		loadComponent: () =>
+			import('./pages/music-bingo-guideline/music-bingo-guideline.component').then(m => m.MusicBingoGuidelineComponent),
+		canActivate: [AuthGuard]
+	},
+	{ path: 'app/music_bingo_schema.html', redirectTo: 'music-bingo-schema', pathMatch: 'full' },
+	{ path: 'app/music_bingo_chat.html', redirectTo: 'music-bingo-guideline', pathMatch: 'full' },
 	{ path: '**', redirectTo: 'overview' }
 ];

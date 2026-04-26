@@ -97,3 +97,42 @@ textarea {
 	border-radius: 999px;
 	background: rgba(255, 255, 255, 0.08);
 }
+
+@media print {
+	body.print-slidecardsw {
+		background: #fff;
+	}
+
+	body.print-slidecardsw .workspace > :not(.router-surface) {
+		display: none !important;
+	}
+
+	body.print-slidecardsw .sidebar,
+	body.print-slidecardsw .topbar,
+	body.print-slidecardsw .sidebar-reveal-tab {
+		display: none !important;
+	}
+
+	body.print-slidecardsw .app-shell {
+		grid-template-columns: 1fr;
+		gap: 0;
+		padding: 0;
+	}
+
+	body.print-slidecardsw .workspace,
+	body.print-slidecardsw .router-surface {
+		padding: 0;
+		margin: 0;
+	}
+
+	body.print-slidecardsw .router-surface.surface-card {
+		background: #fff;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+	}
+
+	body.print-slidecardsw .router-surface > :not(app-slidecardsw) {
+		display: none !important;
+	}
+}

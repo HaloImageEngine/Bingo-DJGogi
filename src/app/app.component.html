@@ -2,12 +2,12 @@
   <aside class="sidebar" [class.sidebar--open]="isSidebarOpen">
     <div class="brand-card surface-card" [class.brand-card--hidden]="isBrandCardHidden" [class.brand-card--showing-image]="showBrandCardImage">
       <ng-container *ngIf="showBrandCardImage; else brandCardContent">
-        <img class="brand-card__image" [src]="brandCardImagePath" alt="GogiTime Admin" />
+        <img class="brand-card__image" [src]="brandCardImagePath" alt="DJ GOGI" />
       </ng-container>
       <ng-template #brandCardContent>
         <p class="eyebrow">{{ controlRoomLabel }}</p>
-        <h1>DJ Gogi Bingo</h1>
-        <p>Direct menus, marketing, and service velocity from one cockpit.</p>
+        <h1>DJ GOGI Bingo</h1>
+        <p>Music Bingo Gameing Service.</p>
       </ng-template>
     </div>
 
@@ -60,41 +60,7 @@
   </button>
 
   <section class="workspace">
-    <header class="topbar surface-card">
-      <div class="topbar__left">
-        <button type="button" class="topbar__menu" (click)="toggleSidebar()">Menu</button>
-      </div>
-      <div class="topbar__right">
-      </div>
-
-      <section class="insight-panel surface-card" [class.is-collapsed]="isInsightBandCollapsed">
-        <div class="insight-panel__header">
-          <p class="eyebrow">Quick Snapshot</p>
-          <button
-            type="button"
-            class="insight-panel__toggle"
-            (click)="toggleInsightBand()"
-            [attr.aria-expanded]="!isInsightBandCollapsed"
-            [attr.aria-label]="isInsightBandCollapsed ? 'Expand quick snapshot' : 'Collapse quick snapshot'">
-            {{ isInsightBandCollapsed ? 'Show' : 'Hide' }}
-          </button>
-        </div>
-
-        <div class="insight-band" *ngIf="!isInsightBandCollapsed">
-          <article
-            class="insight-card surface-card"
-            *ngFor="let highlight of utilityHighlights()"
-            [attr.data-accent]="highlight.accent"
-          >
-            <p class="eyebrow">{{ highlight.title }}</p>
-            <div class="insight-card__value">
-              <span>{{ highlight.value }}</span>
-              <span class="trend" [attr.data-trend]="highlight.trend">{{ highlight.detail }}</span>
-            </div>
-          </article>
-        </div>
-      </section>
-    </header>
+    <button type="button" class="workspace__menu" (click)="toggleSidebar()">Menu</button>
 
     <div class="router-surface surface-card">
       <router-outlet />

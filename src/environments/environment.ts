@@ -8,6 +8,7 @@ export const environment = {
   ordersApiBaseUrl: 'https://api.getgogi.com/api/CMSDemo/Orders',
   ordersStatusChangeApiUrl: 'https://api.getgogi.com/api/CMSDemo/Orders/Update_OrderStatus',
   bingoSongsApiUrl: 'https://api.getgogi.com/api/Bingo/Bingo/GetAllSongs',
+  bingoPrintedCardsApiBaseUrl: 'https://api.getgogi.com/api/Bingo/Bingo/GetPrintedCards',
   thumbnailApiBaseUrl: 'https://api.getgogi.com/api/ImageLoad/Images/Get_ThumbNail_Grid',
   thumbnailApprovalApiUrl: 'https://api.getgogi.com/api/ImageLoad/Images/Update_Image_Approval',
   thumbnailImageBaseUrl: 'https://api.getgogi.com/App_Data/UploadedImagesTN/',

@@ -1,0 +1,139 @@
+<section class="slidecardsw-page">
+  <header class="slidecardsw-page__header">
+    <div class="slidecardsw-page__intro">
+      <p class="slidecardsw-page__eyebrow">Landscape Slider</p>
+      <h1>Browse Bingo Card Pairs</h1>
+      <p class="slidecardsw-page__copy">
+        Use the left and right arrows to move across each two-card spread for Game {{ gameId }}.
+      </p>
+    </div>
+
+    <div class="slidecardsw-carousel__toolbar" *ngIf="!state().loading && !state().error && slides().length > 0; else slidecardswMetaOnly">
+      <div class="slidecardsw-page__meta surface-card">
+        <span>GameID {{ gameId }}</span>
+        <span>{{ state().cards.length }} cards loaded</span>
+        <span>{{ slides().length }} slides</span>
+      </div>
+
+      <div class="slidecardsw-carousel__actions">
+        <button
+          type="button"
+          class="slidecardsw-print__button"
+          (click)="printAllCards()"
+          aria-label="Print all bingo card pairs"
+        >
+          Print All Cards
+        </button>
+
+        <div class="slidecardsw-carousel__controls">
+          <button
+            type="button"
+            class="slidecardsw-carousel__arrow"
+            (click)="goToPreviousSlide()"
+            [disabled]="!canGoPrevious()"
+            aria-label="Go to previous cards"
+          >
+            &#8249;
+          </button>
+
+          <div class="slidecardsw-carousel__summary">
+            <span>Slide {{ currentSlideIndex() + 1 }} of {{ slides().length }}</span>
+          </div>
+
+          <button
+            type="button"
+            class="slidecardsw-carousel__arrow"
+            (click)="goToNextSlide()"
+            [disabled]="!canGoNext()"
+            aria-label="Go to next cards"
+          >
+            &#8250;
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #slidecardswMetaOnly>
+      <div class="slidecardsw-page__meta surface-card">
+        <span>GameID {{ gameId }}</span>
+        <span>{{ state().cards.length }} cards loaded</span>
+        <span>{{ slides().length }} slides</span>
+      </div>
+    </ng-template>
+  </header>
+
+  <section class="surface-card slidecardsw-status" *ngIf="state().loading">
+    <p>Loading printed cards for GameID {{ gameId }}...</p>
+  </section>
+
+  <section class="surface-card slidecardsw-status slidecardsw-status--error" *ngIf="state().error as error">
+    <p>{{ error }}</p>
+  </section>
+
+  <section class="slidecardsw-carousel" *ngIf="!state().loading && !state().error && slides().length > 0">
+    <section
+      #sliderViewport
+      class="slidecardsw-slider"
+      aria-label="Slide bingo card pairs"
+      (scroll)="onSliderScroll()"
+    >
+      <article class="slidecardsw-slide surface-card" *ngFor="let slide of slides(); let slideIndex = index">
+        <header class="slidecardsw-slide__header">
+          <span class="tag accent-amber">Slide {{ slideIndex + 1 }}</span>
+          <p>Use the arrows on desktop, or swipe on touch devices.</p>
+        </header>
+
+        <div class="slidecardsw-slide__cards">
+          <section class="slidecardsw-card" *ngFor="let card of slide">
+            <div class="slidecardsw-card__print-header" aria-hidden="true">
+              <img class="slidecardsw-card__print-logo" src="assets/images/DJGogi.png" alt="DJ GOGI logo" />
+              <div class="slidecardsw-card__print-copy">
+                <p class="slidecardsw-card__print-title">DJ GOGI Music Bingo</p>
+                <p class="slidecardsw-card__print-subtitle">Game {{ card.GameNumber }} | Card {{ card.CardID }} | {{ card.CardIsWinner ? 'Winner' : 'In Play' }}</p>
+              </div>
+            </div>
+
+            <header class="slidecardsw-card__header">
+              <div>
+                <p class="slidecardsw-card__eyebrow">GameID {{ card.GameID }}</p>
+                <h2>CardID {{ card.CardID }}</h2>
+              </div>
+              <div class="slidecardsw-card__badges">
+                <span class="tag accent-teal">Game {{ card.GameNumber }}</span>
+                <span class="tag" [class.accent-rose]="card.CardIsWinner">{{ card.CardIsWinner ? 'Winner' : 'In Play' }}</span>
+              </div>
+            </header>
+
+            <div class="slidecardsw-card__grid" aria-label="Bingo card squares">
+              <article
+                class="slidecardsw-square"
+                *ngFor="let square of card.Squares"
+                [class.is-called]="square.IsCalled"
+                [class.is-free]="square.IsFreeSpace"
+              >
+                <div class="slidecardsw-square__topline">
+                  <span>{{ square.SquareCode }}</span>
+                  <span>{{ square.SquarePosition }}</span>
+                </div>
+                <div class="slidecardsw-square__content" *ngIf="square.Song; else freeSpaceTemplate">
+                  <p class="slidecardsw-square__title">{{ square.Song.SongName }}</p>
+                  <p class="slidecardsw-square__artist">{{ square.Song.SongArtist }}</p>
+                </div>
+                <ng-template #freeSpaceTemplate>
+                  <div class="slidecardsw-square__content slidecardsw-square__content--free">
+                    <p class="slidecardsw-square__title">Free Space</p>
+                    <p class="slidecardsw-square__artist">Center Square</p>
+                  </div>
+                </ng-template>
+              </article>
+            </div>
+          </section>
+        </div>
+      </article>
+    </section>
+  </section>
+
+  <section class="surface-card slidecardsw-status" *ngIf="!state().loading && !state().error && slides().length === 0">
+    <p>No cards were returned for GameID {{ gameId }}.</p>
+  </section>
+</section>

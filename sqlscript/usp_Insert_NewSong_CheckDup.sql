@@ -1,10 +1,20 @@
-﻿-- =============================================
+USE [haloimag_djgogi]
+GO
+
+/****** Object:  StoredProcedure [dbo].[usp_Insert_NewSong_CheckDup]    Script Date: 4/25/2026 8:59:32 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
 -- Author:      YourName
 -- Create date: 2026-04-20
 -- Description: Insert a single song into dbo.songs
 --              Prevents duplicates based on Title + Artist
 -- =============================================
-CREATE PROCEDURE dbo.usp_Insert_NewSong_CheckDup
+CREATE PROCEDURE [dbo].[usp_Insert_NewSong_CheckDup]
 (
     @title NVARCHAR(255),
     @artist NVARCHAR(255),
@@ -64,4 +74,7 @@ BEGIN
     PRINT 'Song inserted successfully.';
     RETURN 1; -- 1 = inserted
 END
+
 GO
+
+

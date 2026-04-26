@@ -29,6 +29,11 @@ interface PipelineStage {
   detail: string;
 }
 
+interface SpotlightStat {
+  label: string;
+  value: string;
+}
+
 @Component({
   selector: 'app-overview',
   standalone: true,
@@ -37,31 +42,37 @@ interface PipelineStage {
   styleUrl: './overview.component.scss'
 })
 export class OverviewComponent {
+  readonly spotlightStats: SpotlightStat[] = [
+    { label: 'Current round', value: 'Round 3 · Crowd Favorites' },
+    { label: 'Now spinning', value: 'Whitney Houston - I Wanna Dance with Somebody' },
+    { label: 'Jackpot pattern', value: 'Neon X with free center' }
+  ];
+
   readonly metrics: Metric[] = [
-    { label: 'Kitchen throughput', value: '312 plates/hr', change: '+8% vs yesterday', trend: 'up', note: 'Third prep line online' },
-    { label: 'Delivery promise', value: '24 min avg', change: '-2 min vs target', trend: 'up', note: 'City-core courier stack healthy' },
-    { label: 'Customer sentiment', value: '4.82 ★', change: '12 new reviews', trend: 'flat', note: 'Highlight chefs table collab' },
-    { label: 'Inventory buffer', value: '3.4 hrs', change: '-0.4 hr vs goal', trend: 'down', note: 'Need protein restock at 15:00' }
+    { label: 'Cards in play', value: '148 boards', change: '+18 walk-ins since last game', trend: 'up', note: 'Main floor nearly full' },
+    { label: 'Song bank ready', value: '96 tracks', change: '4 bonus cuts queued', trend: 'up', note: 'Mix spans disco, pop, and 90s throwbacks' },
+    { label: 'Crowd energy', value: '9.2 / 10', change: 'Steady through two rounds', trend: 'flat', note: 'Biggest reaction on sing-along hooks' },
+    { label: 'Prize table', value: '6 wins left', change: '2 headline prizes already claimed', trend: 'down', note: 'Refill minis before blackout round' }
   ];
 
   readonly activityFeed: ActivityItem[] = [
-    { time: '11:12', owner: 'Menu Ops', detail: 'Activated lunch tasting bundle for downtown.' },
-    { time: '11:05', owner: 'Marketing', detail: 'Approved push copy for office micro-campaign.' },
-    { time: '10:58', owner: 'Kitchen', detail: 'Flagged low kimchi reserve, alert sent to purchasing.' },
-    { time: '10:44', owner: 'Customers', detail: 'VIP feedback captured, awaiting follow-up draft.' }
+    { time: '7:12 PM', owner: 'Caller Booth', detail: 'Locked in Round 3 playlist and pushed the next three song hints to screens.' },
+    { time: '7:05 PM', owner: 'Floor Host', detail: 'Opened a bonus dabber giveaway for the front-row tables.' },
+    { time: '6:58 PM', owner: 'DJ Desk', detail: 'Crossfade timing tightened after the last chorus-heavy round.' },
+    { time: '6:44 PM', owner: 'Prize Runner', detail: 'Delivered the first blackout basket to Table 12.' }
   ];
 
   readonly readinessChecks: ReadinessItem[] = [
-    { label: 'Line cooks staffed', status: 'ready', note: '6 of 6 kitchen pods online' },
-    { label: 'Courier capacity', status: 'watch', note: '2 riders delayed near Midtown' },
-    { label: 'Menu QA', status: 'ready', note: 'Allergens + pricing confirmed' },
-    { label: 'Promo assets', status: 'risk', note: 'Need final art for evening drop' }
+    { label: 'Audio mix', status: 'ready', note: 'Room levels balanced for booth, bar, and patio' },
+    { label: 'Wildcard stack', status: 'watch', note: 'Only one decade-switch round left in reserve' },
+    { label: 'Prize desk', status: 'ready', note: 'Gift cards, merch, and bonus drinks logged' },
+    { label: 'Late arrivals', status: 'risk', note: 'Need three spare boards held near the door' }
   ];
 
   readonly pipeline: PipelineStage[] = [
-    { stage: 'Prep & mise', status: 'On track', detail: 'Batch 3 veggies inbound in 12 min' },
-    { stage: 'Cooking', status: 'High flow', detail: 'Skillets 1-4 synced with expo' },
-    { stage: 'Packaging', status: 'Watch', detail: 'Label printer warming up again' },
-    { stage: 'Courier handoff', status: 'Green', detail: 'Rider staging area clear' }
+    { stage: 'Doors Open', status: 'Complete', detail: 'Check-in, card pickup, and warm-up playlist wrapped on time' },
+    { stage: 'Round One', status: 'Complete', detail: 'Classic hooks round finished with two line winners' },
+    { stage: 'Wildcard Round', status: 'Live', detail: 'Decade shuffle is running with bonus stamp calls' },
+    { stage: 'Blackout Finale', status: 'Queued', detail: 'Grand prize reveal follows the last power ballad' }
   ];
 }
