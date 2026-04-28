@@ -16,14 +16,25 @@
       </div>
 
       <div class="slidecardsw-carousel__actions">
-        <button
-          type="button"
-          class="slidecardsw-print__button"
-          (click)="printAllCards()"
-          aria-label="Print all bingo card pairs"
-        >
-          Print All Cards
-        </button>
+        <div class="slidecardsw-print__actions">
+          <button
+            type="button"
+            class="slidecardsw-print__button"
+            (click)="printAllCards()"
+            aria-label="Print all bingo card pairs"
+          >
+            Print All Cards
+          </button>
+
+          <button
+            type="button"
+            class="slidecardsw-print__button slidecardsw-print__button--secondary"
+            (click)="printAllCardsWithMeta()"
+            aria-label="Print all bingo card pairs with GameID and CardID"
+          >
+            Print All Cards with GAMEID/CARDID
+          </button>
+        </div>
 
         <div class="slidecardsw-carousel__controls">
           <button
@@ -85,22 +96,20 @@
 
         <div class="slidecardsw-slide__cards">
           <section class="slidecardsw-card" *ngFor="let card of slide">
-            <div class="slidecardsw-card__print-header" aria-hidden="true">
+            <div class="slidecardsw-card__print-header slidecardsw-banner-container" aria-hidden="true">
               <img class="slidecardsw-card__print-logo" src="assets/images/DJGogi.png" alt="DJ GOGI logo" />
               <div class="slidecardsw-card__print-copy">
                 <p class="slidecardsw-card__print-title">DJ GOGI Music Bingo</p>
-                <p class="slidecardsw-card__print-subtitle">Game {{ card.GameNumber }} | Card {{ card.CardID }} | {{ card.CardIsWinner ? 'Winner' : 'In Play' }}</p>
               </div>
             </div>
 
-            <header class="slidecardsw-card__header">
-              <div>
+            <header class="slidecardsw-card__header slidecardsw-sponsor-container">
+              <div class="slidecardsw-card__meta" [class.slidecardsw-card__meta--print-hidden]="!showPrintCardMeta()">
                 <p class="slidecardsw-card__eyebrow">GameID {{ card.GameID }}</p>
                 <h2>CardID {{ card.CardID }}</h2>
               </div>
-              <div class="slidecardsw-card__badges">
-                <span class="tag accent-teal">Game {{ card.GameNumber }}</span>
-                <span class="tag" [class.accent-rose]="card.CardIsWinner">{{ card.CardIsWinner ? 'Winner' : 'In Play' }}</span>
+              <div class="slidecardsw-sponsor-area" aria-label="Sponsor area placeholder">
+                <div class="slidecardsw-sponsor-banner">SponsorBanner</div>
               </div>
             </header>
 

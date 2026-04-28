@@ -51,6 +51,12 @@ export const routes: Routes = [
 		canActivate: [AuthGuard]
 	},
 	{
+		path: 'console/create-song-list',
+		loadComponent: () =>
+			import('./pages/createsonglist/createsonglist.component').then(m => m.CreateSongListComponent),
+		canActivate: [AuthGuard]
+	},
+	{
 		path: 'console/songs/:songId',
 		loadComponent: () =>
 			import('./pages/songs/songdetail.component').then(m => m.SongDetailComponent),

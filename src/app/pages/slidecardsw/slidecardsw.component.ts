@@ -28,6 +28,7 @@ export class SlidecardswComponent {
   private sliderViewport?: ElementRef<HTMLElement>;
 
   readonly gameId = 1;
+  readonly showPrintCardMeta = signal(false);
   readonly currentSlideIndex = signal(0);
   readonly state = toSignal(
     this.printedCardsService.getPrintedCardsByGameId(this.gameId).pipe(
@@ -66,14 +67,35 @@ export class SlidecardswComponent {
   }
 
   printAllCards(): void {
+    this.printCards(false);
+  }
+
+  printAllCardsWithMeta(): void {
+    this.printCards(true);
+  }
+
+  private printCards(showMeta: boolean): void {
     if (this.state().loading || this.state().error || this.slides().length === 0) {
       return;
+    }
+
+    this.showPrintCardMeta.set(showMeta);
+
+    const view = globalThis.window;
+    const resetMeta = (): void => this.showPrintCardMeta.set(false);
+
+    if (showMeta && view) {
+      view.addEventListener('afterprint', resetMeta, { once: true });
     }
 
     this.printService.print({
       bodyClass: 'print-slidecardsw',
       title: `Game ${this.gameId} bingo cards`
     });
+
+    if (!showMeta) {
+      resetMeta();
+    }
   }
 
   onSliderScroll(): void {

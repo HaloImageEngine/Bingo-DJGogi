@@ -42,6 +42,7 @@ export class AppComponent implements OnInit {
         { label: 'Cards', helper: 'Two bingo cards view', path: '/cards', accent: 'amber', icon: 'CD' },
       { label: 'Slide Cards', helper: 'Landscape swipe card pairs', path: '/slidecards', accent: 'teal', icon: 'SC' },
         { label: 'Songs', helper: 'Browse bingo song library', path: '/console/songs', accent: 'teal', icon: 'SG' },
+        { label: 'Create Song List', helper: 'Pick songs into a custom list', path: '/console/create-song-list', accent: 'rose', icon: 'SL' },
         { label: 'MB Schema', helper: 'Music bingo data map', path: '/music-bingo-schema', accent: 'iris', icon: 'DB' },
         { label: 'MB Guidelines', helper: 'Music bingo chat transcript', path: '/music-bingo-guideline', accent: 'iris', icon: 'MG' },
         { label: 'Console', helper: 'Bingo game console', path: '/console', accent: 'rose', icon: 'BC' },
