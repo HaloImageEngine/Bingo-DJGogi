@@ -11,10 +11,28 @@ export class PrintedCardsService {
   private readonly printedCardsApiBaseUrl = environment.bingoPrintedCardsApiBaseUrl;
 
   getPrintedCardsByGameId(gameId: number): Observable<PrintedCard[]> {
-    return this.http.get<unknown>(`${this.printedCardsApiBaseUrl}/${gameId}`).pipe(
-      map(response => this.normalizeRows(response)),
+    return this.http.get(`${this.printedCardsApiBaseUrl}/${gameId}`, { responseType: 'text' }).pipe(
+      map(response => this.parsePrintedCardsResponse(response)),
       map(rows => this.groupCards(rows))
     );
+  }
+
+  private parsePrintedCardsResponse(response: string): PrintedCardResultRow[] {
+    const normalized = response.trim();
+
+    if (normalized.length === 0) {
+      return [];
+    }
+
+    if (normalized.startsWith('<')) {
+      return this.parsePrintedCardsXml(normalized);
+    }
+
+    try {
+      return this.normalizeRows(JSON.parse(normalized));
+    } catch {
+      return [];
+    }
   }
 
   private normalizeRows(response: unknown): PrintedCardResultRow[] {
@@ -33,6 +51,18 @@ export class PrintedCardsService {
 
     return rawItems
       .map(item => this.mapRow(item))
+      .filter((item): item is PrintedCardResultRow => item !== null);
+  }
+
+  private parsePrintedCardsXml(xml: string): PrintedCardResultRow[] {
+    const document = this.parseXmlDocument(xml);
+
+    if (!document) {
+      return [];
+    }
+
+    return Array.from(document.getElementsByTagName('ModelPrintedCard'))
+      .map(node => this.mapRow(this.xmlNodeToRecord(node)))
       .filter((item): item is PrintedCardResultRow => item !== null);
   }
 
@@ -76,7 +106,7 @@ export class PrintedCardsService {
       CardPlayerName: this.asNullableString(record['CardPlayerName']),
       CardPlayerEmail: this.asNullableString(record['CardPlayerEmail']),
       PlayCount: this.asNullableNumber(record['PlayCount']) ?? 0,
-      CardIsWinner: false,
+      CardIsWinner: this.asBoolean(record['CardIsWinner']),
       CardSeedKey: this.asNullableString(record['CardSeedKey']),
       CardPrintedAt: this.asNullableString(record['CardPrintedAt']),
       SquareCode: squareCode,
@@ -89,6 +119,21 @@ export class PrintedCardsService {
       IsCalled: this.asBoolean(record['IsCalled']),
       IsFreeSpace: this.asBoolean(record['IsFreeSpace'])
     };
+  }
+
+  private parseXmlDocument(xml: string): Document | null {
+    const parser = new DOMParser();
+    const document = parser.parseFromString(xml, 'application/xml');
+
+    return document.querySelector('parsererror') ? null : document;
+  }
+
+  private xmlNodeToRecord(node: Element): Record<string, unknown> {
+    return Array.from(node.children).reduce<Record<string, unknown>>((record, child) => {
+      const isNil = child.getAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'nil') === 'true';
+      record[child.tagName] = isNil ? null : child.textContent?.trim() ?? null;
+      return record;
+    }, {});
   }
 
   private groupCards(rows: PrintedCardResultRow[]): PrintedCard[] {

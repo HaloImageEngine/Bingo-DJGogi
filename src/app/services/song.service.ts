@@ -11,8 +11,8 @@ export class SongService {
   private readonly getAllSongsUrl = environment.bingoSongsApiUrl;
 
   getSongs(): Observable<ModelSongDisplay[]> {
-    return this.http.get<unknown>(this.getAllSongsUrl).pipe(
-      map(response => this.normalizeSongs(response))
+    return this.http.get(this.getAllSongsUrl, { responseType: 'text' }).pipe(
+      map(response => this.parseSongsResponse(response))
     );
   }
 
@@ -24,6 +24,24 @@ export class SongService {
 
   getSongRouteId(song: Pick<ModelSongDisplay, 'song_id'>): string {
     return String(song.song_id ?? '');
+  }
+
+  private parseSongsResponse(response: string): ModelSongDisplay[] {
+    const normalized = response.trim();
+
+    if (normalized.length === 0) {
+      return [];
+    }
+
+    if (normalized.startsWith('<')) {
+      return this.parseSongsXml(normalized);
+    }
+
+    try {
+      return this.normalizeSongs(JSON.parse(normalized));
+    } catch {
+      return [];
+    }
   }
 
   private normalizeSongs(response: unknown): ModelSongDisplay[] {
@@ -42,6 +60,18 @@ export class SongService {
 
     return rawItems
       .map(item => this.mapSong(item))
+      .filter((item): item is ModelSongDisplay => item !== null);
+  }
+
+  private parseSongsXml(xml: string): ModelSongDisplay[] {
+    const document = this.parseXmlDocument(xml);
+
+    if (!document) {
+      return [];
+    }
+
+    return Array.from(document.getElementsByTagName('ModelSongsDisplay'))
+      .map(node => this.mapSong(this.xmlNodeToRecord(node)))
       .filter((item): item is ModelSongDisplay => item !== null);
   }
 
@@ -70,8 +100,23 @@ export class SongService {
       ChartCountry: this.asNullableString(record['ChartCountry']),
       SpotifyPopularity: this.asNullableNumber(record['SpotifyPopularity']),
       DurationSeconds: this.asNullableNumber(record['DurationSeconds']),
-      Active: Boolean(record['Active'])
+      Active: this.asBoolean(record['Active'])
     };
+  }
+
+  private parseXmlDocument(xml: string): Document | null {
+    const parser = new DOMParser();
+    const document = parser.parseFromString(xml, 'application/xml');
+
+    return document.querySelector('parsererror') ? null : document;
+  }
+
+  private xmlNodeToRecord(node: Element): Record<string, unknown> {
+    return Array.from(node.children).reduce<Record<string, unknown>>((record, child) => {
+      const isNil = child.getAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'nil') === 'true';
+      record[child.tagName] = isNil ? null : child.textContent?.trim() ?? null;
+      return record;
+    }, {});
   }
 
   private asRecord(value: unknown): Record<string, unknown> | null {
@@ -83,6 +128,32 @@ export class SongService {
   }
 
   private asNullableNumber(value: unknown): number | null {
-    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+
+    if (typeof value === 'string' && value.trim().length > 0) {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    return null;
+  }
+
+  private asBoolean(value: unknown): boolean {
+    if (typeof value === 'boolean') {
+      return value;
+    }
+
+    if (typeof value === 'number') {
+      return value !== 0;
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      return normalized === 'true' || normalized === '1';
+    }
+
+    return false;
   }
 }
