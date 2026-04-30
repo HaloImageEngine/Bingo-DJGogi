@@ -1,0 +1,109 @@
+<section class="slidecardsw-page">
+  <header class="slidecardsw-page__header">
+    <div class="slidecardsw-page__intro">
+      <p class="slidecardsw-page__eyebrow">Single Card</p>
+      <h1>Browse One Bingo Card</h1>
+      <p class="slidecardsw-page__copy">
+        This page loads one printed card by Card ID.
+      </p>
+    </div>
+
+    <div class="slidecardsw-page__settings surface-card">
+      <label class="slidecardsw-page__field" for="slidecardone-card-id">
+        <span>Card ID</span>
+        <input
+          id="slidecardone-card-id"
+          type="number"
+          class="slidecardsw-page__input"
+          [value]="cardId()"
+          (input)="updateCardId($event)"
+          placeholder="Enter card id"
+          min="1"
+        />
+      </label>
+    </div>
+
+    <div class="slidecardsw-page__meta surface-card" *ngIf="!state().loading && !state().error && card(); else slidecardoneMetaOnly">
+      <span>CardID {{ cardId() }}</span>
+      <span>{{ state().cards.length }} cards loaded</span>
+      <span>1 card displayed</span>
+    </div>
+
+    <ng-template #slidecardoneMetaOnly>
+      <div class="slidecardsw-page__meta surface-card">
+        <span>CardID {{ cardId() }}</span>
+        <span>{{ state().cards.length }} cards loaded</span>
+        <span>{{ card() ? 1 : 0 }} card displayed</span>
+      </div>
+    </ng-template>
+  </header>
+
+  <section class="surface-card slidecardsw-status" *ngIf="state().loading">
+    <p>Loading printed card for CardID {{ cardId() }}...</p>
+  </section>
+
+  <section class="surface-card slidecardsw-status slidecardsw-status--error" *ngIf="state().error as error">
+    <p>{{ error }}</p>
+  </section>
+
+  <section class="slidecardone-stage" *ngIf="!state().loading && !state().error && card() as displayedCard">
+    <article class="slidecardsw-card surface-card slidecardone-card">
+      <div class="slidecardsw-card__print-header slidecardsw-banner-container" aria-hidden="true">
+        <div class="slidecardsw-banner-container__left">
+          <img class="slidecardsw-card__print-logo" src="assets/images/DJGogi.png" alt="DJ GOGI logo" />
+        </div>
+        <div class="slidecardsw-banner-container__title">
+          <p class="slidecardsw-card__print-title">DJ Gogi Music Bingo</p>
+        </div>
+        <div class="slidecardsw-banner-container__right">
+          <img class="slidecardsw-card__print-sponsor-logo" src="assets/images/HillTop5.png" alt="HillTop sponsor logo" />
+        </div>
+        <div class="slidecardsw-banner-container__sponsor">
+          <p class="slidecardsw-card__print-sponsor-text">Card ID {{ cardId() }}</p>
+        </div>
+      </div>
+
+      <header
+        class="slidecardsw-card__header slidecardsw-sponsor-container"
+        [class.slidecardsw-card__header--print-meta-hidden]="!showPrintCardMeta()"
+      >
+        <div class="slidecardsw-card__meta" [class.slidecardsw-card__meta--print-hidden]="!showPrintCardMeta()">
+          <p class="slidecardsw-card__eyebrow">GameID {{ displayedCard.GameID }}</p>
+          <h2>CardID {{ displayedCard.CardID }}</h2>
+        </div>
+        <div class="slidecardsw-sponsor-area" aria-label="Card id display">
+          <div class="slidecardsw-sponsor-banner">Card ID {{ cardId() }}</div>
+        </div>
+      </header>
+
+      <div class="slidecardsw-card__grid" aria-label="Bingo card squares">
+        <article
+          class="slidecardsw-square"
+          *ngFor="let square of displayedCard.Squares"
+          [class.is-called]="square.IsCalled"
+          [class.is-free]="square.IsFreeSpace"
+        >
+          <div class="slidecardsw-square__topline">
+            <span>{{ square.SquareCode }}</span>
+            <span>{{ square.SquarePosition }}</span>
+          </div>
+          <div class="slidecardsw-square__content" *ngIf="square.Song; else freeSpaceTemplate">
+            <p class="slidecardsw-square__title">{{ square.Song.SongName }}</p>
+            <p class="slidecardsw-square__artist">{{ square.Song.SongArtist }}</p>
+          </div>
+          <ng-template #freeSpaceTemplate>
+            <div class="slidecardsw-square__content slidecardsw-square__content--free">
+              <p class="slidecardsw-square__title">Free Space</p>
+              <p class="slidecardsw-square__artist">Center Square</p>
+            </div>
+          </ng-template>
+        </article>
+      </div>
+
+    </article>
+  </section>
+
+  <section class="surface-card slidecardsw-status" *ngIf="!state().loading && !state().error && !card()">
+    <p>No card was returned for CardID {{ cardId() }}.</p>
+  </section>
+</section>

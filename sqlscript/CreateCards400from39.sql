@@ -3,7 +3,7 @@ Use all active songs
 EXEC dbo.usp_GenerateBingoCards
     @Game_ID = 1,
     @CardCount = 400,
-    @PlaylistSize = 100;
+    @PlaylistSize = 39;
 
 -- Filter by bingo category
 EXEC dbo.usp_GenerateBingoCards

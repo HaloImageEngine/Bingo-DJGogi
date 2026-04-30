@@ -47,6 +47,7 @@
             *ngFor="let song of filteredSongs(); trackBy: trackBySong"
             (click)="addSong(song)">
             <span class="song-row__meta">
+              <span class="song-row__id">#{{ song.song_id }}</span>
               <strong>{{ song.Title || 'Untitled song' }}</strong>
               <small>{{ song.Artist || 'Unknown artist' }} • {{ song.Genre || 'Unknown genre' }}</small>
             </span>
@@ -76,6 +77,7 @@
         <div class="song-list" *ngIf="selectedSongs().length > 0; else noSelection">
           <div class="song-row song-row--selected" *ngFor="let song of selectedSongs(); trackBy: trackBySong">
             <span class="song-row__meta">
+              <span class="song-row__id">#{{ song.song_id }}</span>
               <strong>{{ song.Title || 'Untitled song' }}</strong>
               <small>{{ song.Artist || 'Unknown artist' }} • {{ song.Decade || 'Unknown decade' }}</small>
             </span>

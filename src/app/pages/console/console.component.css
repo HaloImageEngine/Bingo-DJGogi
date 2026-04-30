@@ -104,6 +104,53 @@
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
+  align-items: end;
+}
+
+.control-message {
+  margin-left: auto;
+  min-height: 2.7rem;
+  min-width: 18rem;
+  max-width: 32rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: rgba(17, 24, 39, 0.7);
+  color: #d1d5db;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+}
+
+.control-message--success {
+  border-color: #065f46;
+  background: rgba(6, 95, 70, 0.18);
+  color: #a7f3d0;
+}
+
+.control-message--error {
+  border-color: #7f1d1d;
+  background: rgba(127, 29, 29, 0.18);
+  color: #fecaca;
+}
+
+.game-id-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.game-id-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #9ca3af;
+  letter-spacing: 0.04em;
+}
+
+.game-id-input {
+  width: 5.5rem;
+  min-width: 5.5rem;
+  flex: 0 0 auto;
 }
 
 .ctrl-btn {
@@ -349,3 +396,149 @@
     max-height: 50vh;
   }
 }
+
+/* ===== Call Song Controls ===== */
+.call-song-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #374151;
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
+}
+
+.call-song-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.call-song-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #9ca3af;
+  letter-spacing: 0.04em;
+}
+
+.call-id-input {
+  width: 5.5rem;
+  min-width: 5.5rem;
+  flex: 0 0 auto;
+}
+
+.call-song-error {
+  font-size: 0.78rem;
+  color: #fca5a5;
+  align-self: center;
+}
+
+/* ===== Winner Result Area ===== */
+.winner-result-area {
+  flex-shrink: 0;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  background: #111827;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.winner-result-area--bingo {
+  background: linear-gradient(135deg, #064e3b 0%, #1e3a5f 100%);
+  border-color: #6ee7b7;
+  animation: winner-pulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes winner-pulse {
+  from { box-shadow: 0 0 0 0 rgba(110, 231, 183, 0); }
+  to   { box-shadow: 0 0 14px 4px rgba(110, 231, 183, 0.3); }
+}
+
+.winner-result__headline {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #6ee7b7;
+  letter-spacing: 0.1em;
+  text-align: center;
+  margin-bottom: 0.6rem;
+}
+
+.winner-result-area--empty .winner-result__placeholder {
+  display: block;
+  text-align: center;
+  font-size: 0.78rem;
+  color: #4b5563;
+}
+
+.winner-result__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.winner-result__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+}
+
+.winner-result__label {
+  color: #9ca3af;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.winner-result__value {
+  color: #f3f4f6;
+  text-align: right;
+  word-break: break-all;
+}
+
+/* ===== Called Songs Table ===== */
+.called-songs-table-wrap {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.called-songs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.83rem;
+}
+
+.called-songs-table thead tr {
+  position: sticky;
+  top: 0;
+  background: #1f2937;
+  z-index: 1;
+}
+
+.called-songs-table th {
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #9ca3af;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-bottom: 1px solid #374151;
+}
+
+.called-songs-table td {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid #1f2937;
+  color: #e5e7eb;
+}
+
+.called-songs-table tbody tr:hover td {
+  background: rgba(255,255,255,0.04);
+}
+
+.called-songs-table .col-num  { width: 2rem; color: #6b7280; font-size: 0.75rem; }
+.called-songs-table .col-id   { width: 4rem; color: #818cf8; font-weight: 600; }
+.called-songs-table .col-title { font-weight: 600; color: #f9fafb; }
+.called-songs-table .col-artist { color: #9ca3af; }

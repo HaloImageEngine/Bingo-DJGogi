@@ -1,8 +1,12 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { BingoCalledSong, BingoTopCard, BingoWinnerResult } from '../../models/bingo-game.model';
 import { Song } from '../../models/song.model';
+import { BingoGameService } from '../../services/bingo-game.service';
 
 export type GameStatus = 'idle' | 'active' | 'paused' | 'finished';
 
@@ -14,10 +18,18 @@ export type GameStatus = 'idle' | 'active' | 'paused' | 'finished';
   styleUrl: './console.component.css'
 })
 export class ConsoleComponent {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly bingoGameService = inject(BingoGameService);
+  readonly gameId = signal(1);
+  readonly topCardsCount = 5;
 
   // --- Game state ---
   gameStatus = signal<GameStatus>('idle');
   roundNumber = signal(1);
+  gameActionError = signal<string | null>(null);
+  gameActionMessage = signal<string | null>(null);
+  gameActionLoading = signal(false);
+  topCards = signal<BingoTopCard[]>([]);
 
   // --- Song pool & playlist ---
   allSongs = signal<Song[]>([]);
@@ -70,13 +82,158 @@ export class ConsoleComponent {
     this.loadSampleSongs();
   }
 
+  // --- Song calling panel ---
+  manualSongId = signal<number | null>(null);
+  callSongLoading = signal(false);
+  callSongError = signal<string | null>(null);
+  winnerResult = signal<BingoWinnerResult | null>(null);
+
   // --- Game controls ---
   startGame(): void {
-    if (this.playlist().length === 0) return;
-    this.gameStatus.set('active');
-    this.calledSongs.set([]);
-    this.currentSong.set(null);
-    this.roundNumber.set(1);
+    if (this.playlist().length === 0 || this.gameActionLoading()) return;
+
+    this.gameActionLoading.set(true);
+    this.gameActionError.set(null);
+    this.gameActionMessage.set(null);
+
+    this.bingoGameService
+      .startNewGame(this.gameId())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: result => {
+          if (!result.Success) {
+            this.gameActionError.set('Unable to start a new game right now.');
+            return;
+          }
+
+          this.gameStatus.set('active');
+          this.calledSongs.set([]);
+          this.currentSong.set(null);
+          this.roundNumber.set(1);
+        },
+        error: error => {
+          console.error('Start game failed', error);
+          this.gameActionError.set('Unable to start a new game right now.');
+        },
+        complete: () => this.gameActionLoading.set(false)
+      });
+  }
+
+  clearCards(): void {
+    if (this.gameActionLoading()) return;
+
+    this.gameActionLoading.set(true);
+    this.gameActionError.set(null);
+    this.gameActionMessage.set(null);
+
+    this.bingoGameService
+      .clearAllCalledFlags(this.gameId())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: result => {
+          if (!result.Success) {
+            this.gameActionError.set('Unable to clear called cards right now.');
+            return;
+          }
+
+          this.calledSongs.set([]);
+          this.currentSong.set(null);
+          this.roundNumber.set(1);
+          this.gameActionMessage.set(
+            `Success: ${result.Success} | GameID: ${result.GameID} | ReturnValue: ${result.ReturnValue}`
+          );
+        },
+        error: error => {
+          console.error('Clear cards failed', error);
+          this.gameActionError.set(this.formatActionError(error, 'Unable to clear called cards right now.'));
+        },
+        complete: () => this.gameActionLoading.set(false)
+      });
+  }
+
+  clearCalled(): void {
+    if (this.gameActionLoading()) return;
+
+    this.gameActionLoading.set(true);
+    this.gameActionError.set(null);
+    this.gameActionMessage.set(null);
+
+    this.bingoGameService
+      .clearAllCalledSongs(this.gameId())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: result => {
+          if (!result.Success) {
+            this.gameActionError.set('Unable to clear called songs right now.');
+            return;
+          }
+
+          this.calledSongs.set([]);
+          this.winnerResult.set(null);
+          this.gameActionMessage.set(
+            `Success: ${result.Success} | GameID: ${result.GameID} | ReturnValue: ${result.ReturnValue}`
+          );
+        },
+        error: error => {
+          console.error('Clear called songs failed', error);
+          this.gameActionError.set('Unable to clear called songs right now.');
+        },
+        complete: () => this.gameActionLoading.set(false)
+      });
+  }
+
+  getTopCards(): void {
+    if (this.gameActionLoading()) return;
+
+    this.gameActionLoading.set(true);
+    this.gameActionError.set(null);
+    this.gameActionMessage.set(null);
+
+    this.bingoGameService
+      .getTopCards(this.gameId(), this.topCardsCount)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: cards => {
+          this.topCards.set(cards);
+        },
+        error: error => {
+          console.error('Get top cards failed', error);
+          this.gameActionError.set('Unable to load top cards right now.');
+        },
+        complete: () => this.gameActionLoading.set(false)
+      });
+  }
+
+  getCalledSongs(): void {
+    if (this.gameActionLoading()) return;
+
+    this.gameActionLoading.set(true);
+    this.gameActionError.set(null);
+    this.gameActionMessage.set(null);
+
+    this.bingoGameService
+      .getCalledSongs(this.gameId())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: calledSongs => {
+          this.calledSongs.set(calledSongs.map(song => this.mapCalledSongToSong(song)));
+        },
+        error: error => {
+          console.error('Get called songs failed', error);
+          this.gameActionError.set('Unable to load called songs right now.');
+        },
+        complete: () => this.gameActionLoading.set(false)
+      });
+  }
+
+  updateGameId(value: string | number | null): void {
+    const nextGameId = Number(value);
+
+    if (!Number.isInteger(nextGameId) || nextGameId <= 0 || nextGameId > 999) {
+      return;
+    }
+
+    this.gameId.set(nextGameId);
   }
 
   pauseGame(): void {
@@ -97,6 +254,107 @@ export class ConsoleComponent {
     this.calledSongs.set([]);
     this.currentSong.set(null);
     this.roundNumber.set(1);
+  }
+
+  // --- Manual song call ---
+  callSongManual(): void {
+    const songId = this.manualSongId();
+    if (songId === null || songId <= 0 || this.callSongLoading()) return;
+
+    const gameId = this.gameId();
+    this.callSongLoading.set(true);
+    this.callSongError.set(null);
+    this.winnerResult.set(null);
+
+    this.bingoGameService
+      .callSongByNumber(gameId, songId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.manualSongId.set(null);
+          this.refreshCalledSongsAfterCall(gameId);
+        },
+        error: err => {
+          console.error('Call song failed', err);
+          this.callSongError.set('Failed to call song. Please try again.');
+          this.callSongLoading.set(false);
+        }
+      });
+  }
+
+  private refreshCalledSongsAfterCall(gameId: number): void {
+    this.bingoGameService
+      .getCalledSongs(gameId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: calledSongs => {
+          this.calledSongs.set(calledSongs.map(song => this.mapCalledSongToSong(song)));
+
+          this.bingoGameService
+            .checkForWinner(gameId)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: winner => {
+                this.winnerResult.set(winner);
+
+                this.bingoGameService
+                  .getTopCards(gameId, this.topCardsCount)
+                  .pipe(takeUntilDestroyed(this.destroyRef))
+                  .subscribe({
+                    next: cards => this.topCards.set(cards),
+                    error: err => console.error('Get top cards failed', err),
+                    complete: () => this.callSongLoading.set(false)
+                  });
+              },
+              error: err => {
+                console.error('Check for winner failed', err);
+                this.callSongLoading.set(false);
+              }
+            });
+        },
+        error: err => {
+          console.error('Get called songs failed', err);
+          this.callSongError.set('Failed to refresh the called songs list.');
+          this.callSongLoading.set(false);
+        }
+      });
+  }
+
+  private mapCalledSongToSong(song: BingoCalledSong): Song {
+    const librarySong = this.allSongs().find(item => item.song_id === song.SongID);
+
+    return librarySong ?? {
+      song_id: song.SongID,
+      title: song.SongTitle,
+      artist: song.SongArtist,
+      play_count: 0,
+      active: true
+    };
+  }
+
+  private formatActionError(error: unknown, fallbackMessage: string): string {
+    if (!(error instanceof HttpErrorResponse)) {
+      return fallbackMessage;
+    }
+
+    const body = error.error as Record<string, unknown> | null;
+    const status = error.status ? `HTTP ${error.status}` : 'Request failed';
+
+    if (body && typeof body === 'object') {
+      const success = body['Success'];
+      const gameId = body['GameID'];
+      const returnValue = body['ReturnValue'];
+
+      if (success !== undefined || gameId !== undefined || returnValue !== undefined) {
+        return `${status} | Success: ${String(success)} | GameID: ${String(gameId)} | ReturnValue: ${String(returnValue)}`;
+      }
+    }
+
+    const errorMessage = typeof error.error === 'string' && error.error.trim().length > 0
+      ? error.error.trim()
+      : error.message;
+
+    return `${status} | ${errorMessage || fallbackMessage}`;
   }
 
   // --- Song calling ---

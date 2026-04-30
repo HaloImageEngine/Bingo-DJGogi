@@ -45,6 +45,12 @@ export const routes: Routes = [
 		canActivate: [AuthGuard]
 	},
 	{
+		path: 'slidecardone',
+		loadComponent: () =>
+			import('./pages/slidecardone/slidecardone.component').then(m => m.SlidecardoneComponent),
+		canActivate: [AuthGuard]
+	},
+	{
 		path: 'console/songs',
 		loadComponent: () =>
 			import('./pages/songs/songslist.component').then(m => m.SongsListComponent),

@@ -175,6 +175,13 @@
   gap: 0.25rem;
 }
 
+.song-row__id {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted, #9ca3af);
+  letter-spacing: 0.04em;
+}
+
 .song-row__meta strong {
   font-size: 1rem;
 }

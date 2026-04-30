@@ -3,7 +3,10 @@
   <!-- Header -->
   <header class="console-header">
     <a routerLink="/" class="back-link">&larr; Back</a>
-    <h1>Master Console</h1>
+    <div>
+      <h1>Master Console</h1>
+      <div>GameID {{ gameId() }}</div>
+    </div>
     <div class="game-badge" [class]="gameStatus()">
       {{ gameStatus() | uppercase }}
     </div>
@@ -27,11 +30,36 @@
   <!-- Game Controls -->
   <section class="game-controls">
     <div class="control-row">
+      <label class="game-id-field">
+        <span class="game-id-label">GameID</span>
+        <input
+          type="number"
+          min="1"
+          max="999"
+          step="1"
+          [ngModel]="gameId()"
+          (ngModelChange)="updateGameId($event)"
+          class="filter-input game-id-input"
+          aria-label="GameID"
+        />
+      </label>
       @if (gameStatus() === 'idle' || gameStatus() === 'finished') {
         <button class="ctrl-btn start" (click)="startGame()" [disabled]="playlist().length === 0">
           Start Game
         </button>
       }
+      <button class="ctrl-btn reset" (click)="clearCards()" [disabled]="gameActionLoading()">
+        Clear Cards
+      </button>
+      <button class="ctrl-btn reset" (click)="clearCalled()" [disabled]="gameActionLoading()">
+        Clear Called
+      </button>
+      <button class="ctrl-btn reset" (click)="getTopCards()" [disabled]="gameActionLoading()">
+        Get Top Cards
+      </button>
+      <button class="ctrl-btn reset" (click)="getCalledSongs()" [disabled]="gameActionLoading()">
+        Get Called Songs
+      </button>
       @if (gameStatus() === 'active') {
         <button class="ctrl-btn call" (click)="callNextSong()">
           Call Next Song
@@ -46,6 +74,13 @@
       @if (gameStatus() !== 'idle') {
         <button class="ctrl-btn reset" (click)="resetGame()">Reset</button>
       }
+      <div
+        class="control-message"
+        [class.control-message--error]="!!gameActionError()"
+        [class.control-message--success]="!gameActionError() && !!gameActionMessage()"
+      >
+        {{ gameActionError() || gameActionMessage() || '' }}
+      </div>
     </div>
     <div class="stats-row">
       <div class="stat-card">
@@ -69,6 +104,160 @@
 
   <!-- Main panels -->
   <div class="panels">
+
+    <!-- Called Songs History -->
+    <section class="panel history-panel">
+      <h2>Called Songs</h2>
+
+      <!-- Call Song Controls -->
+      <div class="call-song-controls">
+        <label class="call-song-field">
+          <span class="call-song-label">Game ID</span>
+          <input
+            type="number"
+            min="1"
+            [ngModel]="gameId()"
+            class="filter-input call-id-input"
+            aria-label="GameID"
+            readonly
+          />
+        </label>
+        <label class="call-song-field">
+          <span class="call-song-label">Song ID</span>
+          <input
+            type="number"
+            min="1"
+            [ngModel]="manualSongId()"
+            (ngModelChange)="manualSongId.set($event ? +$event : null)"
+            class="filter-input call-id-input"
+            placeholder="Song ID"
+            aria-label="Song ID"
+          />
+        </label>
+        <button
+          class="ctrl-btn call"
+          (click)="callSongManual()"
+          [disabled]="callSongLoading() || !manualSongId()"
+        >
+          {{ callSongLoading() ? 'Calling…' : 'Call' }}
+        </button>
+        @if (callSongError()) {
+          <span class="call-song-error">{{ callSongError() }}</span>
+        }
+      </div>
+
+      <!-- Winner Result Area -->
+      <div class="winner-result-area" [class.winner-result-area--bingo]="winnerResult()?.Result === 'BINGO!'" [class.winner-result-area--empty]="!winnerResult()">
+        @if (winnerResult(); as winner) {
+          <div class="winner-result__headline">{{ winner.Result ?? 'No winner yet' }}</div>
+          <div class="winner-result__grid">
+            <div class="winner-result__row">
+              <span class="winner-result__label">Game ID</span>
+              <span class="winner-result__value">{{ winner.GameID }}</span>
+            </div>
+            <div class="winner-result__row">
+              <span class="winner-result__label">Winning Card</span>
+              <span class="winner-result__value">{{ winner.WinningCardID ?? '—' }}</span>
+            </div>
+            <div class="winner-result__row">
+              <span class="winner-result__label">Pattern</span>
+              <span class="winner-result__value">{{ winner.WinningPattern ?? '—' }}</span>
+            </div>
+            <div class="winner-result__row">
+              <span class="winner-result__label">Player</span>
+              <span class="winner-result__value">{{ winner.PlayerName ?? '—' }}</span>
+            </div>
+            <div class="winner-result__row">
+              <span class="winner-result__label">Email</span>
+              <span class="winner-result__value">{{ winner.PlayerEmail ?? '—' }}</span>
+            </div>
+          </div>
+        } @else {
+          <span class="winner-result__placeholder">Winner check results will appear here after calling a song.</span>
+        }
+      </div>
+
+      <!-- Called Songs Table -->
+      <div class="called-songs-table-wrap">
+        <table class="called-songs-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Song ID</th>
+              <th>Title</th>
+              <th>Artist</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (song of calledSongs(); track song.song_id; let i = $index) {
+              <tr>
+                <td class="col-num">{{ i + 1 }}</td>
+                <td class="col-id">{{ song.song_id }}</td>
+                <td class="col-title">{{ song.title }}</td>
+                <td class="col-artist">{{ song.artist }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="empty-msg">No songs called yet.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Playlist -->
+    <section class="panel playlist-panel">
+      <div class="playlist-header">
+        <h2>Playlist</h2>
+        <div class="playlist-actions">
+          <button class="filter-btn" (click)="shufflePlaylist()" [disabled]="playlist().length === 0">Shuffle</button>
+          <button class="filter-btn danger" (click)="clearPlaylist()" [disabled]="playlist().length === 0">Clear</button>
+        </div>
+      </div>
+      <div class="song-list">
+        @for (song of playlist(); track song.song_id; let i = $index) {
+          <div class="song-row" [class.called]="isCalled(song)" [class.current]="currentSong()?.song_id === song.song_id">
+            <span class="song-index">{{ i + 1 }}</span>
+            <div class="song-info">
+              <span class="song-title">{{ song.title }}</span>
+              <span class="song-artist">{{ song.artist }}</span>
+            </div>
+            <div class="song-tags">
+              <span class="tag category">{{ song.bingo_category }}</span>
+              <span class="tag time">{{ formatDuration(song.duration_seconds) }}</span>
+            </div>
+            <div class="song-actions">
+              @if (gameStatus() === 'active' && !isCalled(song)) {
+                <button class="action-btn call" (click)="callSpecificSong(song)" title="Call this song">&#9654;</button>
+              }
+              @if (gameStatus() === 'idle') {
+                <button class="action-btn remove" (click)="removeFromPlaylist(song)" title="Remove">&times;</button>
+              }
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-msg">Add songs from the library to build your playlist.</div>
+        }
+      </div>
+    </section>
+
+    <!-- Top Cards -->
+    <section class="panel top-cards-panel">
+      <h2>Top Cards</h2>
+      <div class="song-list">
+        @for (card of topCards(); track card.CardID; let i = $index) {
+          <div class="song-row history-row">
+            <span class="song-index">#{{ i + 1 }}</span>
+            <div class="song-info">
+              <span class="song-title">Card {{ card.CardID }}</span>
+              <span class="song-artist">Called {{ card.CalledCount }} squares</span>
+            </div>
+            <span class="tag time">{{ card.CalledCount }}</span>
+          </div>
+        } @empty {
+          <div class="empty-msg">Click Get Top Cards to load the top cards for this game.</div>
+        }
+      </div>
+    </section>
 
     <!-- Song Library -->
     <section class="panel library-panel">
@@ -123,61 +312,6 @@
           </div>
         } @empty {
           <div class="empty-msg">No songs match your filters.</div>
-        }
-      </div>
-    </section>
-
-    <!-- Playlist -->
-    <section class="panel playlist-panel">
-      <div class="playlist-header">
-        <h2>Playlist</h2>
-        <div class="playlist-actions">
-          <button class="filter-btn" (click)="shufflePlaylist()" [disabled]="playlist().length === 0">Shuffle</button>
-          <button class="filter-btn danger" (click)="clearPlaylist()" [disabled]="playlist().length === 0">Clear</button>
-        </div>
-      </div>
-      <div class="song-list">
-        @for (song of playlist(); track song.song_id; let i = $index) {
-          <div class="song-row" [class.called]="isCalled(song)" [class.current]="currentSong()?.song_id === song.song_id">
-            <span class="song-index">{{ i + 1 }}</span>
-            <div class="song-info">
-              <span class="song-title">{{ song.title }}</span>
-              <span class="song-artist">{{ song.artist }}</span>
-            </div>
-            <div class="song-tags">
-              <span class="tag category">{{ song.bingo_category }}</span>
-              <span class="tag time">{{ formatDuration(song.duration_seconds) }}</span>
-            </div>
-            <div class="song-actions">
-              @if (gameStatus() === 'active' && !isCalled(song)) {
-                <button class="action-btn call" (click)="callSpecificSong(song)" title="Call this song">&#9654;</button>
-              }
-              @if (gameStatus() === 'idle') {
-                <button class="action-btn remove" (click)="removeFromPlaylist(song)" title="Remove">&times;</button>
-              }
-            </div>
-          </div>
-        } @empty {
-          <div class="empty-msg">Add songs from the library to build your playlist.</div>
-        }
-      </div>
-    </section>
-
-    <!-- Called Songs History -->
-    <section class="panel history-panel">
-      <h2>Called Songs</h2>
-      <div class="song-list">
-        @for (song of calledSongs(); track song.song_id; let i = $index) {
-          <div class="song-row history-row">
-            <span class="song-index">#{{ i + 1 }}</span>
-            <div class="song-info">
-              <span class="song-title">{{ song.title }}</span>
-              <span class="song-artist">{{ song.artist }}</span>
-            </div>
-            <span class="tag category">{{ song.bingo_category }}</span>
-          </div>
-        } @empty {
-          <div class="empty-msg">No songs called yet.</div>
         }
       </div>
     </section>

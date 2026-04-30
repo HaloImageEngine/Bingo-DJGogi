@@ -1,0 +1,71 @@
+@use '../slidecardsw/slidecardsw.component.scss';
+
+.slidecardsw-page__settings {
+  grid-template-columns: minmax(0, 18rem);
+}
+
+.slidecardone-stage {
+  display: grid;
+}
+
+.slidecardone-card {
+  max-width: 62rem;
+  justify-self: center;
+  width: 100%;
+}
+
+@media print {
+  .slidecardone-stage {
+    display: block;
+    overflow: visible;
+  }
+
+  .slidecardone-card {
+    grid-template-rows: 0.94in auto 1fr;
+    gap: 0.025in;
+    width: calc(100% / 0.92);
+    max-width: 10.3in;
+    min-height: 0;
+    margin: 0 auto;
+    padding: 0.03in;
+    transform: scale(0.92);
+    transform-origin: top center;
+  }
+
+  .slidecardone-card .slidecardsw-card__print-header {
+    grid-template-rows: 0.42in 0.46in;
+    min-height: 0.88in;
+    margin-bottom: 0.02in;
+  }
+
+  .slidecardone-card .slidecardsw-card__print-title {
+    font-size: 15pt;
+  }
+
+  .slidecardone-card .slidecardsw-card__print-sponsor-text {
+    font-size: 8.5pt;
+  }
+
+  .slidecardone-card .slidecardsw-card__grid {
+    gap: 0.025in;
+  }
+
+  .slidecardone-card .slidecardsw-square {
+    min-height: 0.78in;
+    padding: 0.025in;
+  }
+
+  .slidecardone-card .slidecardsw-square__title {
+    font-size: 6.7pt;
+    line-height: 1;
+  }
+
+  .slidecardone-card .slidecardsw-square__artist {
+    font-size: 5.9pt;
+    line-height: 1;
+  }
+
+  .slidecardone-card .slidecardsw-square__topline {
+    font-size: 5.6pt;
+  }
+}

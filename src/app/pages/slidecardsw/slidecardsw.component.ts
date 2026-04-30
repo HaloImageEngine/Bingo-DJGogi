@@ -29,6 +29,10 @@ export class SlidecardswComponent {
 
   readonly gameId = 1;
   readonly showPrintCardMeta = signal(false);
+  readonly sponsorBannerText = signal('Sponsor-Banner');
+  readonly adSpace1Text = signal('Ad-Space1');
+  readonly adSpace2Text = signal('Ad-Space2');
+  readonly adSpace3Text = signal('Ad-Space3');
   readonly currentSlideIndex = signal(0);
   readonly state = toSignal(
     this.printedCardsService.getPrintedCardsByGameId(this.gameId).pipe(
@@ -74,6 +78,26 @@ export class SlidecardswComponent {
     this.printCards(true);
   }
 
+  updateSponsorBannerText(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    this.sponsorBannerText.set(input?.value.trim() || 'Sponsor-Banner');
+  }
+
+  updateAdSpace1Text(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    this.adSpace1Text.set(input?.value.trim() || 'Ad-Space1');
+  }
+
+  updateAdSpace2Text(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    this.adSpace2Text.set(input?.value.trim() || 'Ad-Space2');
+  }
+
+  updateAdSpace3Text(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    this.adSpace3Text.set(input?.value.trim() || 'Ad-Space3');
+  }
+
   private printCards(showMeta: boolean): void {
     if (this.state().loading || this.state().error || this.slides().length === 0) {
       return;
@@ -89,8 +113,7 @@ export class SlidecardswComponent {
     }
 
     this.printService.print({
-      bodyClass: 'print-slidecardsw',
-      title: `Game ${this.gameId} bingo cards`
+      bodyClass: 'print-slidecardsw'
     });
 
     if (!showMeta) {

@@ -9,9 +9,17 @@ import { PrintedCard, PrintedCardResultRow, PrintedCardSquare } from '../models/
 export class PrintedCardsService {
   private readonly http = inject(HttpClient);
   private readonly printedCardsApiBaseUrl = environment.bingoPrintedCardsApiBaseUrl;
+  private readonly printedCardsByCardIdApiBaseUrl = environment.bingoPrintedCardsByCardIdApiBaseUrl;
 
   getPrintedCardsByGameId(gameId: number): Observable<PrintedCard[]> {
     return this.http.get(`${this.printedCardsApiBaseUrl}/${gameId}`, { responseType: 'text' }).pipe(
+      map(response => this.parsePrintedCardsResponse(response)),
+      map(rows => this.groupCards(rows))
+    );
+  }
+
+  getPrintedCardsByCardId(cardId: number): Observable<PrintedCard[]> {
+    return this.http.get(`${this.printedCardsByCardIdApiBaseUrl}/${cardId}`, { responseType: 'text' }).pipe(
       map(response => this.parsePrintedCardsResponse(response)),
       map(rows => this.groupCards(rows))
     );

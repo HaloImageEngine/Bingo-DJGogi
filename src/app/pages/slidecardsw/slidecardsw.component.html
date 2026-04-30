@@ -8,6 +8,56 @@
       </p>
     </div>
 
+    <div class="slidecardsw-page__settings surface-card">
+      <label class="slidecardsw-page__field" for="slidecardsw-sponsor-banner">
+        <span>Sponsor Banner</span>
+        <input
+          id="slidecardsw-sponsor-banner"
+          type="text"
+          class="slidecardsw-page__input"
+          [value]="sponsorBannerText()"
+          (input)="updateSponsorBannerText($event)"
+          placeholder="Enter sponsor banner text"
+        />
+      </label>
+
+      <label class="slidecardsw-page__field" for="slidecardsw-ad-space-1">
+        <span>Ad Space 1</span>
+        <input
+          id="slidecardsw-ad-space-1"
+          type="text"
+          class="slidecardsw-page__input"
+          [value]="adSpace1Text()"
+          (input)="updateAdSpace1Text($event)"
+          placeholder="Enter ad space 1 text"
+        />
+      </label>
+
+      <label class="slidecardsw-page__field" for="slidecardsw-ad-space-2">
+        <span>Ad Space 2</span>
+        <input
+          id="slidecardsw-ad-space-2"
+          type="text"
+          class="slidecardsw-page__input"
+          [value]="adSpace2Text()"
+          (input)="updateAdSpace2Text($event)"
+          placeholder="Enter ad space 2 text"
+        />
+      </label>
+
+      <label class="slidecardsw-page__field" for="slidecardsw-ad-space-3">
+        <span>Ad Space 3</span>
+        <input
+          id="slidecardsw-ad-space-3"
+          type="text"
+          class="slidecardsw-page__input"
+          [value]="adSpace3Text()"
+          (input)="updateAdSpace3Text($event)"
+          placeholder="Enter ad space 3 text"
+        />
+      </label>
+    </div>
+
     <div class="slidecardsw-carousel__toolbar" *ngIf="!state().loading && !state().error && slides().length > 0; else slidecardswMetaOnly">
       <div class="slidecardsw-page__meta surface-card">
         <span>GameID {{ gameId }}</span>
@@ -97,19 +147,30 @@
         <div class="slidecardsw-slide__cards">
           <section class="slidecardsw-card" *ngFor="let card of slide">
             <div class="slidecardsw-card__print-header slidecardsw-banner-container" aria-hidden="true">
-              <img class="slidecardsw-card__print-logo" src="assets/images/DJGogi.png" alt="DJ GOGI logo" />
-              <div class="slidecardsw-card__print-copy">
-                <p class="slidecardsw-card__print-title">DJ GOGI Music Bingo</p>
+              <div class="slidecardsw-banner-container__left">
+                <img class="slidecardsw-card__print-logo" src="assets/images/DJGogi.png" alt="DJ GOGI logo" />
+              </div>
+              <div class="slidecardsw-banner-container__title">
+                <p class="slidecardsw-card__print-title">DJ Gogi Music Bingo</p>
+              </div>
+              <div class="slidecardsw-banner-container__right">
+                <img class="slidecardsw-card__print-sponsor-logo" src="assets/images/HillTop5.png" alt="HillTop sponsor logo" />
+              </div>
+              <div class="slidecardsw-banner-container__sponsor">
+                <p class="slidecardsw-card__print-sponsor-text">{{ sponsorBannerText() }}</p>
               </div>
             </div>
 
-            <header class="slidecardsw-card__header slidecardsw-sponsor-container">
+            <header
+              class="slidecardsw-card__header slidecardsw-sponsor-container"
+              [class.slidecardsw-card__header--print-meta-hidden]="!showPrintCardMeta()"
+            >
               <div class="slidecardsw-card__meta" [class.slidecardsw-card__meta--print-hidden]="!showPrintCardMeta()">
                 <p class="slidecardsw-card__eyebrow">GameID {{ card.GameID }}</p>
                 <h2>CardID {{ card.CardID }}</h2>
               </div>
               <div class="slidecardsw-sponsor-area" aria-label="Sponsor area placeholder">
-                <div class="slidecardsw-sponsor-banner">SponsorBanner</div>
+                <div class="slidecardsw-sponsor-banner">{{ sponsorBannerText() }}</div>
               </div>
             </header>
 
@@ -136,6 +197,12 @@
                 </ng-template>
               </article>
             </div>
+
+            <footer class="slidecardsw-card__print-footer" aria-hidden="true">
+              <div class="slidecardsw-card__print-footer-zone">{{ adSpace1Text() }}</div>
+              <div class="slidecardsw-card__print-footer-zone">{{ adSpace2Text() }}</div>
+              <div class="slidecardsw-card__print-footer-zone">{{ adSpace3Text() }}</div>
+            </footer>
           </section>
         </div>
       </article>
