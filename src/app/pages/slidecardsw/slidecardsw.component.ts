@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { catchError, map, of, startWith } from 'rxjs';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { catchError, distinctUntilChanged, map, of, startWith, switchMap, timer } from 'rxjs';
 
 import { PrintedCard } from '../../models/printed-card.model';
+import { ActiveGameService } from '../../services/active-game.service';
 import { PrintService } from '../../services/print.service';
 import { PrintedCardsService } from '../../services/printed-cards.service';
+import { environment } from '../../../environments/environment';
 
 interface SlidecardswState {
   cards: PrintedCard[];
@@ -21,8 +23,10 @@ interface SlidecardswState {
   styleUrl: './slidecardsw.component.scss'
 })
 export class SlidecardswComponent {
+  private readonly activeGameService = inject(ActiveGameService);
   private readonly printService = inject(PrintService);
   private readonly printedCardsService = inject(PrintedCardsService);
+  private readonly refreshIntervalMs = Math.max(environment.slidecardRefreshIntervalSeconds, 1) * 1000;
 
   @ViewChild('sliderViewport')
   private sliderViewport?: ElementRef<HTMLElement>;
@@ -34,17 +38,35 @@ export class SlidecardswComponent {
   readonly adSpace2Text = signal('Ad-Space2');
   readonly adSpace3Text = signal('Ad-Space3');
   readonly currentSlideIndex = signal(0);
+  readonly refreshEnabled = this.activeGameService.activeGame;
   readonly state = toSignal(
-    this.printedCardsService.getPrintedCardsByGameId(this.gameId).pipe(
-      map(cards => ({ cards, loading: false, error: null } satisfies SlidecardswState)),
-      startWith({ cards: [], loading: true, error: null } satisfies SlidecardswState),
-      catchError(error => {
-        console.error('Printed cards load failed', error);
-        return of({
-          cards: [],
-          loading: false,
-          error: 'Unable to load slide cards right now.'
-        } satisfies SlidecardswState);
+    toObservable(this.refreshEnabled).pipe(
+      distinctUntilChanged(),
+      switchMap(refreshEnabled => {
+        if (!refreshEnabled) {
+          return of({
+            cards: [],
+            loading: false,
+            error: 'Refresh is waiting for ActiveGame to be enabled in the console.'
+          } satisfies SlidecardswState);
+        }
+
+        return timer(0, this.refreshIntervalMs).pipe(
+          switchMap(() =>
+            this.printedCardsService.getPrintedCardsByGameId(this.gameId).pipe(
+              map(cards => ({ cards, loading: false, error: null } satisfies SlidecardswState)),
+              catchError(error => {
+                console.error('Printed cards load failed', error);
+                return of({
+                  cards: [],
+                  loading: false,
+                  error: 'Unable to load slide cards right now.'
+                } satisfies SlidecardswState);
+              })
+            )
+          ),
+          startWith({ cards: [], loading: true, error: null } satisfies SlidecardswState)
+        );
       })
     ),
     { initialValue: { cards: [], loading: true, error: null } }

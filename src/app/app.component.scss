@@ -101,9 +101,7 @@ body.workspace-expanded .sidebar {
 	background: var(--gradient-brand);
 	color: #fff;
 	border: 1px solid rgba(255, 255, 255, 0.25);
-	transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease, margin 0.3s ease;
-	max-height: 200px;
-	overflow: hidden;
+	flex: 0 0 auto;
 }
 
 .brand-card--showing-image {
@@ -119,15 +117,6 @@ body.workspace-expanded .sidebar {
 	max-height: 168px;
 	object-fit: contain;
 	border-radius: 1rem;
-}
-
-.brand-card--hidden {
-	max-height: 0;
-	opacity: 0;
-	padding-top: 0;
-	padding-bottom: 0;
-	margin: 0;
-	border-width: 0;
 }
 
 .eyebrow {
@@ -161,15 +150,21 @@ body.workspace-expanded .sidebar {
 	padding: 0.35rem 0.9rem;
 }
 
+.sidebar__nav-shell {
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	border-radius: 1rem;
+}
+
 .sidebar__nav {
 	display: flex;
 	flex-direction: column;
 	gap: 0.5rem;
-	flex: 1;
+	height: 100%;
 	min-height: 0;
 	overflow-y: auto;
-	scrollbar-width: thin;
-	scrollbar-color: var(--border-strong) transparent;
+	padding-right: 0.2rem;
 }
 
 .sidebar__nav::-webkit-scrollbar {

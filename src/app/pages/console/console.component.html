@@ -3,10 +3,25 @@
   <!-- Header -->
   <header class="console-header">
     <a routerLink="/" class="back-link">&larr; Back</a>
-    <div>
+    <div class="console-header__title-block">
       <h1>Master Console</h1>
       <div>GameID {{ gameId() }}</div>
     </div>
+    <label class="active-game-field active-game-field--header">
+      <span class="game-id-label">ActiveGame</span>
+      <select
+        [ngModel]="activeGame()"
+        (ngModelChange)="updateActiveGame($event)"
+        class="filter-select active-game-select"
+        aria-label="Active game refresh"
+      >
+        <option [ngValue]="true">True</option>
+        <option [ngValue]="false">False</option>
+      </select>
+      <small class="active-game-field__meta">
+        {{ activeGame() ? 'Until ' + activeGameExpiresAt() : 'Disabled' }}
+      </small>
+    </label>
     <div class="game-badge" [class]="gameStatus()">
       {{ gameStatus() | uppercase }}
     </div>

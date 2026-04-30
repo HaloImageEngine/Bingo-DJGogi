@@ -1,6 +1,6 @@
 <div class="app-shell" [class.sidebar-open]="isSidebarOpen" [class.sidebar-collapsed]="isSidebarCollapsed">
   <aside class="sidebar" [class.sidebar--open]="isSidebarOpen">
-    <div class="brand-card surface-card" [class.brand-card--hidden]="isBrandCardHidden" [class.brand-card--showing-image]="showBrandCardImage">
+    <div class="brand-card surface-card" [class.brand-card--showing-image]="showBrandCardImage">
       <ng-container *ngIf="showBrandCardImage; else brandCardContent">
         <img class="brand-card__image" [src]="brandCardImagePath" alt="DJ GOGI" />
       </ng-container>
@@ -19,28 +19,30 @@
       Close
     </button>
 
-    <nav class="sidebar__nav" (scroll)="onNavScroll($event)">
-      <ng-container *ngFor="let section of navSections">
-        <ng-container *ngIf="!section.hidden">
-        <p class="nav-section__label">{{ section.title }}</p>
-        <a
-          *ngFor="let item of section.items"
-          class="nav-link"
-          [routerLink]="item.path"
-          routerLinkActive="is-active"
-          [routerLinkActiveOptions]="{ exact: true }"
-          (click)="closeSidebar()"
-        >
-          <span class="nav-link__icon" [attr.data-accent]="item.accent">{{ item.icon }}</span>
-          <span class="nav-link__body">
-            <span class="nav-link__title">{{ item.label }}</span>
-            <span class="nav-link__helper">{{ item.helper }}</span>
-          </span>
-          <span *ngIf="item.badge" class="nav-link__badge">{{ item.badge }}</span>
-        </a>
+    <div class="sidebar__nav-shell">
+      <nav class="sidebar__nav">
+        <ng-container *ngFor="let section of navSections">
+          <ng-container *ngIf="!section.hidden">
+          <p class="nav-section__label">{{ section.title }}</p>
+          <a
+            *ngFor="let item of section.items"
+            class="nav-link"
+            [routerLink]="item.path"
+            routerLinkActive="is-active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            (click)="closeSidebar()"
+          >
+            <span class="nav-link__icon" [attr.data-accent]="item.accent">{{ item.icon }}</span>
+            <span class="nav-link__body">
+              <span class="nav-link__title">{{ item.label }}</span>
+              <span class="nav-link__helper">{{ item.helper }}</span>
+            </span>
+            <span *ngIf="item.badge" class="nav-link__badge">{{ item.badge }}</span>
+          </a>
+          </ng-container>
         </ng-container>
-      </ng-container>
-    </nav>
+      </nav>
+    </div>
 
     <!-- <div class="sidebar__footer surface-card">
       <p class="eyebrow">Escalations</p>

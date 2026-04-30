@@ -5,6 +5,7 @@ import { catchError, distinctUntilChanged, map, of, startWith, switchMap, timer 
 
 import { environment } from '../../../environments/environment';
 import { PrintedCard } from '../../models/printed-card.model';
+import { ActiveGameService } from '../../services/active-game.service';
 import { PrintService } from '../../services/print.service';
 import { PrintedCardsService } from '../../services/printed-cards.service';
 
@@ -22,17 +23,27 @@ interface SlidecardoneState {
   styleUrl: './slidecardone.component.scss'
 })
 export class SlidecardoneComponent {
+  private readonly activeGameService = inject(ActiveGameService);
   private readonly printService = inject(PrintService);
   private readonly printedCardsService = inject(PrintedCardsService);
   private readonly refreshIntervalMs = Math.max(environment.slidecardRefreshIntervalSeconds, 1) * 1000;
 
   readonly cardId = signal(87);
   readonly showPrintCardMeta = signal(false);
+  readonly refreshEnabled = this.activeGameService.activeGame;
   readonly state = toSignal(
-    toObservable(this.cardId).pipe(
-      distinctUntilChanged(),
-      switchMap(cardId =>
-        timer(0, this.refreshIntervalMs).pipe(
+    toObservable(computed(() => ({ cardId: this.cardId(), refreshEnabled: this.refreshEnabled() }))).pipe(
+      distinctUntilChanged((left, right) => left.cardId === right.cardId && left.refreshEnabled === right.refreshEnabled),
+      switchMap(({ cardId, refreshEnabled }) => {
+        if (!refreshEnabled) {
+          return of({
+            cards: [],
+            loading: false,
+            error: 'Refresh is waiting for ActiveGame to be enabled in the console.'
+          } satisfies SlidecardoneState);
+        }
+
+        return timer(0, this.refreshIntervalMs).pipe(
           switchMap(() =>
             this.printedCardsService.getPrintedCardsByCardId(cardId).pipe(
               map(cards => ({ cards, loading: false, error: null } satisfies SlidecardoneState)),
@@ -47,8 +58,8 @@ export class SlidecardoneComponent {
             )
           ),
           startWith({ cards: [], loading: true, error: null } satisfies SlidecardoneState)
-        )
-      )
+        );
+      })
     ),
     { initialValue: { cards: [], loading: true, error: null } }
   );

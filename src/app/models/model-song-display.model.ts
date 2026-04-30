@@ -14,6 +14,7 @@ export interface ModelSongDisplay {
   Difficulty: string | null;
   ChartPeakPosition: number | null;
   ChartCountry: string | null;
+  LastPlayed: string | null;
   SpotifyPopularity: number | null;
   DurationSeconds: number | null;
   Active: boolean;

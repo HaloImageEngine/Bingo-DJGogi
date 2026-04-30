@@ -6,6 +6,7 @@ import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BingoCalledSong, BingoTopCard, BingoWinnerResult } from '../../models/bingo-game.model';
 import { Song } from '../../models/song.model';
+import { ActiveGameService } from '../../services/active-game.service';
 import { BingoGameService } from '../../services/bingo-game.service';
 
 export type GameStatus = 'idle' | 'active' | 'paused' | 'finished';
@@ -19,9 +20,23 @@ export type GameStatus = 'idle' | 'active' | 'paused' | 'finished';
 })
 export class ConsoleComponent {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly activeGameService = inject(ActiveGameService);
   private readonly bingoGameService = inject(BingoGameService);
   readonly gameId = signal(1);
   readonly topCardsCount = 5;
+  readonly activeGame = this.activeGameService.activeGame;
+  readonly activeGameExpiresAt = computed(() => {
+    const expiresAt = this.activeGameService.expiresAt();
+
+    if (!expiresAt) {
+      return 'Inactive';
+    }
+
+    return new Date(expiresAt).toLocaleTimeString([], {
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  });
 
   // --- Game state ---
   gameStatus = signal<GameStatus>('idle');
@@ -107,6 +122,7 @@ export class ConsoleComponent {
           }
 
           this.gameStatus.set('active');
+          this.activeGameService.setActive(true);
           this.calledSongs.set([]);
           this.currentSong.set(null);
           this.roundNumber.set(1);
@@ -238,22 +254,30 @@ export class ConsoleComponent {
 
   pauseGame(): void {
     this.gameStatus.set('paused');
+    this.activeGameService.setActive(false);
   }
 
   resumeGame(): void {
     this.gameStatus.set('active');
+    this.activeGameService.setActive(true);
   }
 
   endGame(): void {
     this.gameStatus.set('finished');
+    this.activeGameService.setActive(false);
     this.currentSong.set(null);
   }
 
   resetGame(): void {
     this.gameStatus.set('idle');
+    this.activeGameService.setActive(false);
     this.calledSongs.set([]);
     this.currentSong.set(null);
     this.roundNumber.set(1);
+  }
+
+  updateActiveGame(value: boolean | string): void {
+    this.activeGameService.setActive(value === true || value === 'true');
   }
 
   // --- Manual song call ---
@@ -271,6 +295,7 @@ export class ConsoleComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
+          this.activeGameService.touch();
           this.manualSongId.set(null);
           this.refreshCalledSongsAfterCall(gameId);
         },
@@ -368,12 +393,14 @@ export class ConsoleComponent {
     }
     const index = Math.floor(Math.random() * remaining.length);
     const next = remaining[index];
+    this.activeGameService.touch();
     this.currentSong.set(next);
     this.calledSongs.update(list => [...list, next]);
   }
 
   callSpecificSong(song: Song): void {
     if (this.calledSongs().some(c => c.song_id === song.song_id)) return;
+    this.activeGameService.touch();
     this.currentSong.set(song);
     this.calledSongs.update(list => [...list, song]);
   }
