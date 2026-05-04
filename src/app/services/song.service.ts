@@ -15,6 +15,7 @@ export class SongService {
   private readonly insertSongUrl = environment.bingoInsertSongApiUrl;
   private readonly insertSongsUrl = environment.bingoInsertSongsApiUrl;
   private readonly artistTypesUrl = environment.bingoArtistTypesApiUrl;
+  private readonly genreUrl = environment.bingoGenreApiUrl;
   private readonly tempoUrl = environment.bingoTempoApiUrl;
   private readonly decadeUrl = environment.bingoDecadeApiUrl;
   private readonly eraUrl = environment.bingoEraApiUrl;
@@ -41,6 +42,12 @@ export class SongService {
 
   getArtistTypes(): Observable<LookupOption[]> {
     return this.http.get<unknown>(this.artistTypesUrl).pipe(
+      map(response => this.normalizeLookupOptions(response))
+    );
+  }
+
+  getGenreOptions(): Observable<LookupOption[]> {
+    return this.http.get<unknown>(this.genreUrl).pipe(
       map(response => this.normalizeLookupOptions(response))
     );
   }

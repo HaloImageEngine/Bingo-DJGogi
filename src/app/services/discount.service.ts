@@ -8,8 +8,8 @@ import { environment } from '../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class DiscountService {
   private readonly http = inject(HttpClient);
-  private readonly getAllUrl = `${environment.menuApiBaseUrl}/Get_All_Discounts`;
-  private readonly crudUrl = `${environment.menuApiBaseUrl}/CRUD_Discounts`;
+  private readonly getAllUrl = environment.discountsGetAllApiUrl;
+  private readonly crudUrl = environment.discountsCrudApiUrl;
 
   getAllDiscounts(): Observable<Discount[]> {
     const params = new HttpParams().set('discount', 'ALL');

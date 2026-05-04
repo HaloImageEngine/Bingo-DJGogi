@@ -59,7 +59,19 @@ export const routes: Routes = [
 	{
 		path: 'console/create-song-list',
 		loadComponent: () =>
-			import('./pages/createsonglist/createsonglist.component').then(m => m.CreateSongListComponent),
+			import('./pages/create-master_withsongs/create-master-withsongs.component').then(m => m.CreateSongListComponent),
+		canActivate: [AuthGuard]
+	},
+	{
+		path: 'console/edit-song-list',
+		loadComponent: () =>
+			import('./pages/edit-song-list/edit-song-list.component').then(m => m.EditSongListComponent),
+		canActivate: [AuthGuard]
+	},
+	{
+		path: 'console/create-call-list',
+		loadComponent: () =>
+			import('./pages/review-call-list/review-call-list.component').then(m => m.CreateCallListComponent),
 		canActivate: [AuthGuard]
 	},
 	{

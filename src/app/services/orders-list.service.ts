@@ -10,8 +10,8 @@ import { LoggerService } from './logger.service';
 export class OrdersListService {
   private readonly http = inject(HttpClient);
   private readonly logger = inject(LoggerService);
-  private readonly ordersByStatusUrl = `${environment.ordersApiBaseUrl}/Get_OrdersbyStatus`;
-  private readonly orderByIdFullUrl = `${environment.ordersApiBaseUrl}/Get_OrderbyOrderIdFull_HeadandDetails`;
+  private readonly ordersByStatusUrl = environment.ordersByStatusApiUrl;
+  private readonly orderByIdFullUrl = environment.orderByIdFullApiUrl;
   private readonly updateOrderStatusUrl = environment.ordersStatusChangeApiUrl;
 
   getOrdersByStatus(status: OrderStatus): Observable<OrderListItem[]> {
@@ -47,10 +47,10 @@ export class OrdersListService {
 
   private normalizeOrderDetailResponse(response: unknown, fallbackOrderId: number): OrderFullDetailResponse | null {
     this.logger.log('🌐', '[NORMALIZE START]', { response, fallbackOrderId });
-    
+
     const payload = this.unwrapPayload(response);
     this.logger.log('🌐', '[NORMALIZE UNWRAPPED]', payload);
-    
+
     const source = Array.isArray(payload) ? payload[0] : payload;
     this.logger.log('🌐', '[NORMALIZE SOURCE]', source);
 
@@ -62,16 +62,16 @@ export class OrdersListService {
     const record = source as Record<string, unknown>;
     const headSource = this.pickObject(record, ['Head', 'head', 'OrderHead', 'orderHead']) ?? record;
     this.logger.log('🌐', '[NORMALIZE HEAD SOURCE]', headSource);
-    
+
     const details = this.pickArray(record, ['OrderDetailsList', 'orderDetailsList', 'Details', 'details']);
     this.logger.log('🌐', '[NORMALIZE DETAILS ARRAY]', details);
 
     const normalizedHead = this.normalizeHead(headSource, fallbackOrderId);
     this.logger.log('🌐', '[NORMALIZE HEAD RESULT]', normalizedHead);
-    
+
     const headOrderId = Number(normalizedHead.OrderID);
     this.logger.log('🌐', '[NORMALIZE HEAD ORDER ID]', { headOrderId, isFinite: Number.isFinite(headOrderId) });
-    
+
     if (!Number.isFinite(headOrderId)) {
       this.logger.log('🌐', '[NORMALIZE] ❌ Invalid OrderID, returning null');
       return null;

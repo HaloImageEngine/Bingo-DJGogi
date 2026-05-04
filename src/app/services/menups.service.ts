@@ -6,9 +6,8 @@ import { CrudAction, MenuItem, MenuItemPayload } from '../models/menu-item.model
 import { environment } from '../../environments/environment';
 import { MOCK_MENU_ITEMS } from '../mocks/mock-menu-items';
 
-const MENU_API_BASE = environment.menuApiBaseUrl;
-const MENU_READ_URL = `${MENU_API_BASE}/CRUD_Read_PS`;
-const MENU_CRUD_URL = `${MENU_API_BASE}/CRUD`;
+const MENU_READ_URL = environment.menuReadPsApiUrl;
+const MENU_CRUD_URL = environment.menuCrudApiUrl;
 
 @Injectable({ providedIn: 'root' })
 export class MenuService {

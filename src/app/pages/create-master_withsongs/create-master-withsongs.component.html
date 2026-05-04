@@ -1,0 +1,280 @@
+<section class="create-song-list-page">
+  <header class="create-song-list-page__header">
+    <div class="create-song-list-page__hero">
+      <a routerLink="/console" class="create-song-list-page__back">&larr; Back to Console</a>
+      <h1>Create CallList Master / Songs</h1>
+      <p class="create-song-list-page__copy">Search the full song library on the left, then click any song to move it into the list on the right.</p>
+    </div>
+
+    <div class="create-song-list-page__aside">
+      <button type="button" class="create-song-list-page__cta" (click)="toggleCreateForm()">
+        Create New CallList Master with Songs
+      </button>
+
+      <div class="create-song-list-page__stats">
+        <div class="create-song-stat">
+          <span class="create-song-stat__value">{{ maxGameId() ?? '—' }}</span>
+          <span class="create-song-stat__label">Max Game ID</span>
+        </div>
+        <div class="create-song-stat">
+          <span class="create-song-stat__value">{{ maxCallListId() ?? '—' }}</span>
+          <span class="create-song-stat__label">Max CallList ID</span>
+        </div>
+        <div class="create-song-stat">
+          <span class="create-song-stat__value">{{ maxCallListId() !== null ? maxCallListId()! + 1 : '—' }}</span>
+          <span class="create-song-stat__label">Next CallList ID</span>
+        </div>
+        <div class="create-song-stat">
+          <span class="create-song-stat__value">{{ songCount() }}</span>
+          <span class="create-song-stat__label">Full Songlist</span>
+        </div>
+        <div class="create-song-stat">
+          <span class="create-song-stat__value">{{ selectedCount() }}</span>
+          <span class="create-song-stat__label">Picked Songs</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="create-song-list-form" *ngIf="showCreateForm()">
+    <div class="create-song-list-form__header">
+      <div>
+        <h2>New CallList Master Info</h2>
+        <p>Define the list header, then create it with the songs currently selected on the right.</p>
+      </div>
+      <span class="create-song-list-form__status" *ngIf="loadingLookups()">Loading dropdowns...</span>
+    </div>
+
+    <div class="create-song-list-form__message create-song-list-form__message--error" *ngIf="formError() as formErrorMessage">
+      {{ formErrorMessage }}
+    </div>
+    <div class="create-song-list-form__message create-song-list-form__message--success" *ngIf="success() as successMessage">
+      {{ successMessage }}
+    </div>
+
+    <form class="create-song-list-form__grid" [formGroup]="form" (ngSubmit)="createSongList()">
+      <label class="form-field">
+        <span>Call List Name</span>
+        <input type="text" formControlName="CallListName" maxlength="150" placeholder="Friday Night Hits" />
+        <small *ngIf="showFieldError('CallListName')">{{ fieldError('CallListName') }}</small>
+      </label>
+
+      <label class="form-field">
+        <span>Call List Date</span>
+        <input type="date" formControlName="CallListDate" />
+        <small *ngIf="showFieldError('CallListDate')">{{ fieldError('CallListDate') }}</small>
+      </label>
+
+      <label class="form-field form-field--wide">
+        <span>Call List Description</span>
+        <textarea formControlName="CallListDescription" rows="3" maxlength="500" placeholder="A curated list of party songs."></textarea>
+        <small *ngIf="showFieldError('CallListDescription')">{{ fieldError('CallListDescription') }}</small>
+      </label>
+
+      <label class="form-field">
+        <span>Game ID</span>
+        <input type="number" formControlName="GameID" [placeholder]="maxGameId() !== null ? (maxGameId()! + 1).toString() : ''" />
+      </label>
+
+      <label class="form-field">
+        <span>Call List Genre</span>
+        <select formControlName="CallListGenre" class="select--pink">
+          <option value="">Select genre</option>
+          <option *ngFor="let option of genreOptions()" [value]="option.Name ?? ''">{{ option.Name }}</option>
+        </select>
+        <small *ngIf="showFieldError('CallListGenre')">{{ fieldError('CallListGenre') }}</small>
+      </label>
+
+      <label class="form-field">
+        <span>Call List Decade</span>
+        <select formControlName="CallListDecade" class="select--pink">
+          <option value="">Select decade</option>
+          <option *ngFor="let option of decadeOptions()" [value]="option.Name ?? ''">{{ option.Name }}</option>
+        </select>
+        <small *ngIf="showFieldError('CallListDecade')">{{ fieldError('CallListDecade') }}</small>
+      </label>
+
+      <label class="form-field">
+        <span>Call List Era</span>
+        <select formControlName="CallListEra" class="select--pink">
+          <option value="">Select era</option>
+          <option *ngFor="let option of eraOptions()" [value]="option.Name ?? ''">{{ option.Name }}</option>
+        </select>
+        <small *ngIf="showFieldError('CallListEra')">{{ fieldError('CallListEra') }}</small>
+      </label>
+
+      <label class="form-field form-field--readonly">
+        <span>Call List Song Count</span>
+        <input type="number" [value]="selectedCount()" readonly />
+      </label>
+
+      <label class="form-field form-field--toggle">
+        <span>Call List Is Active</span>
+        <input type="checkbox" formControlName="CallListIsActive" />
+      </label>
+
+      <label class="form-field form-field--readonly">
+        <span>New Call List ID</span>
+        <input type="text" [value]="createdList()?.NewCallListID ?? ''" readonly />
+      </label>
+
+      <label class="form-field form-field--readonly">
+        <span>Call List Created At</span>
+        <input type="text" [value]="createdList()?.CallListCreatedAt ?? ''" readonly />
+      </label>
+
+      <label class="form-field form-field--readonly">
+        <span>Call List ID</span>
+        <input type="text" [value]="createdList()?.CallListID ?? ''" readonly />
+      </label>
+
+      <div class="create-song-list-form__actions form-field--wide">
+        <button type="submit" class="primary-button" [disabled]="saving() || loadingLookups()">
+          {{ saving() ? 'Creating...' : 'Create New Song Master' }}
+        </button>
+        <button type="button" class="clear-button" (click)="resetCreateForm()" [disabled]="saving()">
+          Reset
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="create-song-list-board">
+    <div class="create-song-list-board__state" *ngIf="loading()">Loading songs...</div>
+    <div class="create-song-list-board__state create-song-list-board__state--error" *ngIf="error() as errorMessage">{{ errorMessage }}</div>
+
+    <div class="create-song-list-columns" *ngIf="!loading() && !error()">
+      <section class="song-panel song-panel--master">
+        <div class="song-panel__topbar">
+          <div>
+            <span class="song-panel__eyebrow">CallList_Master</span>
+            <h2>CallList_Master</h2>
+            <p>Existing call list masters appear here before the full song library.</p>
+          </div>
+        </div>
+
+        <div class="song-panel__empty" *ngIf="loadingCallListMasters()">Loading call list masters...</div>
+        <div class="song-panel__empty" *ngIf="!loadingCallListMasters() && callListMasterError() as callListMasterErrorMessage">
+          {{ callListMasterErrorMessage }}
+        </div>
+
+        <div class="song-list" *ngIf="!loadingCallListMasters() && !callListMasterError() && callListMasters().length > 0; else noCallListMaster">
+          <button
+            type="button"
+            class="song-row song-row--master"
+            *ngFor="let item of callListMasters(); trackBy: trackByCallListMaster"
+            (click)="selectCallListMaster(item)">
+            <span class="song-row__meta">
+              <span class="song-row__id">#{{ item.Call_List_ID }}</span>
+              <strong>{{ item.Call_List_Name || 'Untitled list' }}</strong>
+              <small>
+                {{ item.Call_List_Description || 'No description' }}
+                <span *ngIf="item.Call_List_Genre"> • {{ item.Call_List_Genre }}</span>
+              </small>
+            </span>
+            <span class="song-row__side">
+              <span class="song-chip song-chip--selected">{{ item.Call_List_SongCount }} songs</span>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <section class="song-panel song-panel--library">
+        <div class="song-panel__topbar">
+          <div>
+            <span class="song-panel__eyebrow">Full_Songlist</span>
+            <h2>Full Songlist</h2>
+            <p>Use the text box to filter the library, then click a row to add it.</p>
+          </div>
+          <label class="song-search" for="song-search-input">
+            <span>Search</span>
+            <input
+              id="song-search-input"
+              type="text"
+              [ngModel]="searchTerm()"
+              (ngModelChange)="searchTerm.set($event)"
+              placeholder="Search title, artist, or genre" />
+          </label>
+        </div>
+
+        <div class="song-list" *ngIf="filteredSongs().length > 0; else noSongsFound">
+          <button
+            type="button"
+            class="song-row song-row--pick"
+            *ngFor="let song of filteredSongs(); trackBy: trackBySong"
+            (click)="addSong(song)">
+            <span class="song-row__meta">
+              <span class="song-row__id">#{{ song.song_id }}</span>
+              <strong>{{ song.Title || 'Untitled song' }}</strong>
+              <small>{{ song.Artist || 'Unknown artist' }} • {{ song.Genre || 'Unknown genre' }}</small>
+            </span>
+            <span class="song-row__side">
+              <span class="song-chip">{{ formatDuration(song.DurationSeconds) }}</span>
+              <span class="song-row__action">Add</span>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <section class="song-panel song-panel--selected">
+        <div class="song-panel__topbar song-panel__topbar--selected">
+          <div>
+            <span class="song-panel__eyebrow">CallList_Songs</span>
+            <span class="song-panel__eyebrow" *ngIf="selectedCallListMaster() as selectedMaster">
+              CallList_ID: {{ selectedMaster.Call_List_ID }}
+            </span>
+            <h2>CallList_Songs</h2>
+            <p *ngIf="selectedCallListMaster() as selectedMaster; else noMasterSelected">
+              Songs loaded for {{ selectedMaster.Call_List_Name || 'the selected call list' }}.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="clear-button"
+            (click)="clearSelection()"
+            [disabled]="selectedCount() === 0">
+            Clear All
+          </button>
+        </div>
+
+        <div class="song-panel__empty" *ngIf="loadingCallListSongs()">Loading call list songs...</div>
+        <div class="song-panel__empty" *ngIf="!loadingCallListSongs() && callListSongError() as callListSongErrorMessage">
+          {{ callListSongErrorMessage }}
+        </div>
+
+        <div class="song-list" *ngIf="!loadingCallListSongs() && !callListSongError() && callListSongs().length > 0; else noCallListSongs">
+          <div class="song-row song-row--selected" *ngFor="let song of callListSongs(); trackBy: trackByCallListSong">
+            <span class="song-row__meta">
+              <span class="song-row__id">#{{ song.song_id }}</span>
+              <strong>{{ song.title || 'Untitled song' }}</strong>
+              <small>{{ song.artist || 'Unknown artist' }} • {{ song.decade || 'Unknown decade' }}</small>
+            </span>
+            <span class="song-row__side">
+              <span class="song-chip song-chip--selected">{{ song.genre || 'Unknown genre' }}</span>
+            </span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+</section>
+
+<ng-template #noSongsFound>
+  <div class="song-panel__empty">No songs match the current search.</div>
+</ng-template>
+
+<ng-template #noSelection>
+  <div class="song-panel__empty">Pick songs from the left side to build your list.</div>
+</ng-template>
+
+<ng-template #noCallListMaster>
+  <div class="song-panel__empty">No call list masters are available yet.</div>
+</ng-template>
+
+<ng-template #noMasterSelected>
+  <p>Select a call list master to view its songs.</p>
+</ng-template>
+
+<ng-template #noCallListSongs>
+  <div class="song-panel__empty">No call list songs are available for the selected master.</div>
+</ng-template>

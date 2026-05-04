@@ -39,12 +39,15 @@ export class AppComponent implements OnInit {
       title: 'Operations',
       items: [
         { label: 'Console', helper: 'Bingo game console', path: '/console', accent: 'rose', icon: 'BC' },
+        { label: 'Create CallList Master', helper: 'Pick songs into a custom list', path: '/console/create-song-list', accent: 'rose', icon: 'CL' },
+        { label: 'Edit CallList Master', helper: 'Edit an existing call list', path: '/console/edit-song-list', accent: 'rose', icon: 'EL' },
+        { label: 'Review Call List', helper: 'Review the call list with songs', path: '/console/create-call-list', accent: 'rose', icon: 'RL' },
         { label: 'Slide Cards', helper: 'Landscape swipe card pairs', path: '/slidecards', accent: 'teal', icon: 'SC' },
         { label: 'Slide Card One', helper: 'Single printed bingo card', path: '/slidecardone', accent: 'teal', icon: 'S1' },
         { label: 'Songs', helper: 'Browse bingo song library', path: '/console/songs', accent: 'teal', icon: 'SG' },
         { label: 'Insert Song', helper: 'Add one song with lookup dropdowns', path: '/console/insert-song-single', accent: 'amber', icon: 'IS' },
         { label: 'Bulk Insert', helper: 'Paste JSON to add many songs', path: '/console/insert-song-bulk', accent: 'amber', icon: 'BI' },
-        { label: 'Create Song List', helper: 'Pick songs into a custom list', path: '/console/create-song-list', accent: 'rose', icon: 'SL' },
+
         { label: 'Cards', helper: 'Two bingo cards view', path: '/cards', accent: 'amber', icon: 'CD' },
         //{ label: 'MB Schema', helper: 'Music bingo data map', path: '/music-bingo-schema', accent: 'iris', icon: 'DB' },
         //{ label: 'MB Guidelines', helper: 'Music bingo chat transcript', path: '/music-bingo-guideline', accent: 'iris', icon: 'MG' },
