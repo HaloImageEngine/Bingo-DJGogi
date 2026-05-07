@@ -5,7 +5,7 @@ import { AbstractControl, FormBuilder, FormsModule, ReactiveFormsModule, Validat
 import { RouterLink } from '@angular/router';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
 
-import { BingoCallListCreate, BingoCallListMaster, BingoCallListSong, BingoCallListSongInsert } from '../../models/bingo-game.model';
+import { BingoCallListCreate, BingoCallListMaster, BingoCallListSong, BingoCallListSongInsert, BingoInsertGameGameNight, BingoInsertGameGameNightResult } from '../../models/bingo-game.model';
 import { LookupOption } from '../../models/lookup-option.model';
 import { ModelSongDisplay } from '../../models/model-song-display.model';
 import { CallListService } from '../../services/calllist.service';
@@ -18,7 +18,7 @@ const trimmedRequired: ValidatorFn = (control: AbstractControl): ValidationError
 };
 
 @Component({
-  selector: 'app-create-song-list',
+  selector: 'app-create-master-withsonglist',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
   templateUrl: './create-master-withsongs.component.html',
@@ -50,6 +50,15 @@ export class CreateSongListComponent implements OnInit {
   readonly callListSongError = signal<string | null>(null);
   readonly maxGameId = signal<number | null>(null);
   readonly maxCallListId = signal<number | null>(null);
+  readonly gnName = signal('');
+  readonly gnDate = signal(new Date().toISOString().slice(0, 16));
+  readonly gnVenue = signal('');
+  readonly gameNumber = signal<number | null>(null);
+  readonly gameName = signal('');
+  readonly savingGameNight = signal(false);
+  readonly gameNightError = signal<string | null>(null);
+  readonly gameNightSuccess = signal<string | null>(null);
+  readonly createdGameNightId = signal<number | null>(null);
   readonly genreOptions = signal<LookupOption[]>([]);
   readonly decadeOptions = signal<LookupOption[]>([]);
   readonly eraOptions = signal<LookupOption[]>([]);
@@ -222,6 +231,38 @@ export class CreateSongListComponent implements OnInit {
     this.showCreateForm.update(value => !value);
     this.formError.set(null);
     this.success.set(null);
+  }
+
+  insertGameGameNight(): void {
+    this.gameNightError.set(null);
+    this.gameNightSuccess.set(null);
+
+    const payload: BingoInsertGameGameNight = {
+      GN_Name: this.gnName(),
+      GN_Date: this.gnDate(),
+      GN_Venue: this.gnVenue(),
+      Game_Number: this.gameNumber() ?? 0,
+      Game_Name: this.gameName()
+    };
+
+    this.savingGameNight.set(true);
+
+    this.callListService.insertGameGameNight(payload)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        catchError(err => {
+          console.error('Insert_Game_GameNight failed', err);
+          this.gameNightError.set('Failed to create Game Night.');
+          return of<BingoInsertGameGameNightResult>({ NewGN_ID: 0 });
+        }),
+        finalize(() => this.savingGameNight.set(false))
+      )
+      .subscribe(result => {
+        if (result.NewGN_ID) {
+          this.createdGameNightId.set(result.NewGN_ID);
+          this.gameNightSuccess.set(`Game Night created with ID #${result.NewGN_ID}.`);
+        }
+      });
   }
 
   createSongList(): void {

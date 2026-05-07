@@ -57,7 +57,7 @@ export const routes: Routes = [
 		canActivate: [AuthGuard]
 	},
 	{
-		path: 'console/create-song-list',
+		path: 'console/create-master-withsonglist',
 		loadComponent: () =>
 			import('./pages/create-master_withsongs/create-master-withsongs.component').then(m => m.CreateSongListComponent),
 		canActivate: [AuthGuard]

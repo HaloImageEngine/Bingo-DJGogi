@@ -89,3 +89,15 @@ export interface CallListBuildResult {
   master: BingoCallListMaster;
   songs: BingoCallListSong[];
 }
+
+export interface BingoInsertGameGameNight {
+  GN_Name: string;
+  GN_Date: string;
+  GN_Venue: string;
+  Game_Number: number;
+  Game_Name: string;
+}
+
+export interface BingoInsertGameGameNightResult {
+  NewGN_ID: number;
+}

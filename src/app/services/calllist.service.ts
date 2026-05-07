@@ -8,6 +8,8 @@ import {
   BingoCallListMaster,
   BingoCallListSong,
   BingoCallListSongInsert,
+  BingoInsertGameGameNight,
+  BingoInsertGameGameNightResult,
   CallListBuildResult
 } from '../models/bingo-game.model';
 
@@ -21,6 +23,7 @@ export class CallListService {
   private readonly insertCallListSongsJsonApiUrl = environment.bingoInsertCallListSongsJsonApiUrl;
   private readonly maxCallListIdApiUrl = environment.bingoMaxCallListIdApiUrl;
   private readonly maxGameIdApiUrl = environment.bingoMaxGameIdApiUrl;
+  private readonly insertGameGameNightApiUrl = environment.bingoInsertGameGameNightApiUrl;
 
   getMaxCallListId(): Observable<number> {
     return this.http.get<unknown>(this.maxCallListIdApiUrl).pipe(
@@ -80,6 +83,27 @@ export class CallListService {
         console.groupEnd();
       }),
       map(response => this.normalizeCallListSongInsert(response, payload))
+    );
+  }
+
+  insertGameGameNight(payload: BingoInsertGameGameNight): Observable<BingoInsertGameGameNightResult> {
+    console.group('Insert_Game_GameNight');
+    console.log('URL', this.insertGameGameNightApiUrl);
+    console.log('Request JSON', JSON.parse(JSON.stringify(payload)));
+    console.groupEnd();
+
+    return this.http.post<unknown>(this.insertGameGameNightApiUrl, payload).pipe(
+      tap(response => {
+        console.group('Insert_Game_GameNight Response');
+        console.log('Response JSON', JSON.parse(JSON.stringify(response)));
+        console.groupEnd();
+      }),
+      map(response => {
+        const record = this.unwrapRecord(response) ?? {};
+        return {
+          NewGN_ID: this.asNullableNumber(record['NewGN_ID']) ?? 0
+        };
+      })
     );
   }
 

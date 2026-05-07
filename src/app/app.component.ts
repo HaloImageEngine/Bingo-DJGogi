@@ -39,7 +39,7 @@ export class AppComponent implements OnInit {
       title: 'Operations',
       items: [
         { label: 'Console', helper: 'Bingo game console', path: '/console', accent: 'rose', icon: 'BC' },
-        { label: 'Create CallList Master', helper: 'Pick songs into a custom list', path: '/console/create-song-list', accent: 'rose', icon: 'CL' },
+        { label: 'Create CallList Master', helper: 'Pick songs into a custom list', path: '/console/create-master-withsonglist', accent: 'rose', icon: 'CL' },
         { label: 'Edit CallList Master', helper: 'Edit an existing call list', path: '/console/edit-song-list', accent: 'rose', icon: 'EL' },
         { label: 'Review Call List', helper: 'Review the call list with songs', path: '/console/create-call-list', accent: 'rose', icon: 'RL' },
         { label: 'Slide Cards', helper: 'Landscape swipe card pairs', path: '/slidecards', accent: 'teal', icon: 'SC' },
