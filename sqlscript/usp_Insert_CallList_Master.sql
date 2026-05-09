@@ -1,8 +1,18 @@
+USE [haloimag_djgogi]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
 -- =============================================
 -- Author:		William D Beaty
 -- Create Date:	2026-05-01
 -- Description:	Inserts a new record into the CallList_Master table.
 --              Validates required fields, sets CreatedAt timestamp,
+--              stores InningNumber,
 --              and returns the newly generated Call_List_ID.
 -- =============================================
 -- How It Works:
@@ -10,13 +20,14 @@
 --   2. Validates that required fields (@Call_List_Name, @Call_List_Date,
 --      @Game_ID) are not NULL or empty.
 --   3. Defaults @Call_List_IsActive to 1 (Active) if not provided.
---   4. Sets @Call_List_CreatedAt to GETDATE() automatically.
---   5. Inserts the new row into [dbo].[CallList_Master].
---   6. Returns the newly created Call_List_ID via SCOPE_IDENTITY().
---   7. If any error occurs, the CATCH block rolls back and raises the error.
+--   4. Defaults @InningNumber to 0 if not provided.
+--   5. Sets @Call_List_CreatedAt to GETDATE() automatically.
+--   6. Inserts the new row into [dbo].[CallList_Master].
+--   7. Returns the newly created Call_List_ID via SCOPE_IDENTITY().
+--   8. If any error occurs, the CATCH block rolls back and raises the error.
 -- =============================================
 
-Alter PROCEDURE [dbo].[usp_Insert_CallList_Master]
+ALTER PROCEDURE [dbo].[usp_Insert_CallList_Master]
     @Call_List_Name         VARCHAR(150),
     @Call_List_Date         DATE,
     @Call_List_Description  NVARCHAR(500)   = NULL,
@@ -26,6 +37,7 @@ Alter PROCEDURE [dbo].[usp_Insert_CallList_Master]
     @Call_List_Era          VARCHAR(10)     = NULL,
     @Call_List_SongCount    INT             = 0,
     @Call_List_IsActive     BIT             = 1,
+    @InningNumber           INT             = 0,
     @NewCallListID          INT             OUTPUT
 AS
 BEGIN
@@ -69,6 +81,7 @@ BEGIN
                 [Call_List_Era],
                 [Call_List_SongCount],
                 [Call_List_IsActive],
+                [InningNumber],
                 [Call_List_CreatedAt]
             )
             VALUES
@@ -82,6 +95,7 @@ BEGIN
                 @Call_List_Era,
                 @Call_List_SongCount,
                 @Call_List_IsActive,
+                @InningNumber,
                 GETDATE()
             );
 
@@ -103,8 +117,3 @@ BEGIN
 
 END
 GO
-
-
-DECLARE @NewID INT;
-
-SELECT @NewID AS NewlyInserted_Call_List_ID;

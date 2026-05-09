@@ -157,6 +157,8 @@ export class CallListService {
   private toAddCallListSongApiPayload(payload: BingoCallListSongInsert): Record<string, unknown> {
     return {
       CallListID: payload.CallListID,
+      Inning: payload.Inning,
+      Song_ID: payload.Song_ID,
       title: payload.Title,
       artist: payload.Artist,
       featured_artist: payload.FeaturedArtist || null,
@@ -235,6 +237,8 @@ export class CallListService {
 
     return {
       CallListID: this.asNullableNumber(record['CallListID'] ?? record['CallListId'] ?? record['Call_List_ID']) ?? fallbackPayload.CallListID,
+      Inning: this.asNullableNumber(record['Inning'] ?? record['inning']) ?? fallbackPayload.Inning,
+      Song_ID: this.asNullableNumber(record['Song_ID'] ?? record['SongID'] ?? record['SongId'] ?? record['song_id']) ?? fallbackPayload.Song_ID,
       Title: this.asString(record['Title'] ?? record['title'], fallbackPayload.Title),
       Artist: this.asString(record['Artist'] ?? record['artist'], fallbackPayload.Artist),
       FeaturedArtist: this.asString(record['FeaturedArtist'] ?? record['featured_artist'], fallbackPayload.FeaturedArtist),
@@ -312,6 +316,7 @@ export class CallListService {
     return {
       song_id: songId,
       Call_List_ID: callListId,
+      inning: this.asNullableNumber(record['inning'] ?? record['Inning']),
       title: this.asString(record['title'] ?? record['Title']),
       artist: this.asString(record['artist'] ?? record['Artist']),
       featured_artist: this.asNullableString(record['featured_artist'] ?? record['FeaturedArtist']),

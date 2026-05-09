@@ -137,6 +137,8 @@ export class BingoGameService {
 
     return {
       CallListID: this.asNullableNumber(record['CallListID'] ?? record['CallListId'] ?? record['Call_List_ID']) ?? fallbackPayload.CallListID,
+      Inning: this.asNullableNumber(record['Inning'] ?? record['inning']) ?? fallbackPayload.Inning,
+      Song_ID: this.asNullableNumber(record['Song_ID'] ?? record['SongID'] ?? record['SongId'] ?? record['song_id']) ?? fallbackPayload.Song_ID,
       Title: this.asString(record['Title'] ?? record['title'], fallbackPayload.Title),
       Artist: this.asString(record['Artist'] ?? record['artist'], fallbackPayload.Artist),
       FeaturedArtist: this.asString(

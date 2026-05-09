@@ -290,11 +290,17 @@
 .song-search {
   display: grid;
   gap: 0.45rem;
-  min-width: min(22rem, 100%);
+  flex: 1 1 0;
+  min-width: 0;
   color: var(--text-muted);
   font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+.song-search--narrow {
+  min-width: unset;
+  width: 10ch;
 }
 
 .song-search input {

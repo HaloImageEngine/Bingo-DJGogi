@@ -55,6 +55,8 @@ export interface BingoCallListCreate {
 
 export interface BingoCallListSongInsert {
   CallListID: number;
+  Inning: number;
+  Song_ID: number;
   Title: string;
   Artist: string;
   FeaturedArtist: string;
@@ -66,12 +68,13 @@ export interface BingoCallListSongInsert {
   Decade: string;
   Era: string;
   LastPlayed: string;
-  NewSongID: number;
+  NewSongID?: number;
 }
 
 export interface BingoCallListSong {
   song_id: number;
   Call_List_ID: number;
+  inning: number | null;
   title: string;
   artist: string;
   featured_artist: string | null;

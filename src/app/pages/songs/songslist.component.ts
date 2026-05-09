@@ -3,10 +3,12 @@ import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angula
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { catchError, finalize, of } from 'rxjs';
+import { catchError, finalize, forkJoin, of } from 'rxjs';
 
 import { LookupOption } from '../../models/lookup-option.model';
+import { McInfoArtistTypeCount, McInfoDecadeCount, McInfoEraCount, McInfoGenreCount } from '../../models/mcinfo.model';
 import { ModelSongDisplay } from '../../models/model-song-display.model';
+import { DashboardSummaryService } from '../../services/dashboard-summary.service';
 import { SongService } from '../../services/song.service';
 
 type SortColumn = 'Title' | 'Era' | 'ReleaseYear' | 'Tempo' | 'Decade' | 'Genre' | 'Difficulty' | 'LastPlayed' | 'Active';
@@ -21,6 +23,7 @@ type SortDirection = 'asc' | 'desc';
 })
 export class SongsListComponent implements OnInit {
   private readonly songService = inject(SongService);
+  private readonly dashboardSummaryService = inject(DashboardSummaryService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly loading = signal(false);
@@ -32,6 +35,11 @@ export class SongsListComponent implements OnInit {
   readonly decadeOptions = signal<LookupOption[]>([]);
   readonly sortColumn = signal<SortColumn>('Title');
   readonly sortDirection = signal<SortDirection>('asc');
+  readonly eraCounts = signal<McInfoEraCount[]>([]);
+  readonly genreCounts = signal<McInfoGenreCount[]>([]);
+  readonly artistTypeCounts = signal<McInfoArtistTypeCount[]>([]);
+  readonly decadeCounts = signal<McInfoDecadeCount[]>([]);
+  readonly loadingCounts = signal(false);
   readonly genreOptions = computed(() => {
     return [...new Set(this.songs().map(song => song.Genre).filter((genre): genre is string => !!genre && genre.trim().length > 0))]
       .sort((left, right) => left.localeCompare(right));
@@ -71,6 +79,7 @@ export class SongsListComponent implements OnInit {
   ngOnInit(): void {
     this.loadSongs();
     this.loadDecadeOptions();
+    this.loadCounts();
   }
 
   loadSongs(): void {
@@ -96,6 +105,31 @@ export class SongsListComponent implements OnInit {
         });
 
         this.songs.set(sortedSongs);
+      });
+  }
+
+  loadCounts(): void {
+    this.loadingCounts.set(true);
+
+    forkJoin({
+      eras: this.dashboardSummaryService.getCountByEra(),
+      genres: this.dashboardSummaryService.getCountByGenre(),
+      artistTypes: this.dashboardSummaryService.getCountByArtistType(),
+      decades: this.dashboardSummaryService.getCountByDecade()
+    })
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        catchError(err => {
+          console.error('Count load failed', err);
+          return of({ eras: [], genres: [], artistTypes: [], decades: [] });
+        }),
+        finalize(() => this.loadingCounts.set(false))
+      )
+      .subscribe(({ eras, genres, artistTypes, decades }) => {
+        this.eraCounts.set(eras);
+        this.genreCounts.set(genres);
+        this.artistTypeCounts.set(artistTypes);
+        this.decadeCounts.set(decades);
       });
   }
 

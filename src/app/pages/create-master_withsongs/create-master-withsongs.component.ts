@@ -43,6 +43,7 @@ export class CreateSongListComponent implements OnInit {
   readonly callListSongs = signal<BingoCallListSong[]>([]);
   readonly selectedCallListMaster = signal<BingoCallListMaster | null>(null);
   readonly searchTerm = signal('');
+  readonly inning = signal<number>(4);
   readonly callListMasters = signal<BingoCallListMaster[]>([]);
   readonly loadingCallListMasters = signal(false);
   readonly callListMasterError = signal<string | null>(null);
@@ -423,6 +424,8 @@ export class CreateSongListComponent implements OnInit {
   private buildCallListSongPayload(callListId: number, song: ModelSongDisplay): BingoCallListSongInsert {
     return {
       CallListID: callListId,
+      Inning: this.inning(),
+      Song_ID: song.song_id ?? 0,
       Title: song.Title ?? '',
       Artist: song.Artist ?? '',
       FeaturedArtist: '',

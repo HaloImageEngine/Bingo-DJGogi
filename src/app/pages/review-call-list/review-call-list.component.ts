@@ -407,6 +407,8 @@ export class CreateCallListComponent implements OnInit {
   private buildCallListSongPayload(song: ModelSongDisplay, callListId = 0): BingoCallListSongInsert {
     return {
       CallListID: callListId,
+      Inning: 0,
+      Song_ID: song.song_id ?? 0,
       Title: song.Title ?? '',
       Artist: song.Artist ?? '',
       FeaturedArtist: '',

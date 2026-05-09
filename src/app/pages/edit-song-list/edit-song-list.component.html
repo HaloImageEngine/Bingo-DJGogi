@@ -185,7 +185,7 @@
           <div>
             <span class="song-panel__eyebrow">Full_Songlist</span>
             <h2>Full Songlist</h2>
-            <p>Use the text box to filter the library, then click a row to add it.</p>
+
           </div>
           <label class="song-search" for="edit-song-search-input">
             <span>Search</span>
@@ -195,6 +195,18 @@
               [ngModel]="searchTerm()"
               (ngModelChange)="searchTerm.set($event)"
               placeholder="Search title, artist, or genre" />
+          </label>
+          <label class="song-search song-search--narrow" for="edit-song-inning-input">
+            <span>Inning</span>
+            <select
+              id="edit-song-inning-input"
+              [value]="inning()"
+              (change)="inning.set(+$any($event.target).value)">
+              <option [value]="1">1</option>
+              <option [value]="2">2</option>
+              <option [value]="3">3</option>
+              <option [value]="4">4</option>
+            </select>
           </label>
         </div>
 
@@ -264,12 +276,13 @@
         <div class="song-list" *ngIf="!loadingCallListSongs() && !callListSongError() && callListSongs().length > 0; else noCallListSongs">
           <div class="song-row song-row--selected" *ngFor="let song of callListSongs(); trackBy: trackByCallListSong">
             <span class="song-row__meta">
-              <span class="song-row__id">#{{ song.song_id }}</span>
+              <span class="song-row__id">#{{ song.song_id }} · Inning: {{ song.inning ?? '—' }}</span>
               <strong>{{ song.title || 'Untitled song' }}</strong>
               <small>{{ song.artist || 'Unknown artist' }} • {{ song.decade || 'Unknown decade' }}</small>
             </span>
             <span class="song-row__side">
               <span class="song-chip song-chip--selected">{{ song.genre || 'Unknown genre' }}</span>
+              <span class="song-chip">{{ song.last_played ? (song.last_played | date:'MM/dd/yy') : 'Not played' }}</span>
             </span>
           </div>
         </div>

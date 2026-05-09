@@ -1,4 +1,47 @@
 <section class="songs-page">
+
+  <section class="songs-info-bar" *ngIf="!loadingCounts()">
+    <span class="songs-info-bar__eyebrow">Song Library — Counts</span>
+    <div class="songs-mini-dash">
+      <div class="songs-mini-dash__panel">
+        <h3 class="songs-mini-dash__title">By Era</h3>
+        <ul class="songs-mini-dash__list">
+          <li class="songs-mini-dash__row" *ngFor="let item of eraCounts()">
+            <span class="songs-mini-dash__row-label">{{ item.Era }}</span>
+            <span class="songs-mini-dash__row-value">{{ item.SongCount }}</span>
+          </li>
+        </ul>
+      </div>
+      <div class="songs-mini-dash__panel">
+        <h3 class="songs-mini-dash__title">By Genre</h3>
+        <ul class="songs-mini-dash__list">
+          <li class="songs-mini-dash__row" *ngFor="let item of genreCounts()">
+            <span class="songs-mini-dash__row-label">{{ item.Genre }}</span>
+            <span class="songs-mini-dash__row-value">{{ item.SongCount }}</span>
+          </li>
+        </ul>
+      </div>
+      <div class="songs-mini-dash__panel">
+        <h3 class="songs-mini-dash__title">By Artist Type</h3>
+        <ul class="songs-mini-dash__list">
+          <li class="songs-mini-dash__row" *ngFor="let item of artistTypeCounts()">
+            <span class="songs-mini-dash__row-label">{{ item.ArtistType }}</span>
+            <span class="songs-mini-dash__row-value">{{ item.SongCount }}</span>
+          </li>
+        </ul>
+      </div>
+      <div class="songs-mini-dash__panel">
+        <h3 class="songs-mini-dash__title">By Decade</h3>
+        <ul class="songs-mini-dash__list">
+          <li class="songs-mini-dash__row" *ngFor="let item of decadeCounts()">
+            <span class="songs-mini-dash__row-label">{{ item.Decade }}</span>
+            <span class="songs-mini-dash__row-value">{{ item.SongCount }}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <header class="songs-page__header">
     <div>
       <a routerLink="/console" class="songs-page__back">&larr; Back to Console</a>

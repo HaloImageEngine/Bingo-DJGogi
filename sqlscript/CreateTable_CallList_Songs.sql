@@ -1,7 +1,7 @@
 USE [haloimag_djgogi]
 GO
 
-/****** Object:  Table [dbo].[CallList_Songs]    Script Date: 4/25/2026 8:40:28 PM ******/
+/****** Object:  Table [dbo].[CallList_Songs]    Script Date: 5/8/2026 12:53:02 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -25,6 +25,7 @@ CREATE TABLE [dbo].[CallList_Songs](
 	[decade] [varchar](5) NULL,
 	[era] [varchar](10) NULL,
 	[last_played] [datetime2](7) NULL,
+	[Inning] [int] NOT NULL,
  CONSTRAINT [PK_CallList_Songs] PRIMARY KEY CLUSTERED 
 (
 	[song_id] ASC
@@ -37,6 +38,9 @@ SET ANSI_PADDING OFF
 GO
 
 ALTER TABLE [dbo].[CallList_Songs] ADD  CONSTRAINT [DF_CallList_Songs_Explicit]  DEFAULT ((0)) FOR [explicit]
+GO
+
+ALTER TABLE [dbo].[CallList_Songs] ADD  CONSTRAINT [DF_CallList_Songs_Inning]  DEFAULT ((0)) FOR [Inning]
 GO
 
 

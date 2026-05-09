@@ -49,6 +49,7 @@ export class EditSongListComponent implements OnInit {
   readonly loadingCallListSongs = signal(false);
   readonly callListSongError = signal<string | null>(null);
   readonly addingSongId = signal<number | null>(null);
+  readonly inning = signal<number>(4);
   readonly maxGameId = signal<number | null>(null);
   readonly maxCallListId = signal<number | null>(null);
   readonly genreOptions = signal<LookupOption[]>([]);
@@ -350,7 +351,16 @@ export class EditSongListComponent implements OnInit {
         this.callListService
           .getCallListSongs(master.Call_List_ID)
           .pipe(takeUntilDestroyed(this.destroyRef), catchError(() => of(this.callListSongs())))
-          .subscribe(items => this.callListSongs.set(items));
+          .subscribe(items => {
+            this.callListSongs.set(items);
+            this.callListMasters.update(masters =>
+              masters.map(m =>
+                m.Call_List_ID === master.Call_List_ID
+                  ? { ...m, Call_List_SongCount: items.length }
+                  : m
+              )
+            );
+          });
       });
   }
 
@@ -425,6 +435,8 @@ export class EditSongListComponent implements OnInit {
   private buildCallListSongPayload(callListId: number, song: ModelSongDisplay): BingoCallListSongInsert {
     return {
       CallListID: callListId,
+      Inning: this.inning(),
+      Song_ID: song.song_id ?? 0,
       Title: song.Title ?? '',
       Artist: song.Artist ?? '',
       FeaturedArtist: '',
