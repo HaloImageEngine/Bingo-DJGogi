@@ -330,7 +330,10 @@
 }
 .song-row:hover { background: rgba(255,255,255,0.04); }
 .song-row.in-playlist { background: rgba(99, 102, 241, 0.1); }
-.song-row.called { opacity: 0.45; }
+.song-row.called {
+  background: rgba(6, 95, 70, 0.28);
+  border-left: 3px solid #10b981;
+}
 .song-row.current { background: rgba(124, 58, 237, 0.25); border-left: 3px solid #7c3aed; }
 
 .song-index {
@@ -365,6 +368,19 @@
   text-overflow: ellipsis;
 }
 
+.song-meta-small {
+  font-size: 0.68rem;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-meta-small__separator {
+  margin: 0 0.3rem;
+  color: #4b5563;
+}
+
 /* ===== Tags ===== */
 .song-tags {
   display: flex;
@@ -393,11 +409,13 @@
 }
 
 .action-btn {
-  width: 28px;
+  min-width: 56px;
   height: 28px;
   border: none;
   border-radius: 6px;
-  font-size: 1rem;
+  padding: 0 0.75rem;
+  font-size: 0.76rem;
+  font-weight: 700;
   line-height: 1;
   cursor: pointer;
   display: flex;
@@ -411,6 +429,15 @@
 .action-btn.remove:hover { background: #991b1b; }
 .action-btn.call   { background: #4338ca; color: #c4b5fd; }
 .action-btn.call:hover { background: #4f46e5; }
+.action-btn:disabled {
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.song-row.called .action-btn.call {
+  background: #065f46;
+  color: #a7f3d0;
+}
 
 /* ===== Playlist header ===== */
 .playlist-header {

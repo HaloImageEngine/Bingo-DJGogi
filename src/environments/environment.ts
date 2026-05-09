@@ -38,6 +38,7 @@ export const environment = {
   bingoCalledSongsApiUrl: `${apiBaseUrl}Bingo/Bingo/Get_Called_Songs`,
   bingoCallListMasterApiUrl: `${apiBaseUrl}Bingo/CallList/Get_All_CallList_Master`,
   bingoCallListSongsApiUrl: `${apiBaseUrl}Bingo/CallList/Get_All_CallList_Songs_by_CallList_ID`,
+  bingoCallListSongsByGciApiUrl: `${apiBaseUrl}Bingo/CallList/Get_CallList_Songs_byGCI`,
   bingoCallListDropdownApiUrl: `${apiBaseUrl}Bingo/CallList/Get_All_CallList_DropDown`,
   bingoInsertCallListMasterApiUrl: `${apiBaseUrl}Bingo/CallList/Create_CallList_Master`,
   bingoInsertCallListSongApiUrl: `${apiBaseUrl}Bingo/CallList/Insert_CallList_Song`,

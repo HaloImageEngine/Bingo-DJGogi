@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
@@ -11,8 +11,21 @@ export class PrintedCardsService {
   private readonly printedCardsApiBaseUrl = environment.bingoPrintedCardsApiBaseUrl;
   private readonly printedCardsByCardIdApiBaseUrl = environment.bingoPrintedCardsByCardIdApiBaseUrl;
 
-  getPrintedCardsByGameId(gameId: number): Observable<PrintedCard[]> {
-    return this.http.get(`${this.printedCardsApiBaseUrl}/${gameId}`, { responseType: 'text' }).pipe(
+  getPrintedCardsByGameId(
+    gameId: number,
+    options?: { callListId?: number; inning?: number }
+  ): Observable<PrintedCard[]> {
+    let params = new HttpParams();
+
+    if (typeof options?.callListId === 'number' && Number.isFinite(options.callListId)) {
+      params = params.set('calllistid', String(options.callListId));
+    }
+
+    if (typeof options?.inning === 'number' && Number.isFinite(options.inning)) {
+      params = params.set('inning', String(options.inning));
+    }
+
+    return this.http.get(`${this.printedCardsApiBaseUrl}/${gameId}`, { params, responseType: 'text' }).pipe(
       map(response => this.parsePrintedCardsResponse(response)),
       map(rows => this.groupCards(rows))
     );
@@ -83,6 +96,8 @@ export class PrintedCardsService {
 
     const cardId = this.asNullableNumber(record['CardID']);
     const gameId = this.asNullableNumber(record['GameID']);
+    const callListId = this.asNullableNumber(record['CallListID'] ?? record['CallListId'] ?? record['Call_List_ID']);
+    const inning = this.asNullableNumber(record['Inning'] ?? record['inning']);
     const gnid = this.asNullableNumber(record['GNID']);
     const squarePosition = this.asNullableNumber(record['SquarePosition']);
     const rowNumber = this.asNullableNumber(record['RowNumber']);
@@ -106,6 +121,8 @@ export class PrintedCardsService {
     return {
       CardID: cardId,
       GameID: gameId,
+      CallListID: callListId,
+      Inning: inning,
       GNID: gnid,
       GameNumber: gameNumber,
       GameName: this.asNullableString(record['GameName']),
@@ -158,6 +175,8 @@ export class PrintedCardsService {
       cards.set(row.CardID, {
         CardID: row.CardID,
         GameID: row.GameID,
+        CallListID: row.CallListID,
+        Inning: row.Inning,
         GNID: row.GNID,
         GameNumber: row.GameNumber,
         GameName: row.GameName,

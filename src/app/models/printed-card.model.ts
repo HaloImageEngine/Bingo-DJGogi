@@ -5,6 +5,8 @@ export type BingoColumnLetter = 'B' | 'I' | 'N' | 'G' | 'O';
 export interface PrintedCardResultRow {
   CardID: number;
   GameID: number;
+  CallListID: number | null;
+  Inning: number | null;
   GNID: number;
   GameNumber: string;
   GameName: string | null;
@@ -40,6 +42,8 @@ export interface PrintedCardSquare {
 export interface PrintedCard {
   CardID: number;
   GameID: number;
+  CallListID: number | null;
+  Inning: number | null;
   GNID: number;
   GameNumber: string;
   GameName: string | null;

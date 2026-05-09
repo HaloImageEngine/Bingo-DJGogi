@@ -31,7 +31,9 @@ export class SlidecardswComponent {
   @ViewChild('sliderViewport')
   private sliderViewport?: ElementRef<HTMLElement>;
 
-  readonly gameId = 1;
+  readonly gameId = 26;
+  readonly callListId = 26;
+  readonly inning = 1;
   readonly showPrintCardMeta = signal(false);
   readonly sponsorBannerText = signal('Sponsor-Banner');
   readonly adSpace1Text = signal('Ad-Space1');
@@ -53,7 +55,10 @@ export class SlidecardswComponent {
 
         return timer(0, this.refreshIntervalMs).pipe(
           switchMap(() =>
-            this.printedCardsService.getPrintedCardsByGameId(this.gameId).pipe(
+            this.printedCardsService.getPrintedCardsByGameId(this.gameId, {
+              callListId: this.callListId,
+              inning: this.inning
+            }).pipe(
               map(cards => ({ cards, loading: false, error: null } satisfies SlidecardswState)),
               catchError(error => {
                 console.error('Printed cards load failed', error);

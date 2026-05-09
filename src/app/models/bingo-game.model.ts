@@ -1,6 +1,8 @@
 export interface BingoGameActionResult {
   Success: boolean;
   GameID: number;
+  CallListID?: number | null;
+  Inning?: number | null;
   ReturnValue: number;
 }
 
@@ -82,6 +84,19 @@ export interface BingoCallListSong {
   artist_type: string | null;
   genre: string | null;
   explicit: boolean;
+  release_year: number | null;
+  decade: string | null;
+  era: string | null;
+  last_played: string | null;
+}
+
+export interface BingoCallListSongByGci {
+  Inning: number;
+  Call_List_ID: number;
+  song_id: number;
+  title: string;
+  artist: string;
+  genre: string | null;
   release_year: number | null;
   decade: string | null;
   era: string | null;

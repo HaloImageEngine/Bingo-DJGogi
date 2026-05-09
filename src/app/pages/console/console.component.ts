@@ -4,7 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { BingoCalledSong, BingoTopCard, BingoWinnerResult } from '../../models/bingo-game.model';
+import { BingoCalledSong, BingoCallListSongByGci, BingoTopCard, BingoWinnerResult } from '../../models/bingo-game.model';
 import { Song } from '../../models/song.model';
 import { ActiveGameService } from '../../services/active-game.service';
 import { BingoGameService } from '../../services/bingo-game.service';
@@ -49,6 +49,8 @@ export class ConsoleComponent {
   // --- Song pool & playlist ---
   allSongs = signal<Song[]>([]);
   playlist = signal<Song[]>([]);
+  playlistLoading = signal(false);
+  playlistError = signal<string | null>(null);
   calledSongs = signal<Song[]>([]);
   currentSong = signal<Song | null>(null);
 
@@ -98,6 +100,8 @@ export class ConsoleComponent {
   }
 
   // --- Song calling panel ---
+  callListId = signal<number | null>(null);
+  inning = signal<number | null>(1);
   manualSongId = signal<number | null>(null);
   callSongLoading = signal(false);
   callSongError = signal<string | null>(null);
@@ -107,12 +111,15 @@ export class ConsoleComponent {
   startGame(): void {
     if (this.playlist().length === 0 || this.gameActionLoading()) return;
 
+    const callListId = this.callListId();
+    const inning = this.inning();
+
     this.gameActionLoading.set(true);
     this.gameActionError.set(null);
     this.gameActionMessage.set(null);
 
     this.bingoGameService
-      .startNewGame(this.gameId())
+      .clearAllCalledFlags(this.gameId(), callListId, inning)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: result => {
@@ -138,12 +145,15 @@ export class ConsoleComponent {
   clearCards(): void {
     if (this.gameActionLoading()) return;
 
+    const callListId = this.callListId();
+    const inning = this.inning();
+
     this.gameActionLoading.set(true);
     this.gameActionError.set(null);
     this.gameActionMessage.set(null);
 
     this.bingoGameService
-      .clearAllCalledFlags(this.gameId())
+      .clearAllCalledFlags(this.gameId(), callListId, inning)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: result => {
@@ -156,7 +166,7 @@ export class ConsoleComponent {
           this.currentSong.set(null);
           this.roundNumber.set(1);
           this.gameActionMessage.set(
-            `Success: ${result.Success} | GameID: ${result.GameID} | ReturnValue: ${result.ReturnValue}`
+            `Success: ${result.Success} | GameID: ${result.GameID} | CallListID: ${result.CallListID ?? '-'} | Inning: ${result.Inning ?? '-'} | ReturnValue: ${result.ReturnValue}`
           );
         },
         error: error => {
@@ -170,12 +180,15 @@ export class ConsoleComponent {
   clearCalled(): void {
     if (this.gameActionLoading()) return;
 
+    const callListId = this.callListId();
+    const inning = this.inning();
+
     this.gameActionLoading.set(true);
     this.gameActionError.set(null);
     this.gameActionMessage.set(null);
 
     this.bingoGameService
-      .clearAllCalledSongs(this.gameId())
+      .clearAllCalledSongs(this.gameId(), callListId, inning)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: result => {
@@ -250,6 +263,33 @@ export class ConsoleComponent {
     }
 
     this.gameId.set(nextGameId);
+    this.loadPlaylistForSelection();
+  }
+
+  updateCallListId(value: string | number | null): void {
+    const nextCallListId = Number(value);
+
+    if (!Number.isInteger(nextCallListId) || nextCallListId <= 0) {
+      this.callListId.set(null);
+      this.resetPlaylistState();
+      return;
+    }
+
+    this.callListId.set(nextCallListId);
+    this.loadPlaylistForSelection();
+  }
+
+  updateInning(value: string | number | null): void {
+    const nextInning = Number(value);
+
+    if (!Number.isInteger(nextInning) || nextInning <= 0) {
+      this.inning.set(null);
+      this.resetPlaylistState();
+      return;
+    }
+
+    this.inning.set(nextInning);
+    this.loadPlaylistForSelection();
   }
 
   pauseGame(): void {
@@ -286,12 +326,14 @@ export class ConsoleComponent {
     if (songId === null || songId <= 0 || this.callSongLoading()) return;
 
     const gameId = this.gameId();
+    const callListId = this.callListId();
+    const inning = this.inning();
     this.callSongLoading.set(true);
     this.callSongError.set(null);
     this.winnerResult.set(null);
 
     this.bingoGameService
-      .callSongByNumber(gameId, songId)
+      .callSongByNumber(gameId, songId, callListId, inning)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -357,6 +399,57 @@ export class ConsoleComponent {
     };
   }
 
+  private loadPlaylistForSelection(): void {
+    const gameId = this.gameId();
+    const callListId = this.callListId();
+    const inning = this.inning();
+
+    if (callListId === null || inning === null) {
+      this.resetPlaylistState();
+      return;
+    }
+
+    this.playlistLoading.set(true);
+    this.playlistError.set(null);
+
+    this.bingoGameService
+      .getCallListSongsByGci(gameId, callListId, inning)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: songs => {
+          const playlist = songs.map(song => this.mapPlaylistSong(song));
+          this.playlist.set(playlist);
+          this.allSongs.set(playlist);
+        },
+        error: error => {
+          console.error('Load playlist failed', error);
+          this.playlist.set([]);
+          this.playlistError.set('Unable to load playlist songs right now.');
+        },
+        complete: () => this.playlistLoading.set(false)
+      });
+  }
+
+  private resetPlaylistState(): void {
+    this.playlist.set([]);
+    this.playlistLoading.set(false);
+    this.playlistError.set(null);
+  }
+
+  private mapPlaylistSong(song: BingoCallListSongByGci): Song {
+    return {
+      song_id: song.song_id,
+      title: song.title,
+      artist: song.artist,
+      genre: song.genre ?? undefined,
+      release_year: song.release_year ?? undefined,
+      decade: song.decade ?? undefined,
+      era: song.era ?? undefined,
+      play_count: 0,
+      active: true
+    };
+  }
+
   private formatActionError(error: unknown, fallbackMessage: string): string {
     if (!(error instanceof HttpErrorResponse)) {
       return fallbackMessage;
@@ -399,10 +492,31 @@ export class ConsoleComponent {
   }
 
   callSpecificSong(song: Song): void {
-    if (this.calledSongs().some(c => c.song_id === song.song_id)) return;
-    this.activeGameService.touch();
-    this.currentSong.set(song);
-    this.calledSongs.update(list => [...list, song]);
+    if (this.calledSongs().some(c => c.song_id === song.song_id) || this.callSongLoading()) return;
+
+    const gameId = this.gameId();
+    const callListId = this.callListId();
+    const inning = this.inning();
+
+    this.callSongLoading.set(true);
+    this.callSongError.set(null);
+    this.winnerResult.set(null);
+
+    this.bingoGameService
+      .callSongByNumber(gameId, song.song_id, callListId, inning)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.activeGameService.touch();
+          this.currentSong.set(song);
+          this.refreshCalledSongsAfterCall(gameId);
+        },
+        error: err => {
+          console.error('Call song failed', err);
+          this.callSongError.set('Failed to call song. Please try again.');
+          this.callSongLoading.set(false);
+        }
+      });
   }
 
   // --- Playlist management ---

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
@@ -7,6 +7,7 @@ import {
   BingoCalledSong,
   BingoCallListCreate,
   BingoCallListMaster,
+  BingoCallListSongByGci,
   BingoCallListSongInsert,
   BingoGameActionResult,
   BingoTopCard,
@@ -25,20 +26,49 @@ export class BingoGameService {
   private readonly checkForWinnerApiBaseUrl = environment.bingoCheckForWinnerApiBaseUrl;
   private readonly calledSongsApiUrl = environment.bingoCalledSongsApiUrl;
   private readonly callListMasterApiUrl = environment.bingoCallListMasterApiUrl;
+  private readonly callListSongsByGciApiUrl = environment.bingoCallListSongsByGciApiUrl;
   private readonly callListDropdownApiUrl = environment.bingoCallListDropdownApiUrl;
   private readonly insertCallListMasterApiUrl = environment.bingoInsertCallListMasterApiUrl;
   private readonly insertCallListSongApiUrl = environment.bingoInsertCallListSongApiUrl;
   private readonly insertCallListSongsJsonApiUrl = environment.bingoInsertCallListSongsJsonApiUrl;
 
-  clearAllCalledFlags(gameId: number): Observable<BingoGameActionResult> {
-    return this.http.post<unknown>(`${this.clearCalledFlagsApiBaseUrl}/${gameId}`, null).pipe(
-      map(response => this.normalizeActionResult(response, gameId))
+  clearAllCalledFlags(
+    gameId: number,
+    callListId?: number | null,
+    inning?: number | null
+  ): Observable<BingoGameActionResult> {
+    let params = new HttpParams();
+
+    if (typeof callListId === 'number' && Number.isFinite(callListId)) {
+      params = params.set('callListId', String(callListId));
+    }
+
+    if (typeof inning === 'number' && Number.isFinite(inning)) {
+      params = params.set('inning', String(inning));
+    }
+
+    return this.http.post<unknown>(`${this.clearCalledFlagsApiBaseUrl}/${gameId}`, null, { params }).pipe(
+      map(response => this.normalizeActionResult(response, gameId, callListId, inning))
     );
   }
 
-  clearAllCalledSongs(gameId: number): Observable<BingoGameActionResult> {
-    return this.http.post<unknown>(`${this.clearCalledSongsApiBaseUrl}/${gameId}`, null).pipe(
-      map(response => this.normalizeActionResult(response, gameId))
+  clearAllCalledSongs(
+    gameId: number,
+    callListId?: number | null,
+    inning?: number | null
+  ): Observable<BingoGameActionResult> {
+    let params = new HttpParams();
+
+    if (typeof callListId === 'number' && Number.isFinite(callListId)) {
+      params = params.set('callListId', String(callListId));
+    }
+
+    if (typeof inning === 'number' && Number.isFinite(inning)) {
+      params = params.set('inning', String(inning));
+    }
+
+    return this.http.post<unknown>(`${this.clearCalledSongsApiBaseUrl}/${gameId}`, null, { params }).pipe(
+      map(response => this.normalizeActionResult(response, gameId, callListId, inning))
     );
   }
 
@@ -61,6 +91,12 @@ export class BingoGameService {
   getCallListMaster(): Observable<BingoCallListMaster[]> {
     return this.http.get<unknown>(this.callListMasterApiUrl).pipe(
       map(response => this.normalizeCallListMaster(response))
+    );
+  }
+
+  getCallListSongsByGci(gameId: number, callListId: number, inning: number): Observable<BingoCallListSongByGci[]> {
+    return this.http.get<unknown>(`${this.callListSongsByGciApiUrl}/${gameId}/${callListId}/${inning}`).pipe(
+      map(response => this.normalizeCallListSongsByGci(response))
     );
   }
 
@@ -97,8 +133,25 @@ export class BingoGameService {
     );
   }
 
-  callSongByNumber(gameId: number, songId: number): Observable<Song | null> {
-    const url = `${this.callSongApiUrl}?Game_ID=${gameId}&Song_ID=${songId}`;
+  callSongByNumber(
+    gameId: number,
+    songId: number,
+    callListId?: number | null,
+    inning?: number | null
+  ): Observable<Song | null> {
+    const queryParts = [`Game_ID=${gameId}`];
+
+    if (typeof callListId === 'number' && Number.isFinite(callListId)) {
+      queryParts.push(`Call_List_ID=${callListId}`);
+    }
+
+    if (typeof inning === 'number' && Number.isFinite(inning)) {
+      queryParts.push(`Inning=${inning}`);
+    }
+
+    queryParts.push(`Song_ID=${songId}`);
+
+    const url = `${this.callSongApiUrl}?${queryParts.join('&')}`;
     return this.http.get<unknown>(url).pipe(
       map(response => this.normalizeSongResponse(response, songId))
     );
@@ -232,12 +285,19 @@ export class BingoGameService {
     };
   }
 
-  private normalizeActionResult(response: unknown, fallbackGameId: number): BingoGameActionResult {
+  private normalizeActionResult(
+    response: unknown,
+    fallbackGameId: number,
+    fallbackCallListId?: number | null,
+    fallbackInning?: number | null
+  ): BingoGameActionResult {
     const record = this.unwrapRecord(response);
 
     return {
       Success: this.asBoolean(record?.['Success'] ?? record?.['success']),
       GameID: this.asNullableNumber(record?.['GameID'] ?? record?.['gameId']) ?? fallbackGameId,
+      CallListID: this.asNullableNumber(record?.['CallListID'] ?? record?.['CallListId'] ?? record?.['Call_List_ID']) ?? fallbackCallListId ?? null,
+      Inning: this.asNullableNumber(record?.['Inning'] ?? record?.['inning']) ?? fallbackInning ?? null,
       ReturnValue: this.asNullableNumber(record?.['ReturnValue'] ?? record?.['returnValue']) ?? 0
     };
   }
@@ -278,6 +338,25 @@ export class BingoGameService {
     return rawItems
       .map(item => this.mapCallListMaster(item))
       .filter((item): item is BingoCallListMaster => item !== null);
+  }
+
+  private normalizeCallListSongsByGci(response: unknown): BingoCallListSongByGci[] {
+    const candidates = ['data', 'Data', 'items', 'Items', 'result', 'Result', 'payload', 'Payload'];
+    const record = this.asRecord(response);
+    const listCandidate = record
+      ? candidates.map(key => record[key]).find(value => Array.isArray(value))
+      : undefined;
+    const rawItems = Array.isArray(listCandidate)
+      ? listCandidate
+      : Array.isArray(response)
+        ? response
+        : response
+          ? [response]
+          : [];
+
+    return rawItems
+      .map(item => this.mapCallListSongByGci(item))
+      .filter((item): item is BingoCallListSongByGci => item !== null);
   }
 
   private normalizeCallListDropdownOptions(response: unknown): LookupOption[] {
@@ -385,6 +464,37 @@ export class BingoGameService {
     return {
       Id: id,
       Name: name
+    };
+  }
+
+  private mapCallListSongByGci(item: unknown): BingoCallListSongByGci | null {
+    const record = this.asRecord(item);
+
+    if (!record) {
+      return null;
+    }
+
+    const inning = this.asNullableNumber(record['Inning'] ?? record['inning']);
+    const callListId = this.asNullableNumber(record['Call_List_ID'] ?? record['CallListID'] ?? record['CallListId']);
+    const songId = this.asNullableNumber(record['song_id'] ?? record['Song_ID'] ?? record['SongID']);
+    const title = this.asNullableString(record['title'] ?? record['Title']);
+    const artist = this.asNullableString(record['artist'] ?? record['Artist']);
+
+    if (inning === null || callListId === null || songId === null || title === null || artist === null) {
+      return null;
+    }
+
+    return {
+      Inning: inning,
+      Call_List_ID: callListId,
+      song_id: songId,
+      title,
+      artist,
+      genre: this.asNullableString(record['genre'] ?? record['Genre']),
+      release_year: this.asNullableNumber(record['release_year'] ?? record['ReleaseYear']),
+      decade: this.asNullableString(record['decade'] ?? record['Decade']),
+      era: this.asNullableString(record['era'] ?? record['Era']),
+      last_played: this.asNullableString(record['last_played'] ?? record['LastPlayed'])
     };
   }
 

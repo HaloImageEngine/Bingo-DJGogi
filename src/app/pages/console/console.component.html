@@ -46,7 +46,7 @@
   <section class="game-controls">
     <div class="control-row">
       <label class="game-id-field">
-        <span class="game-id-label">GameID</span>
+        <span class="game-id-label">Game ID</span>
         <input
           type="number"
           min="1"
@@ -58,8 +58,32 @@
           aria-label="GameID"
         />
       </label>
+      <label class="game-id-field">
+        <span class="game-id-label">Call List ID</span>
+        <input
+          type="number"
+          min="1"
+          [ngModel]="callListId()"
+          (ngModelChange)="updateCallListId($event)"
+          class="filter-input game-id-input"
+          aria-label="Call List ID"
+          placeholder="Pick Call List ID"
+        />
+      </label>
+      <label class="game-id-field">
+        <span class="game-id-label">Inning</span>
+        <input
+          type="number"
+          min="1"
+          [ngModel]="inning()"
+          (ngModelChange)="updateInning($event)"
+          class="filter-input game-id-input"
+          aria-label="Inning"
+          placeholder="Inning"
+        />
+      </label>
       @if (gameStatus() === 'idle' || gameStatus() === 'finished') {
-        <button class="ctrl-btn start" (click)="startGame()" [disabled]="playlist().length === 0">
+        <button class="ctrl-btn start" (click)="startGame()" [disabled]="playlistLoading() || playlist().length === 0">
           Start Game
         </button>
       }
@@ -135,6 +159,30 @@
             class="filter-input call-id-input"
             aria-label="GameID"
             readonly
+          />
+        </label>
+        <label class="call-song-field">
+          <span class="call-song-label">Call List ID</span>
+          <input
+            type="number"
+            min="1"
+            [ngModel]="callListId()"
+            (ngModelChange)="updateCallListId($event)"
+            class="filter-input call-id-input"
+            placeholder="Pick Call List ID"
+            aria-label="Call List ID"
+          />
+        </label>
+        <label class="call-song-field">
+          <span class="call-song-label">Inning</span>
+          <input
+            type="number"
+            min="1"
+            [ngModel]="inning()"
+            (ngModelChange)="updateInning($event)"
+            class="filter-input call-id-input"
+            placeholder="Inning"
+            aria-label="Inning"
           />
         </label>
         <label class="call-song-field">
@@ -229,28 +277,39 @@
         </div>
       </div>
       <div class="song-list">
-        @for (song of playlist(); track song.song_id; let i = $index) {
-          <div class="song-row" [class.called]="isCalled(song)" [class.current]="currentSong()?.song_id === song.song_id">
-            <span class="song-index">{{ i + 1 }}</span>
-            <div class="song-info">
-              <span class="song-title">{{ song.title }}</span>
-              <span class="song-artist">{{ song.artist }}</span>
+        @if (playlistLoading()) {
+          <div class="empty-msg">Loading playlist songs...</div>
+        } @else if (playlistError()) {
+          <div class="empty-msg">{{ playlistError() }}</div>
+        } @else {
+          @for (song of playlist(); track song.song_id; let i = $index) {
+            <div class="song-row" [class.called]="isCalled(song)" [class.current]="currentSong()?.song_id === song.song_id">
+              <span class="song-index">{{ i + 1 }}</span>
+              <div class="song-info">
+                <span class="song-title">{{ song.title }}</span>
+                <span class="song-artist">{{ song.artist }}</span>
+                <span class="song-meta-small">
+                  {{ song.genre || 'Unknown Genre' }}
+                  <span class="song-meta-small__separator">|</span>
+                  {{ song.era || 'Unknown Era' }}
+                  <span class="song-meta-small__separator">|</span>
+                  {{ song.decade || 'Unknown Decade' }}
+                </span>
+              </div>
+              <div class="song-actions">
+                <button
+                  class="action-btn call"
+                  (click)="callSpecificSong(song)"
+                  [disabled]="isCalled(song) || callSongLoading()"
+                  [title]="isCalled(song) ? 'Song already called' : 'Call this song'"
+                >
+                  {{ isCalled(song) ? 'Called' : 'Call' }}
+                </button>
+              </div>
             </div>
-            <div class="song-tags">
-              <span class="tag category">{{ song.bingo_category }}</span>
-              <span class="tag time">{{ formatDuration(song.duration_seconds) }}</span>
-            </div>
-            <div class="song-actions">
-              @if (gameStatus() === 'active' && !isCalled(song)) {
-                <button class="action-btn call" (click)="callSpecificSong(song)" title="Call this song">&#9654;</button>
-              }
-              @if (gameStatus() === 'idle') {
-                <button class="action-btn remove" (click)="removeFromPlaylist(song)" title="Remove">&times;</button>
-              }
-            </div>
-          </div>
-        } @empty {
-          <div class="empty-msg">Add songs from the library to build your playlist.</div>
+          } @empty {
+            <div class="empty-msg">Enter Game ID, Call List ID, and Inning to load playlist songs.</div>
+          }
         }
       </div>
     </section>
@@ -270,63 +329,6 @@
           </div>
         } @empty {
           <div class="empty-msg">Click Get Top Cards to load the top cards for this game.</div>
-        }
-      </div>
-    </section>
-
-    <!-- Song Library -->
-    <section class="panel library-panel">
-      <h2>Song Library</h2>
-      <div class="filters">
-        <input
-          type="text"
-          placeholder="Search title or artist..."
-          [ngModel]="searchTerm()"
-          (ngModelChange)="searchTerm.set($event)"
-          class="filter-input"
-        />
-        <select [ngModel]="genreFilter()" (ngModelChange)="genreFilter.set($event)" class="filter-select" aria-label="Filter by genre">
-          <option value="">All Genres</option>
-          @for (g of uniqueGenres(); track g) {
-            <option [value]="g">{{ g }}</option>
-          }
-        </select>
-        <select [ngModel]="decadeFilter()" (ngModelChange)="decadeFilter.set($event)" class="filter-select" aria-label="Filter by decade">
-          <option value="">All Decades</option>
-          @for (d of uniqueDecades(); track d) {
-            <option [value]="d">{{ d }}</option>
-          }
-        </select>
-        <select [ngModel]="difficultyFilter()" (ngModelChange)="difficultyFilter.set($event)" class="filter-select" aria-label="Filter by difficulty">
-          <option value="">All Difficulties</option>
-          <option value="easy">Easy</option>
-          <option value="medium">Medium</option>
-          <option value="hard">Hard</option>
-        </select>
-        <button class="filter-btn" (click)="addAllFiltered()">Add All Filtered</button>
-      </div>
-      <div class="song-list">
-        @for (song of filteredSongs(); track song.song_id) {
-          <div class="song-row" [class.in-playlist]="isInPlaylist(song)">
-            <div class="song-info">
-              <span class="song-title">{{ song.title }}</span>
-              <span class="song-artist">{{ song.artist }}</span>
-            </div>
-            <div class="song-tags">
-              <span class="tag genre">{{ song.genre }}</span>
-              <span class="tag decade">{{ song.decade }}</span>
-              <span class="tag diff" [attr.data-diff]="song.difficulty">{{ song.difficulty }}</span>
-            </div>
-            <div class="song-actions">
-              @if (!isInPlaylist(song)) {
-                <button class="action-btn add" (click)="addToPlaylist(song)" title="Add to playlist">+</button>
-              } @else {
-                <button class="action-btn remove" (click)="removeFromPlaylist(song)" title="Remove from playlist">&minus;</button>
-              }
-            </div>
-          </div>
-        } @empty {
-          <div class="empty-msg">No songs match your filters.</div>
         }
       </div>
     </section>
