@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { catchError, distinctUntilChanged, map, of, startWith, switchMap, timer } from 'rxjs';
+import { catchError, map, of, startWith, switchMap, timer } from 'rxjs';
 
 import { PrintedCard } from '../../models/printed-card.model';
 import { ActiveGameService } from '../../services/active-game.service';
@@ -31,9 +31,12 @@ export class SlidecardswComponent {
   @ViewChild('sliderViewport')
   private sliderViewport?: ElementRef<HTMLElement>;
 
-  readonly gameId = 26;
-  readonly callListId = 26;
-  readonly inning = 1;
+  readonly gameIdInput = signal(26);
+  readonly callListIdInput = signal(26);
+  readonly inningInput = signal(1);
+  readonly gameId = signal(26);
+  readonly callListId = signal(26);
+  readonly inning = signal(1);
   readonly showPrintCardMeta = signal(false);
   readonly sponsorBannerText = signal('Sponsor-Banner');
   readonly adSpace1Text = signal('Ad-Space1');
@@ -41,10 +44,16 @@ export class SlidecardswComponent {
   readonly adSpace3Text = signal('Ad-Space3');
   readonly currentSlideIndex = signal(0);
   readonly refreshEnabled = this.activeGameService.activeGame;
+  private readonly queryParams = computed(() => ({
+    gameId: this.gameId(),
+    callListId: this.callListId(),
+    inning: this.inning(),
+    refreshEnabled: this.refreshEnabled()
+  }));
+
   readonly state = toSignal(
-    toObservable(this.refreshEnabled).pipe(
-      distinctUntilChanged(),
-      switchMap(refreshEnabled => {
+    toObservable(this.queryParams).pipe(
+      switchMap(({ gameId, callListId, inning, refreshEnabled }) => {
         if (!refreshEnabled) {
           return of({
             cards: [],
@@ -55,9 +64,9 @@ export class SlidecardswComponent {
 
         return timer(0, this.refreshIntervalMs).pipe(
           switchMap(() =>
-            this.printedCardsService.getPrintedCardsByGameId(this.gameId, {
-              callListId: this.callListId,
-              inning: this.inning
+            this.printedCardsService.getPrintedCardsByGameId(gameId, {
+              callListId,
+              inning
             }).pipe(
               map(cards => ({ cards, loading: false, error: null } satisfies SlidecardswState)),
               catchError(error => {
@@ -103,6 +112,30 @@ export class SlidecardswComponent {
 
   printAllCardsWithMeta(): void {
     this.printCards(true);
+  }
+
+  updateGameIdInput(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    const val = parseInt(input?.value ?? '', 10);
+    if (!isNaN(val) && val > 0) this.gameIdInput.set(val);
+  }
+
+  updateCallListIdInput(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    const val = parseInt(input?.value ?? '', 10);
+    if (!isNaN(val) && val > 0) this.callListIdInput.set(val);
+  }
+
+  updateInningInput(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    const val = parseInt(input?.value ?? '', 10);
+    if (!isNaN(val) && val > 0) this.inningInput.set(val);
+  }
+
+  loadCards(): void {
+    this.gameId.set(this.gameIdInput());
+    this.callListId.set(this.callListIdInput());
+    this.inning.set(this.inningInput());
   }
 
   updateSponsorBannerText(event: Event): void {

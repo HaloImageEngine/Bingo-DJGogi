@@ -53,6 +53,7 @@ export interface BingoCallListCreate {
   CallListIsActive: boolean;
   CallListCreatedAt: string | null;
   CallListID: number | null;
+  InningNumber: number | null;
 }
 
 export interface BingoCallListSongInsert {

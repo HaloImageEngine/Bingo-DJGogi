@@ -339,7 +339,8 @@ export class CreateCallListComponent implements OnInit {
           CallListSongCount: result.master.Call_List_SongCount,
           CallListIsActive: result.master.Call_List_IsActive,
           CallListCreatedAt: result.master.Call_List_CreatedAt,
-          CallListID: result.master.Call_List_ID
+          CallListID: result.master.Call_List_ID,
+          InningNumber: payload.InningNumber
         });
         this.selectedCallListMasterId.set(result.master.Call_List_ID);
         this.refreshSelectedSongs(result.master.Call_List_ID);
@@ -400,7 +401,8 @@ export class CreateCallListComponent implements OnInit {
       CallListSongCount: this.selectedCount(),
       CallListIsActive: value.CallListIsActive,
       CallListCreatedAt: null,
-      CallListID: null
+      CallListID: null,
+      InningNumber: 1
     };
   }
 

@@ -50,6 +50,8 @@ export const environment = {
   bingoCountDecadeApiUrl: `${apiBaseUrl}Bingo/Count/Get_Count_Decade`,
   bingoCountEraApiUrl: `${apiBaseUrl}Bingo/Count/Get_Count_Era`,
   bingoCountGenreApiUrl: `${apiBaseUrl}Bingo/Count/Get_Count_Genre`,
+  bingoCountCLIDApiUrl: `${apiBaseUrl}Bingo/CallList/Get_Count_CallListSongs_By_CLID_Inning`,
+  bingoCheckSongDuplicateApiUrl: `${apiBaseUrl}Bingo/Song/Check_Song_Duplicate?useNormalized=true`,
   thumbnailApiBaseUrl: `${apiBaseUrl}ImageLoad/Images/Get_ThumbNail_Grid`,
   thumbnailApprovalApiUrl: `${apiBaseUrl}ImageLoad/Images/Update_Image_Approval`,
   thumbnailImageBaseUrl: 'https://api.getgogi.com/App_Data/UploadedImagesTN/',

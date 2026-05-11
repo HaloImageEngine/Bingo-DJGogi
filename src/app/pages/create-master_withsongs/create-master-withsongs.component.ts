@@ -321,7 +321,8 @@ export class CreateSongListComponent implements OnInit {
           CallListSongCount: result.master.Call_List_SongCount,
           CallListIsActive: result.master.Call_List_IsActive,
           CallListCreatedAt: result.master.Call_List_CreatedAt,
-          CallListID: result.master.Call_List_ID
+          CallListID: result.master.Call_List_ID,
+          InningNumber: payload.InningNumber
         } satisfies BingoCallListCreate;
 
         this.createdList.set(updatedResult);
@@ -417,7 +418,8 @@ export class CreateSongListComponent implements OnInit {
       CallListSongCount: this.selectedCount(),
       CallListIsActive: value.CallListIsActive,
       CallListCreatedAt: null,
-      CallListID: null
+      CallListID: null,
+      InningNumber: 1
     };
   }
 

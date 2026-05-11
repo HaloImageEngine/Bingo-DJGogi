@@ -3,8 +3,16 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { map, Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { McInfoArtistTypeCount, McInfoDecadeCount, McInfoEraCount, McInfoGenreCount } from '../models/mcinfo.model';
+import {
+  McInfoArtistTypeCount,
+  McInfoDecadeCount,
+  McInfoEraCount,
+  McInfoGenreCount,
+  McInfoSongDuplicate
+} from '../models/mcinfo.model';
 import { OrderListItem } from '../models/order-list-item.model';
+
+import { CallListSongCount } from '../models/calllist-song-count.model';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardSummaryService {
@@ -13,7 +21,8 @@ export class DashboardSummaryService {
   private readonly countDecadeApiUrl = environment.bingoCountDecadeApiUrl;
   private readonly countEraApiUrl = environment.bingoCountEraApiUrl;
   private readonly countGenreApiUrl = environment.bingoCountGenreApiUrl;
-
+  private readonly checkSongDuplicateApiUrl = environment.bingoCheckSongDuplicateApiUrl;
+  private readonly callListSongCountApiBaseUrl = environment.bingoCountCLIDApiUrl;
   private readonly liveOrdersCount = signal(0);
   private readonly totalSalesAmount = signal(0);
   private readonly activeDiscountsCount = signal(0);
@@ -65,7 +74,53 @@ export class DashboardSummaryService {
     );
   }
 
+  getSongDuplicateCheck(): Observable<McInfoSongDuplicate[]> {
+    return this.http.get<unknown>(this.checkSongDuplicateApiUrl).pipe(
+      map(response => this.normalizeSongDuplicates(response))
+    );
+  }
+
+  /**
+   * Get the song count for a given CallListID and Inning.
+   * @param callListId The CallListID (number)
+   * @param inning The Inning (number)
+   * @returns Observable<CallListSongCount>
+   */
+  getCallListSongCount(callListId: number, inning: number): Observable<CallListSongCount> {
+    const url = `${this.callListSongCountApiBaseUrl}/${callListId}/${inning}`;
+    return this.http.get<CallListSongCount>(url);
+  }
+
   // ── Normalizers ───────────────────────────────────────────────────────────
+
+  private normalizeSongDuplicates(response: unknown): McInfoSongDuplicate[] {
+    return this.unwrapArray(response)
+      .map(item => this.mapSongDuplicate(item))
+      .filter((item): item is McInfoSongDuplicate => item !== null);
+  }
+
+  private mapSongDuplicate(item: unknown): McInfoSongDuplicate | null {
+    const record = this.asRecord(item);
+    if (!record) return null;
+
+    return {
+      song_id: this.asNullableNumber(record['song_id'] ?? record['SongID'] ?? record['songId']),
+      title: this.asNullableString(record['title'] ?? record['Title']),
+      artist: this.asNullableString(record['artist'] ?? record['Artist']),
+      featured_artist: this.asNullableString(record['featured_artist'] ?? record['FeaturedArtist'] ?? record['featuredArtist']),
+      lead_vocalist: this.asNullableString(record['lead_vocalist'] ?? record['LeadVocalist'] ?? record['leadVocalist']),
+      genre: this.asNullableString(record['genre'] ?? record['Genre']),
+      subgenre: this.asNullableString(record['subgenre'] ?? record['Subgenre']),
+      release_year: this.asNullableNumber(record['release_year'] ?? record['ReleaseYear'] ?? record['releaseYear']),
+      decade: this.asNullableString(record['decade'] ?? record['Decade']),
+      bingo_category: this.asNullableString(record['bingo_category'] ?? record['BingoCategory'] ?? record['bingoCategory']),
+      active: this.asNullableBoolean(record['active'] ?? record['Active']),
+      created_at: this.asNullableString(record['created_at'] ?? record['CreatedAt'] ?? record['createdAt']),
+      updated_at: this.asNullableString(record['updated_at'] ?? record['UpdatedAt'] ?? record['updatedAt']),
+      Duplicate_Count: this.asNullableNumber(record['Duplicate_Count'] ?? record['duplicate_count'] ?? record['duplicateCount']),
+      Match_Type: this.asNullableString(record['Match_Type'] ?? record['match_type'] ?? record['matchType'])
+    };
+  }
 
   private normalizeEraCounts(response: unknown): McInfoEraCount[] {
     return this.unwrapArray(response)
@@ -160,6 +215,24 @@ export class DashboardSummaryService {
 
   private asString(value: unknown, fallback = ''): string {
     return typeof value === 'string' ? value : fallback;
+  }
+
+  private asNullableString(value: unknown): string | null {
+    return typeof value === 'string' ? value : null;
+  }
+
+  private asNullableBoolean(value: unknown): boolean | null {
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === 'true') return true;
+      if (normalized === 'false') return false;
+    }
+    if (typeof value === 'number') {
+      if (value === 1) return true;
+      if (value === 0) return false;
+    }
+    return null;
   }
 
   private asNullableNumber(value: unknown): number | null {

@@ -4,7 +4,7 @@
       <p class="slidecardsw-page__eyebrow">Landscape Slider</p>
       <h1>Browse Bingo Card Pairs</h1>
       <p class="slidecardsw-page__copy">
-        Use the left and right arrows to move across each two-card spread for Game {{ gameId }}.
+        Use the left and right arrows to move across each two-card spread for Game {{ gameId() }}.
       </p>
     </div>
 
@@ -59,8 +59,48 @@
     </div>
 
     <div class="slidecardsw-carousel__toolbar" *ngIf="!state().loading && !state().error && slides().length > 0; else slidecardswMetaOnly">
+      <div class="slidecardsw-carousel__params surface-card">
+        <label class="slidecardsw-carousel__param-field" for="sc-game-id">
+          <span>Game ID</span>
+          <input
+            id="sc-game-id"
+            type="number"
+            class="slidecardsw-carousel__param-input"
+            [value]="gameIdInput()"
+            (change)="updateGameIdInput($event)"
+            min="1"
+          />
+        </label>
+
+        <label class="slidecardsw-carousel__param-field" for="sc-call-list-id">
+          <span>List ID</span>
+          <input
+            id="sc-call-list-id"
+            type="number"
+            class="slidecardsw-carousel__param-input"
+            [value]="callListIdInput()"
+            (change)="updateCallListIdInput($event)"
+            min="1"
+          />
+        </label>
+
+        <label class="slidecardsw-carousel__param-field" for="sc-inning">
+          <span>Inning</span>
+          <input
+            id="sc-inning"
+            type="number"
+            class="slidecardsw-carousel__param-input"
+            [value]="inningInput()"
+            (change)="updateInningInput($event)"
+            min="1"
+          />
+        </label>
+
+        <button type="button" class="slidecardsw-carousel__load-btn" (click)="loadCards()">Load Cards</button>
+      </div>
+
       <div class="slidecardsw-page__meta surface-card">
-        <span>GameID {{ gameId }}</span>
+        <span>GameID {{ gameId() }}</span>
         <span>{{ state().cards.length }} cards loaded</span>
         <span>{{ slides().length }} slides</span>
       </div>
@@ -116,7 +156,7 @@
 
     <ng-template #slidecardswMetaOnly>
       <div class="slidecardsw-page__meta surface-card">
-        <span>GameID {{ gameId }}</span>
+        <span>GameID {{ gameId() }}</span>
         <span>{{ state().cards.length }} cards loaded</span>
         <span>{{ slides().length }} slides</span>
       </div>
@@ -124,7 +164,7 @@
   </header>
 
   <section class="surface-card slidecardsw-status" *ngIf="state().loading">
-    <p>Loading printed cards for GameID {{ gameId }}...</p>
+    <p>Loading printed cards for GameID {{ gameId() }}...</p>
   </section>
 
   <section class="surface-card slidecardsw-status slidecardsw-status--error" *ngIf="state().error as error">
@@ -210,6 +250,6 @@
   </section>
 
   <section class="surface-card slidecardsw-status" *ngIf="!state().loading && !state().error && slides().length === 0">
-    <p>No cards were returned for GameID {{ gameId }}.</p>
+    <p>No cards were returned for GameID {{ gameId() }}.</p>
   </section>
 </section>

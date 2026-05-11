@@ -144,7 +144,8 @@ export class CallListService {
       Call_List_Era: payload.CallListEra || null,
       Call_List_SongCount: payload.CallListSongCount,
       Call_List_IsActive: payload.CallListIsActive,
-      NewCallListID: payload.NewCallListID ?? 0
+      NewCallListID: payload.NewCallListID ?? 0,
+      InningNumber: payload.InningNumber ?? 1
     };
 
     console.group('Create_CallList_Master request');
@@ -228,7 +229,8 @@ export class CallListService {
       CallListSongCount: this.asNullableNumber(record['CallListSongCount'] ?? record['Call_List_SongCount']) ?? fallbackPayload.CallListSongCount,
       CallListIsActive: this.asBoolean(record['CallListIsActive'] ?? record['Call_List_IsActive'] ?? fallbackPayload.CallListIsActive),
       CallListCreatedAt: this.asNullableString(record['CallListCreatedAt'] ?? record['Call_List_CreatedAt']) ?? fallbackPayload.CallListCreatedAt,
-      CallListID: this.asNullableNumber(record['CallListID'] ?? record['Call_List_ID']) ?? fallbackPayload.CallListID
+      CallListID: this.asNullableNumber(record['CallListID'] ?? record['Call_List_ID']) ?? fallbackPayload.CallListID,
+      InningNumber: this.asNullableNumber(record['InningNumber'] ?? record['Inning'] ?? record['inning']) ?? fallbackPayload.InningNumber
     };
   }
 
