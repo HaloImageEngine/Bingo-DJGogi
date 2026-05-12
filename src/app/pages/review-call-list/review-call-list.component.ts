@@ -9,6 +9,7 @@ import { BingoCallListCreate, BingoCallListMaster, BingoCallListSong, BingoCallL
 import { LookupOption } from '../../models/lookup-option.model';
 import { ModelSongDisplay } from '../../models/model-song-display.model';
 import { CallListService } from '../../services/calllist.service';
+import { ConsoleContextService } from '../../services/console-context.service';
 import { SongService } from '../../services/song.service';
 
 const trimmedRequired: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
@@ -29,6 +30,7 @@ export class CreateCallListComponent implements OnInit {
   private readonly songService = inject(SongService);
   private readonly callListService = inject(CallListService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly consoleContextService = inject(ConsoleContextService);
 
   readonly loadingSongs = signal(false);
   readonly loadingLookups = signal(false);
@@ -58,7 +60,7 @@ export class CreateCallListComponent implements OnInit {
     CallListDescription: this.formBuilder.nonNullable.control('', [Validators.maxLength(500)]),
     CallListGenre: this.formBuilder.nonNullable.control('', [Validators.required, Validators.maxLength(100)]),
     CallListDecade: this.formBuilder.nonNullable.control('', [Validators.required, Validators.maxLength(10)]),
-    CallListEra: this.formBuilder.nonNullable.control('', [Validators.required, Validators.maxLength(20)]),
+    CallListEra: this.formBuilder.nonNullable.control('', [Validators.required, Validators.maxLength(100)]),
     CallListIsActive: this.formBuilder.nonNullable.control(true)
   });
 
@@ -97,6 +99,11 @@ export class CreateCallListComponent implements OnInit {
   readonly trackBySong = (index: number, song: ModelSongDisplay) => song.song_id ?? index;
 
   ngOnInit(): void {
+    const ctx = this.consoleContextService.getContext();
+    if (ctx?.Game_ID) {
+      this.form.patchValue({ GameID: ctx.Game_ID });
+    }
+
     this.loadSongs();
     this.loadLookups();
     this.loadCallListMasters();
@@ -170,6 +177,11 @@ export class CreateCallListComponent implements OnInit {
       )
       .subscribe(items => {
         this.callListMasters.set(items);
+
+        const storedCallListId = this.consoleContextService.getCallListId();
+        if (storedCallListId !== null) {
+          this.selectExistingCallListMaster(storedCallListId);
+        }
       });
   }
 

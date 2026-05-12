@@ -3,7 +3,7 @@
     <div class="create-master-withsonglist-page__hero">
       <a routerLink="/console" class="create-master-withsonglist-page__back">&larr; Back to Console</a>
       <h1>Create CallList Master / Songs</h1>
-      <p class="create-master-withsonglist-page__copy">This page will create a new Game with GameNight and add songs to the call list.<br> (you must add 20 + songs).</p>
+      <p class="create-master-withsonglist-page__copy">This page will create a new Game with GameNight and add songs to the call list.<br> Use Create Game Night when you need a new GN ID. Pick songs from the library (Add) — Create New Song Master enables when Picked Songs is at least 1. Dropdowns must finish loading first.</p>
     </div>
 
     <div class="create-master-withsonglist-page__aside">
@@ -185,7 +185,7 @@
       </label>
 
       <div class="create-master-withsonglist-form__actions form-field--wide">
-        <button type="submit" class="primary-button" [disabled]="saving() || loadingLookups() || !createdGameNightId() || selectedCount() <= 20">
+        <button type="submit" class="primary-button" [disabled]="saving() || loadingLookups() || selectedCount() < 1">
           {{ saving() ? 'Creating...' : 'Create New Song Master' }}
         </button>
         <button type="button" class="clear-button" (click)="resetCreateForm()" [disabled]="saving()">

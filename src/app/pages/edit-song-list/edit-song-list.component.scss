@@ -287,6 +287,65 @@
   color: var(--text-muted);
 }
 
+.song-panel--master,
+.song-panel--library,
+.song-panel--selected {
+  gap: 0.5rem;
+  padding: 1rem 1rem 1.1rem;
+  align-content: start;
+  align-items: stretch;
+}
+
+.create-song-list-columns .song-panel__empty--compact {
+  display: block;
+  min-height: unset;
+  padding: 0.55rem 0.85rem;
+  place-items: unset;
+  justify-items: unset;
+  text-align: left;
+}
+
+.song-panel__calllist-inning-counts--placeholder {
+  opacity: 0.72;
+}
+
+.song-panel--master .song-panel__topbar p,
+.song-panel--selected .song-panel__topbar p {
+  margin: 0.2rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.song-panel__calllist-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  flex: 0 0 auto;
+  min-width: 0;
+  max-width: min(100%, 20rem);
+}
+
+.song-panel__calllist-inning-row {
+  width: 100%;
+}
+
+.song-search.song-search--inning-inline {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  width: auto;
+  min-width: 0;
+  flex: 0 1 auto;
+  flex-wrap: nowrap;
+}
+
+.song-search--inning-inline > span:first-of-type {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .song-search {
   display: grid;
   gap: 0.45rem;
@@ -317,6 +376,15 @@
   box-shadow: 0 0 0 0.2rem rgba(29, 211, 176, 0.12);
 }
 
+.song-search--inning-inline input {
+  flex: 0 0 auto;
+  width: 5.25rem;
+  min-width: 5.25rem;
+  max-width: 5.25rem;
+  padding: 0.65rem 0.75rem;
+  text-align: center;
+}
+
 .song-list {
   display: grid;
   gap: 0.75rem;
@@ -336,8 +404,65 @@
   border-bottom: 1px solid var(--border-soft);
 }
 
+.song-panel__calllist-inning-counts {
+  min-height: 2.45rem;
+  text-align: left;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.song-panel__calllist-inning-counts > span:first-child {
+  display: inline;
+  margin-right: 0.35rem;
+  margin-bottom: 0;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+
+.song-panel__section-label--calllist-existing {
+  text-transform: none;
+  letter-spacing: 0.04em;
+}
+
+.call-list-existing__name {
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.call-list-existing__meta {
+  text-transform: uppercase;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.song-panel--selected .song-panel__section-label {
+  padding: 0.2rem 0.35rem 0.25rem;
+  margin-top: 0.15rem;
+}
+
+.song-panel--selected .song-list {
+  margin-top: 0;
+}
+
+.song-panel--master .song-list,
+.song-panel--library .song-list,
+.song-panel--selected .song-list:not(.song-list--pending) {
+  gap: 0.55rem;
+}
+
 .song-list--pending {
   max-height: 24vh;
+}
+
+.song-panel--selected .song-list--pending {
+  max-height: 18vh;
+  gap: 0.5rem;
 }
 
 .song-row {

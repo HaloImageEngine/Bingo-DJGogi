@@ -9,6 +9,7 @@ import { BingoCallListCreate, BingoCallListMaster, BingoCallListSong, BingoCallL
 import { LookupOption } from '../../models/lookup-option.model';
 import { ModelSongDisplay } from '../../models/model-song-display.model';
 import { CallListService } from '../../services/calllist.service';
+import { ConsoleContextService } from '../../services/console-context.service';
 import { SongService } from '../../services/song.service';
 
 const trimmedRequired: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
@@ -29,6 +30,7 @@ export class CreateSongListComponent implements OnInit {
   private readonly songService = inject(SongService);
   private readonly callListService = inject(CallListService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly consoleContextService = inject(ConsoleContextService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -71,7 +73,7 @@ export class CreateSongListComponent implements OnInit {
     GameID: this.formBuilder.control<number | null>(null),
     CallListGenre: this.formBuilder.nonNullable.control('', [Validators.required, Validators.maxLength(100)]),
     CallListDecade: this.formBuilder.nonNullable.control('', [Validators.required, Validators.maxLength(5)]),
-    CallListEra: this.formBuilder.nonNullable.control('', [Validators.required, Validators.maxLength(50)]),
+    CallListEra: this.formBuilder.nonNullable.control('', [Validators.required, Validators.maxLength(100)]),
     CallListIsActive: this.formBuilder.nonNullable.control(true)
   });
 
@@ -104,6 +106,12 @@ export class CreateSongListComponent implements OnInit {
   readonly trackByCallListSong = (index: number, item: BingoCallListSong) => item.song_id ?? index;
 
   ngOnInit(): void {
+    const ctx = this.consoleContextService.getContext();
+    if (ctx) {
+      if (ctx.Inning) this.inning.set(ctx.Inning);
+      if (ctx.Game_ID) this.form.patchValue({ GameID: ctx.Game_ID });
+    }
+
     this.loadSongs();
     this.loadLookups();
     this.loadCallListMasters();
@@ -145,9 +153,14 @@ export class CreateSongListComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef), catchError(() => of(null)))
       .subscribe(val => {
         this.maxGameId.set(val);
-        if (val !== null) {
-          this.form.patchValue({ GameID: val + 1 });
+
+        const storedGameId = this.consoleContextService.getGameId();
+        if (storedGameId) {
+          this.form.patchValue({ GameID: storedGameId });
+          return;
         }
+
+        if (val !== null) this.form.patchValue({ GameID: val + 1 });
       });
 
     this.callListService.getMaxCallListId()
@@ -196,7 +209,11 @@ export class CreateSongListComponent implements OnInit {
         this.callListMasters.set(items);
 
         const currentSelectedId = this.selectedCallListMaster()?.Call_List_ID;
-        const nextSelected = items.find(item => item.Call_List_ID === currentSelectedId) ?? items[0] ?? null;
+        const storedCallListId = this.consoleContextService.getCallListId();
+
+        const nextSelected = storedCallListId !== null
+          ? items.find(item => item.Call_List_ID === storedCallListId) ?? items[0] ?? null
+          : items.find(item => item.Call_List_ID === currentSelectedId) ?? items[0] ?? null;
 
         if (nextSelected) {
           this.selectCallListMaster(nextSelected);
@@ -277,8 +294,14 @@ export class CreateSongListComponent implements OnInit {
       return;
     }
 
-    const payload = this.buildCallListPayload();
     const selectedSongs = this.selectedSongs();
+    if (selectedSongs.length < 1) {
+      this.formError.set('Add at least one song before creating the song master.');
+      this.showCreateForm.set(true);
+      return;
+    }
+
+    const payload = this.buildCallListPayload();
 
     this.saving.set(true);
 

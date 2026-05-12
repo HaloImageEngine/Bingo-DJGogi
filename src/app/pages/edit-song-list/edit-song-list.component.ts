@@ -9,6 +9,7 @@ import { BingoCallListCreate, BingoCallListMaster, BingoCallListSong, BingoCallL
 import { LookupOption } from '../../models/lookup-option.model';
 import { ModelSongDisplay } from '../../models/model-song-display.model';
 import { CallListService } from '../../services/calllist.service';
+import { ConsoleContextService } from '../../services/console-context.service';
 import { SongService } from '../../services/song.service';
 
 const trimmedRequired: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
@@ -29,6 +30,7 @@ export class EditSongListComponent implements OnInit {
   private readonly songService = inject(SongService);
   private readonly callListService = inject(CallListService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly consoleContextService = inject(ConsoleContextService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -49,7 +51,10 @@ export class EditSongListComponent implements OnInit {
   readonly loadingCallListSongs = signal(false);
   readonly callListSongError = signal<string | null>(null);
   readonly addingSongId = signal<number | null>(null);
+  /** Inning used when inserting a song into the call list (left library panel). */
   readonly inning = signal<number>(4);
+  /** When set (≥1), the CallList_Songs panel only shows rows for that inning; empty / cleared shows all. */
+  readonly callListSongsViewFilterInning = signal<number | null>(null);
   readonly maxGameId = signal<number | null>(null);
   readonly maxCallListId = signal<number | null>(null);
   readonly genreOptions = signal<LookupOption[]>([]);
@@ -63,7 +68,7 @@ export class EditSongListComponent implements OnInit {
     GameID: this.formBuilder.control<number | null>(null),
     CallListGenre: this.formBuilder.nonNullable.control('', [Validators.required, Validators.maxLength(100)]),
     CallListDecade: this.formBuilder.nonNullable.control('', [Validators.required, Validators.maxLength(5)]),
-    CallListEra: this.formBuilder.nonNullable.control('', [Validators.required, Validators.maxLength(50)]),
+    CallListEra: this.formBuilder.nonNullable.control('', [Validators.required, Validators.maxLength(100)]),
     CallListIsActive: this.formBuilder.nonNullable.control(true)
   });
 
@@ -95,7 +100,47 @@ export class EditSongListComponent implements OnInit {
   readonly trackByCallListMaster = (index: number, item: BingoCallListMaster) => item.Call_List_ID ?? index;
   readonly trackByCallListSong = (index: number, item: BingoCallListSong) => item.song_id ?? index;
 
+  /** Count of loaded call-list songs per inning (null/invalid inning grouped as "Unspecified"). */
+  readonly callListSongsInningCountRows = computed(() => {
+    const songs = this.callListSongs();
+    const counts = new Map<number, number>();
+    for (const s of songs) {
+      const inn = s.inning;
+      const key =
+        inn !== null && inn !== undefined && Number.isFinite(inn) ? Math.trunc(inn) : -1;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .map(([inningKey, count]) => ({
+        inningKey,
+        label: inningKey === -1 ? 'Unspecified' : `Inning ${inningKey}`,
+        count
+      }));
+  });
+
+  readonly filteredCallListSongsForView = computed(() => {
+    const all = this.callListSongs();
+    const f = this.callListSongsViewFilterInning();
+    if (f === null || f === undefined || f < 1 || !Number.isInteger(f)) {
+      return all;
+    }
+    return all.filter(s => {
+      const inn = s.inning;
+      if (inn === null || inn === undefined || !Number.isFinite(inn)) {
+        return false;
+      }
+      return Math.trunc(inn) === f;
+    });
+  });
+
   ngOnInit(): void {
+    const ctx = this.consoleContextService.getContext();
+    if (ctx) {
+      if (ctx.Inning) this.inning.set(ctx.Inning);
+      if (ctx.Game_ID) this.form.patchValue({ GameID: ctx.Game_ID });
+    }
+
     this.loadSongs();
     this.loadLookups();
     this.loadCallListMasters();
@@ -185,7 +230,11 @@ export class EditSongListComponent implements OnInit {
         this.callListMasters.set(items);
 
         const currentSelectedId = this.selectedCallListMaster()?.Call_List_ID;
-        const nextSelected = items.find(item => item.Call_List_ID === currentSelectedId) ?? items[0] ?? null;
+        const storedCallListId = this.consoleContextService.getCallListId();
+
+        const nextSelected = storedCallListId !== null
+          ? items.find(item => item.Call_List_ID === storedCallListId) ?? items[0] ?? null
+          : items.find(item => item.Call_List_ID === currentSelectedId) ?? items[0] ?? null;
 
         if (nextSelected) {
           this.selectCallListMaster(nextSelected);
@@ -197,15 +246,18 @@ export class EditSongListComponent implements OnInit {
   }
 
   selectCallListMaster(callListMaster: BingoCallListMaster): void {
+    this.callListSongsViewFilterInning.set(null);
     this.selectedCallListMaster.set(callListMaster);
     this.loadingCallListSongs.set(true);
     this.callListSongError.set(null);
+
+    const storedGameId = this.consoleContextService.getGameId();
 
     this.form.patchValue({
       CallListName: callListMaster.Call_List_Name,
       CallListDate: callListMaster.Call_List_Date ?? this.today(),
       CallListDescription: callListMaster.Call_List_Description ?? '',
-      GameID: null,
+      GameID: storedGameId,
       CallListGenre: callListMaster.Call_List_Genre ?? '',
       CallListDecade: callListMaster.Call_List_Decade ?? '',
       CallListEra: callListMaster.Call_List_Era ?? '',
@@ -379,6 +431,31 @@ export class EditSongListComponent implements OnInit {
 
   clearSelection(): void {
     this.selectedSongs.set([]);
+  }
+
+  setCallListSongsViewFilterInning(value: number | string | null): void {
+    if (value === null || value === undefined || value === '') {
+      this.callListSongsViewFilterInning.set(null);
+      return;
+    }
+    const raw = typeof value === 'string' ? Number.parseFloat(value) : Number(value);
+    if (!Number.isFinite(raw) || raw < 1) {
+      this.callListSongsViewFilterInning.set(null);
+      return;
+    }
+    this.callListSongsViewFilterInning.set(Math.trunc(raw));
+  }
+
+  setInsertInning(value: number | string | null): void {
+    if (value === null || value === undefined || value === '') {
+      this.inning.set(1);
+      return;
+    }
+    const raw = typeof value === 'string' ? Number.parseFloat(value) : Number(value);
+    if (!Number.isFinite(raw)) {
+      return;
+    }
+    this.inning.set(Math.min(4, Math.max(1, Math.trunc(raw))));
   }
 
   showFieldError(controlName: string): boolean {

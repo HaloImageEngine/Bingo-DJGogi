@@ -23,7 +23,7 @@ CREATE TABLE dbo.CallList_Master (
     -- ── Classification ────────────────────────────────────
     Call_List_Genre       VARCHAR(100)  NULL,
     Call_List_Decade      VARCHAR(5)    NULL,
-    Call_List_Era         VARCHAR(10)   NULL,
+    Call_List_Era         VARCHAR(100)  NULL,
     Call_List_SongCount   INT           NOT NULL CONSTRAINT DF_CallList_Master_SongCount  DEFAULT 0,
 
     -- ── Status ────────────────────────────────────────────

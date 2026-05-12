@@ -25,7 +25,7 @@
 --                                        -- genre of the list.
 --   @Call_List_Decade      VARCHAR(5)    -- Optional. Decade
 --                                        -- focus e.g. '80s'
---   @Call_List_Era         VARCHAR(10)   -- Optional. Era focus
+--   @Call_List_Era         VARCHAR(100)  -- Optional. Era focus
 --                                        -- e.g. 'Classic'
 --
 -- HOW IT WORKS:
@@ -71,7 +71,7 @@ CREATE PROCEDURE dbo.usp_Create_NewCallList
     @Call_List_Description NVARCHAR(500) = NULL,
     @Call_List_Genre       VARCHAR(100)  = NULL,
     @Call_List_Decade      VARCHAR(5)    = NULL,
-    @Call_List_Era         VARCHAR(10)   = NULL
+    @Call_List_Era         VARCHAR(100)  = NULL
 AS
 BEGIN
     SET NOCOUNT ON;

@@ -148,8 +148,8 @@
           </div>
         </div>
 
-        <div class="song-panel__empty" *ngIf="loadingCallListMasters()">Loading call list masters...</div>
-        <div class="song-panel__empty" *ngIf="!loadingCallListMasters() && callListMasterError() as callListMasterErrorMessage">
+        <div class="song-panel__empty song-panel__empty--compact" *ngIf="loadingCallListMasters()">Loading call list masters...</div>
+        <div class="song-panel__empty song-panel__empty--compact" *ngIf="!loadingCallListMasters() && callListMasterError() as callListMasterErrorMessage">
           {{ callListMasterErrorMessage }}
         </div>
 
@@ -183,9 +183,11 @@
       <section class="song-panel song-panel--library">
         <div class="song-panel__topbar">
           <div>
-            <span class="song-panel__eyebrow">Full_Songlist</span>
+            <span class="song-panel__eyebrow">Full_Songlist</span><br>
+            <span class="song-panel__eyebrow" *ngIf="selectedCallListMaster() as selectedMaster">
+              CallList_ID: {{ selectedMaster.Call_List_ID }}
+            </span>
             <h2>Full Songlist</h2>
-
           </div>
           <label class="song-search" for="edit-song-search-input">
             <span>Search</span>
@@ -196,17 +198,16 @@
               (ngModelChange)="searchTerm.set($event)"
               placeholder="Search title, artist, or genre" />
           </label>
-          <label class="song-search song-search--narrow" for="edit-song-inning-input">
+          <label class="song-search song-search--inning-inline" for="edit-song-inning-input">
             <span>Inning</span>
-            <select
+            <input
               id="edit-song-inning-input"
-              [value]="inning()"
-              (change)="inning.set(+$any($event.target).value)">
-              <option [value]="1">1</option>
-              <option [value]="2">2</option>
-              <option [value]="3">3</option>
-              <option [value]="4">4</option>
-            </select>
+              type="number"
+              min="1"
+              max="4"
+              step="1"
+              [ngModel]="inning()"
+              (ngModelChange)="setInsertInning($event)" />
           </label>
         </div>
 
@@ -231,28 +232,47 @@
       </section>
 
       <section class="song-panel song-panel--selected">
-        <div class="song-panel__topbar song-panel__topbar--selected">
+        <div class="song-panel__topbar">
           <div>
-            <span class="song-panel__eyebrow">CallList_Songs</span>
+            <span class="song-panel__eyebrow">CallList_Songs</span><br>
             <span class="song-panel__eyebrow" *ngIf="selectedCallListMaster() as selectedMaster">
               CallList_ID: {{ selectedMaster.Call_List_ID }}
             </span>
             <h2>CallList_Songs</h2>
-            <p *ngIf="selectedCallListMaster() as selectedMaster; else noMasterSelected">
-              Songs loaded for {{ selectedMaster.Call_List_Name || 'the selected call list' }}.
-            </p>
+            <ng-container *ngIf="!selectedCallListMaster()">
+              <ng-container *ngTemplateOutlet="noMasterSelected"></ng-container>
+            </ng-container>
           </div>
-          <button
-            type="button"
-            class="clear-button"
-            (click)="clearSelection()"
-            [disabled]="selectedCount() === 0">
-            Clear Picked
-          </button>
+          <div class="song-panel__calllist-controls" *ngIf="selectedCallListMaster()">
+            <label class="song-search song-search--inning-inline" for="calllist-songs-inning-filter">
+              <span>Inning</span>
+              <input
+                id="calllist-songs-inning-filter"
+                type="number"
+                min="1"
+                step="1"
+                [ngModel]="callListSongsViewFilterInning() ?? ''"
+                (ngModelChange)="setCallListSongsViewFilterInning($event)"
+                placeholder="All" />
+            </label>
+          </div>
+        </div>
+        <div class="song-panel__calllist-inning-row" *ngIf="selectedCallListMaster()">
+          <div class="song-panel__calllist-inning-counts">
+            <ng-container *ngIf="callListSongs().length > 0; else inningCountsPlaceholder">
+              <span>Songs per inning:</span>
+              <ng-container *ngFor="let row of callListSongsInningCountRows(); let last = last">
+                <strong>{{ row.label }}</strong> - {{ row.count }}<span *ngIf="!last"> · </span>
+              </ng-container>
+            </ng-container>
+            <ng-template #inningCountsPlaceholder>
+              <span class="song-panel__calllist-inning-counts--placeholder">Songs per inning: —</span>
+            </ng-template>
+          </div>
         </div>
 
-        <div class="song-panel__empty" *ngIf="loadingCallListSongs()">Loading call list songs...</div>
-        <div class="song-panel__empty" *ngIf="!loadingCallListSongs() && callListSongError() as callListSongErrorMessage">
+        <div class="song-panel__empty song-panel__empty--compact" *ngIf="loadingCallListSongs()">Loading call list songs...</div>
+        <div class="song-panel__empty song-panel__empty--compact" *ngIf="!loadingCallListSongs() && callListSongError() as callListSongErrorMessage">
           {{ callListSongErrorMessage }}
         </div>
 
@@ -270,11 +290,28 @@
           </div>
         </div>
 
-        <div class="song-panel__section-label" *ngIf="!loadingCallListSongs() && !callListSongError() && callListSongs().length > 0">
-          Existing Songs ({{ callListSongs().length }})
+        <div
+          class="song-panel__section-label song-panel__section-label--calllist-existing"
+          *ngIf="selectedCallListMaster() && !loadingCallListSongs() && !callListSongError()">
+          <span class="call-list-existing__name">{{ selectedCallListMaster()?.Call_List_Name || 'Untitled list' }}</span>
+          <span class="call-list-existing__meta">
+            — Existing Songs ({{ filteredCallListSongsForView().length
+            }}<span *ngIf="callListSongsViewFilterInning() !== null"> of {{ callListSongs().length }}</span>)
+          </span>
         </div>
-        <div class="song-list" *ngIf="!loadingCallListSongs() && !callListSongError() && callListSongs().length > 0; else noCallListSongs">
-          <div class="song-row song-row--selected" *ngFor="let song of callListSongs(); trackBy: trackByCallListSong">
+        <div
+          class="song-panel__empty song-panel__empty--compact"
+          *ngIf="
+            !loadingCallListSongs() &&
+            !callListSongError() &&
+            callListSongs().length > 0 &&
+            filteredCallListSongsForView().length === 0 &&
+            callListSongsViewFilterInning() !== null
+          ">
+          No songs assigned to Inning {{ callListSongsViewFilterInning() }}.
+        </div>
+        <div class="song-list" *ngIf="!loadingCallListSongs() && !callListSongError() && filteredCallListSongsForView().length > 0">
+          <div class="song-row song-row--selected" *ngFor="let song of filteredCallListSongsForView(); trackBy: trackByCallListSong">
             <span class="song-row__meta">
               <span class="song-row__id">#{{ song.song_id }} · Inning: {{ song.inning ?? '—' }}</span>
               <strong>{{ song.title || 'Untitled song' }}</strong>
@@ -286,23 +323,22 @@
             </span>
           </div>
         </div>
+        <div class="song-panel__empty song-panel__empty--compact" *ngIf="!loadingCallListSongs() && !callListSongError() && callListSongs().length === 0">
+          No songs in this call list yet.
+        </div>
       </section>
     </div>
   </section>
 </section>
 
 <ng-template #noSongsFound>
-  <div class="song-panel__empty">No songs match the current search.</div>
+  <div class="song-panel__empty song-panel__empty--compact">No songs match the current search.</div>
 </ng-template>
 
 <ng-template #noCallListMaster>
-  <div class="song-panel__empty">No call list masters are available yet.</div>
+  <div class="song-panel__empty song-panel__empty--compact">No call list masters are available yet.</div>
 </ng-template>
 
 <ng-template #noMasterSelected>
   <p>Select a call list master to view its songs.</p>
-</ng-template>
-
-<ng-template #noCallListSongs>
-  <div class="song-panel__empty" *ngIf="!loadingCallListSongs()">No songs in this call list yet.</div>
 </ng-template>

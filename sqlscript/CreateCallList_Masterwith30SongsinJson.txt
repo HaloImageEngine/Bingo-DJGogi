@@ -1,3 +1,14 @@
+
+give me a list of top 10 'Ace of Base' songs in this format 
+'{ "Title": "string", "Artist": "string", "ArtistType": "string", "Genre": "string", "Subgenre": "string", "Mood": "string", "Tempo": "string", "ReleaseYear": 0, "Decade": "string", "Era": "string", "BingoCategory": "string", "Difficulty": "string", "ChartPeakPosition": 0, "ChartCountry": "string", "SpotifyPopularity": 0, "DurationSeconds": 0, "Active": true }' : 
+give me the json file only.
+
+
+give me a list of top 10 'Baskstreet Boys' songs in this format 
+'{ "Title": "string", "Artist": "string", "ArtistType": "string", "Genre": "string", "Subgenre": "string", "Mood": "string", "Tempo": "string", "ReleaseYear": 0, "Decade": "string", "Era": "string", "BingoCategory": "string", "Difficulty": "string", "ChartPeakPosition": 0, "ChartCountry": "string", "SpotifyPopularity": 0, "DurationSeconds": 0, "Active": true }' : give me the json file only.
+
+
+
 {
   "MasterRecord": {
     "Call_List_Name": "80s Rock Classics Bingo",

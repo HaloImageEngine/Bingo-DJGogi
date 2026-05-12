@@ -8,6 +8,7 @@ import { BingoCalledSong, BingoCallListSongByGci, BingoTopCard, BingoWinnerResul
 import { Song } from '../../models/song.model';
 import { ActiveGameService } from '../../services/active-game.service';
 import { BingoGameService } from '../../services/bingo-game.service';
+import { ConsoleContextService } from '../../services/console-context.service';
 
 export type GameStatus = 'idle' | 'active' | 'paused' | 'finished';
 
@@ -22,6 +23,7 @@ export class ConsoleComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly activeGameService = inject(ActiveGameService);
   private readonly bingoGameService = inject(BingoGameService);
+  private readonly consoleContextService = inject(ConsoleContextService);
   readonly gameId = signal(1);
   readonly topCardsCount = 5;
   readonly activeGame = this.activeGameService.activeGame;
@@ -97,6 +99,7 @@ export class ConsoleComponent {
 
   constructor() {
     this.loadSampleSongs();
+    this.applyStoredConsoleContext();
   }
 
   // --- Song calling panel ---
@@ -264,6 +267,7 @@ export class ConsoleComponent {
 
     this.gameId.set(nextGameId);
     this.loadPlaylistForSelection();
+    this.syncConsoleContext();
   }
 
   updateCallListId(value: string | number | null): void {
@@ -272,11 +276,13 @@ export class ConsoleComponent {
     if (!Number.isInteger(nextCallListId) || nextCallListId <= 0) {
       this.callListId.set(null);
       this.resetPlaylistState();
+      this.syncConsoleContext();
       return;
     }
 
     this.callListId.set(nextCallListId);
     this.loadPlaylistForSelection();
+    this.syncConsoleContext();
   }
 
   updateInning(value: string | number | null): void {
@@ -285,11 +291,13 @@ export class ConsoleComponent {
     if (!Number.isInteger(nextInning) || nextInning <= 0) {
       this.inning.set(null);
       this.resetPlaylistState();
+      this.syncConsoleContext();
       return;
     }
 
     this.inning.set(nextInning);
     this.loadPlaylistForSelection();
+    this.syncConsoleContext();
   }
 
   pauseGame(): void {
@@ -473,6 +481,33 @@ export class ConsoleComponent {
       : error.message;
 
     return `${status} | ${errorMessage || fallbackMessage}`;
+  }
+
+  private applyStoredConsoleContext(): void {
+    const ctx = this.consoleContextService.getContext();
+    if (!ctx) return;
+
+    if (ctx.Game_ID) {
+      this.gameId.set(ctx.Game_ID);
+    }
+
+    if (ctx.Call_List_ID !== null) {
+      this.callListId.set(ctx.Call_List_ID);
+    }
+
+    if (ctx.Inning !== null) {
+      this.inning.set(ctx.Inning);
+    }
+
+    this.loadPlaylistForSelection();
+  }
+
+  private syncConsoleContext(): void {
+    this.consoleContextService.setContext({
+      Game_ID: this.gameId(),
+      Call_List_ID: this.callListId(),
+      Inning: this.inning()
+    });
   }
 
   // --- Song calling ---

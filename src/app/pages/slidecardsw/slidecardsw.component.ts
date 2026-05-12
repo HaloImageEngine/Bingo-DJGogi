@@ -5,6 +5,7 @@ import { catchError, map, of, startWith, switchMap, timer } from 'rxjs';
 
 import { PrintedCard } from '../../models/printed-card.model';
 import { ActiveGameService } from '../../services/active-game.service';
+import { ConsoleContextService } from '../../services/console-context.service';
 import { PrintService } from '../../services/print.service';
 import { PrintedCardsService } from '../../services/printed-cards.service';
 import { environment } from '../../../environments/environment';
@@ -24,6 +25,7 @@ interface SlidecardswState {
 })
 export class SlidecardswComponent {
   private readonly activeGameService = inject(ActiveGameService);
+  private readonly consoleContextService = inject(ConsoleContextService);
   private readonly printService = inject(PrintService);
   private readonly printedCardsService = inject(PrintedCardsService);
   private readonly refreshIntervalMs = Math.max(environment.slidecardRefreshIntervalSeconds, 1) * 1000;
@@ -50,6 +52,25 @@ export class SlidecardswComponent {
     inning: this.inning(),
     refreshEnabled: this.refreshEnabled()
   }));
+
+  constructor() {
+    const ctx = this.consoleContextService.getContext();
+
+    if (!ctx) return;
+
+    // Only auto-sync the *active* query params when we have all 3 values.
+    // Otherwise, we'd end up mixing stored values with defaults.
+    const hasAllValues =
+      ctx.Game_ID !== null &&
+      ctx.Call_List_ID !== null &&
+      ctx.Inning !== null;
+
+    if (ctx.Game_ID !== null) this.gameIdInput.set(ctx.Game_ID);
+    if (ctx.Call_List_ID !== null) this.callListIdInput.set(ctx.Call_List_ID);
+    if (ctx.Inning !== null) this.inningInput.set(ctx.Inning);
+
+    if (hasAllValues) this.loadCards(false);
+  }
 
   readonly state = toSignal(
     toObservable(this.queryParams).pipe(
@@ -132,10 +153,18 @@ export class SlidecardswComponent {
     if (!isNaN(val) && val > 0) this.inningInput.set(val);
   }
 
-  loadCards(): void {
+  loadCards(syncToStorage = true): void {
     this.gameId.set(this.gameIdInput());
     this.callListId.set(this.callListIdInput());
     this.inning.set(this.inningInput());
+
+    if (syncToStorage) {
+      this.consoleContextService.setContext({
+        Game_ID: this.gameId(),
+        Call_List_ID: this.callListId(),
+        Inning: this.inning()
+      });
+    }
   }
 
   updateSponsorBannerText(event: Event): void {

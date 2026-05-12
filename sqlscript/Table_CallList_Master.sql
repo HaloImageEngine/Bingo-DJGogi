@@ -18,7 +18,7 @@ CREATE TABLE [dbo].[CallList_Master](
 	[Call_List_Description] [nvarchar](500) NULL,
 	[Call_List_Genre] [varchar](100) NULL,
 	[Call_List_Decade] [varchar](5) NULL,
-	[Call_List_Era] [varchar](10) NULL,
+	[Call_List_Era] [varchar](100) NULL,
 	[Call_List_SongCount] [int] NOT NULL,
 	[Call_List_IsActive] [bit] NOT NULL,
 	[Call_List_CreatedAt] [datetime2](7) NOT NULL,
