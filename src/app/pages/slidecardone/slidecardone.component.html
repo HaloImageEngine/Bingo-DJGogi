@@ -21,6 +21,10 @@
           min="1"
         />
       </label>
+      <p class="slidecardsw-page__copy" *ngIf="consoleContext() as ctx">
+        Console context: Game {{ ctx.Game_ID ?? '—' }}, Call list {{ ctx.Call_List_ID ?? '—' }}, Inning
+        {{ ctx.Inning ?? '—' }}. First card loads from API when all three are set.
+      </p>
     </div>
 
     <div class="slidecardsw-page__meta surface-card" *ngIf="!state().loading && !state().error && card(); else slidecardoneMetaOnly">

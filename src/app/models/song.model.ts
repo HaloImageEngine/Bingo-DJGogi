@@ -16,4 +16,8 @@ export interface Song {
   play_count: number;
   duration_seconds?: number;
   active: boolean;
+  /** When the row comes from `Get_Songs_Called_Calculate_by_GCI` → `CalledSongs`. */
+  calledTimeStamp?: string | null;
+  /** GCI `ThisNumberAWinner` ("True" / "False"). */
+  thisNumberAWinner?: string | null;
 }

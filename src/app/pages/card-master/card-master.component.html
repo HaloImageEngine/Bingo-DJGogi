@@ -1,0 +1,99 @@
+<section class="card-master-page">
+  <header class="card-master-page__header">
+    <div class="card-master-page__hero">
+      <a routerLink="/console" class="card-master-page__back">&larr; Back to Console</a>
+      <h1>Card Master</h1>
+      <p class="card-master-page__copy">
+        Set Game_ID, Call_List_ID, and Inning to match the printed-cards API query, then load all cards for review.
+      </p>
+    </div>
+  </header>
+
+  <section class="card-master-controls">
+    <div class="card-master-controls__grid">
+      <label class="card-master-field">
+        <span>Game_ID</span>
+        <input
+          type="number"
+          min="1"
+          step="1"
+          [ngModel]="gameId()"
+          (ngModelChange)="setGameIdFromInput($event)"
+          aria-label="Game ID" />
+      </label>
+      <label class="card-master-field">
+        <span>Call_List_ID</span>
+        <input
+          type="number"
+          min="1"
+          step="1"
+          [ngModel]="callListId() ?? ''"
+          (ngModelChange)="setCallListIdFromInput($event)"
+          placeholder="Optional"
+          aria-label="Call List ID" />
+      </label>
+      <label class="card-master-field">
+        <span>Inning</span>
+        <input
+          type="number"
+          min="1"
+          step="1"
+          [ngModel]="inning()"
+          (ngModelChange)="setInningFromInput($event)"
+          aria-label="Inning" />
+      </label>
+      <div class="card-master-controls__actions">
+        <button type="button" class="card-master-btn card-master-btn--primary" (click)="loadCards()" [disabled]="loading()">
+          {{ loading() ? 'Loading…' : 'Load cards' }}
+        </button>
+      </div>
+    </div>
+    <div class="card-master-controls__hint">
+      Query uses optional query params <code>calllistid</code> and <code>inning</code> when Call_List_ID and Inning are set.
+    </div>
+  </section>
+
+  <div class="card-master-message card-master-message--error" *ngIf="error() as err">{{ err }}</div>
+
+  <section class="card-master-results" *ngIf="hasQueried()">
+    <div class="card-master-results__head">
+      <h2>Printed cards</h2>
+      <span class="card-master-results__count">{{ cards().length }} card(s)</span>
+    </div>
+
+    <div class="card-master-empty" *ngIf="!loading() && !error() && cards().length === 0">
+      No cards returned. Adjust Game_ID / Call_List_ID / Inning and choose Load cards.
+    </div>
+
+    <div class="card-master-table-wrap" *ngIf="cards().length > 0">
+      <table class="card-master-table">
+        <thead>
+          <tr>
+            <th>Card ID</th>
+            <th>Game ID</th>
+            <th>Call list</th>
+            <th>Inning</th>
+            <th>GN ID</th>
+            <th>Squares</th>
+            <th>Player</th>
+            <th>Winner</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let card of cards(); trackBy: trackByCardId">
+            <td>{{ card.CardID }}</td>
+            <td>{{ card.GameID }}</td>
+            <td>{{ card.CallListID ?? '—' }}</td>
+            <td>{{ card.Inning ?? '—' }}</td>
+            <td>{{ card.GNID }}</td>
+            <td>{{ card.Squares.length }}</td>
+            <td>{{ card.CardPlayerName || '—' }}</td>
+            <td>{{ card.CardIsWinner ? 'Yes' : 'No' }}</td>
+            <td>{{ card.CardDateCreate | date: 'short' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>

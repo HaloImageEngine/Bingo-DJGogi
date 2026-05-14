@@ -13,10 +13,14 @@ export interface BingoTopCard {
 
 export interface BingoWinnerResult {
   GameID: number;
+  /** Present when API returns `Check_ForWinner/{Game}/{CallList}/{Inning}` payload. */
+  CallListID?: number | null;
+  Inning?: number | null;
   WinningCardID: number | null;
   WinningPattern: string | null;
   PlayerName: string | null;
   PlayerEmail: string | null;
+  WinningLineCount?: number | null;
   Result: string | null;
 }
 
@@ -25,6 +29,62 @@ export interface BingoCalledSong {
   SongTitle: string;
   SongArtist: string;
 }
+
+/** One row inside `BingoSongsCalledCalculateByGci.CalledSongs`. */
+export interface BingoCalledSongFromGci {
+  Inning: number;
+  Call_List_ID: number;
+  song_id: number;
+  title: string;
+  artist: string;
+  DateTimeStamp: string | null;
+  ThisNumberAWinner: string;
+}
+
+/** GET …/Get_Songs_Called_Calculate_by_GCI/{Game_ID}/{Call_List_ID}/{Inning} */
+export interface BingoSongsCalledCalculateByGci {
+  SongsCalled: number;
+  TotalSongs: number;
+  SongsRemaining: number;
+  Game_ID: number;
+  Call_List_ID: number;
+  Inning: number;
+  CalledSongs?: BingoCalledSongFromGci[];
+}
+
+type BingoCardCol = 'B' | 'I' | 'N' | 'G' | 'O';
+type BingoCardRow = 1 | 2 | 3 | 4 | 5;
+
+/** Song id on one square (free center may be `null`). */
+export type BingoMaxGameCardSquareSongKey = {
+  [C in BingoCardCol]: { [R in BingoCardRow]: `Sq_${C}${R}` }[BingoCardRow];
+}[BingoCardCol];
+
+export type BingoMaxGameCardSquareCalledKey = `${BingoMaxGameCardSquareSongKey}_Called`;
+
+export type BingoMaxGameCardSquareFields = {
+  [K in BingoMaxGameCardSquareSongKey]: number | null;
+} & {
+  [K in BingoMaxGameCardSquareCalledKey]: boolean;
+};
+
+/** Card header from GET …/Get_MaxGameCard_FirstCard/{Game_ID}/{Call_List_ID}/{Inning} */
+export interface BingoMaxGameCardHeader {
+  Card_ID: number;
+  Game_ID: number;
+  Call_List_ID: number;
+  Inning: number;
+  Card_Date_Create: string | null;
+  Card_PlayerName: string | null;
+  Card_PlayerEmail: string | null;
+  PlayCount: number;
+  Card_IsWinner: boolean;
+  Card_SeedKey: string | null;
+  Card_PrintedAt: string | null;
+}
+
+/** Full first-card payload including all BINGO square song ids and called flags. */
+export type BingoMaxGameCardFirstCard = BingoMaxGameCardHeader & BingoMaxGameCardSquareFields;
 
 export interface BingoCallListMaster {
   Call_List_ID: number;

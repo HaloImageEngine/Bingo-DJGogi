@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, defer, map, of } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 import {
@@ -9,7 +9,11 @@ import {
   BingoCallListMaster,
   BingoCallListSongByGci,
   BingoCallListSongInsert,
+  BingoCalledSongFromGci,
   BingoGameActionResult,
+  BingoMaxGameCardFirstCard,
+  BingoMaxGameCardHeader,
+  BingoSongsCalledCalculateByGci,
   BingoTopCard,
   BingoWinnerResult
 } from '../models/bingo-game.model';
@@ -24,9 +28,14 @@ export class BingoGameService {
   private readonly topCardsApiBaseUrl = environment.bingoTopCardsApiBaseUrl;
   private readonly callSongApiUrl = environment.bingoCallSongApiUrl;
   private readonly checkForWinnerApiBaseUrl = environment.bingoCheckForWinnerApiBaseUrl;
+  private readonly checkForWinner2LinesApiBaseUrl = environment.bingoCheckForWinner2LinesApiBaseUrl;
+  private readonly checkForWinner4CornersApiBaseUrl = environment.bingoCheckForWinner4CornersApiBaseUrl;
+  private readonly checkForWinnerBlackoutApiBaseUrl = environment.bingoCheckForWinnerBlackoutApiBaseUrl;
   private readonly calledSongsApiUrl = environment.bingoCalledSongsApiUrl;
   private readonly callListMasterApiUrl = environment.bingoCallListMasterApiUrl;
   private readonly callListSongsByGciApiUrl = environment.bingoCallListSongsByGciApiUrl;
+  private readonly songsCalledCalculateByGciApiBaseUrl = environment.bingoSongsCalledCalculateByGciApiBaseUrl;
+  private readonly maxGameCardFirstCardApiBaseUrl = environment.bingoMaxGameCardFirstCardApiBaseUrl;
   private readonly callListDropdownApiUrl = environment.bingoCallListDropdownApiUrl;
   private readonly insertCallListMasterApiUrl = environment.bingoInsertCallListMasterApiUrl;
   private readonly insertCallListSongApiUrl = environment.bingoInsertCallListSongApiUrl;
@@ -76,8 +85,23 @@ export class BingoGameService {
     return this.clearAllCalledFlags(gameId);
   }
 
-  getTopCards(gameId: number, topN: number): Observable<BingoTopCard[]> {
-    return this.http.get<unknown>(`${this.topCardsApiBaseUrl}/${gameId}/${topN}`).pipe(
+  getTopCards(
+    gameId: number,
+    topN: number,
+    callListId?: number | null,
+    inning?: number | null
+  ): Observable<BingoTopCard[]> {
+    let params = new HttpParams();
+
+    if (typeof callListId === 'number' && Number.isFinite(callListId)) {
+      params = params.set('callListId', String(callListId));
+    }
+
+    if (typeof inning === 'number' && Number.isFinite(inning)) {
+      params = params.set('inning', String(inning));
+    }
+
+    return this.http.get<unknown>(`${this.topCardsApiBaseUrl}/${gameId}/${topN}`, { params }).pipe(
       map(response => this.normalizeTopCards(response))
     );
   }
@@ -98,6 +122,26 @@ export class BingoGameService {
     return this.http.get<unknown>(`${this.callListSongsByGciApiUrl}/${gameId}/${callListId}/${inning}`).pipe(
       map(response => this.normalizeCallListSongsByGci(response))
     );
+  }
+
+  getSongsCalledCalculateByGci(
+    gameId: number,
+    callListId: number,
+    inning: number
+  ): Observable<BingoSongsCalledCalculateByGci> {
+    return this.http
+      .get<unknown>(`${this.songsCalledCalculateByGciApiBaseUrl}/${gameId}/${callListId}/${inning}`)
+      .pipe(map(response => this.normalizeSongsCalledCalculateByGci(response, gameId, callListId, inning)));
+  }
+
+  getMaxGameCardFirstCard(
+    gameId: number,
+    callListId: number,
+    inning: number
+  ): Observable<BingoMaxGameCardFirstCard> {
+    return this.http
+      .get<unknown>(`${this.maxGameCardFirstCardApiBaseUrl}/${gameId}/${callListId}/${inning}`)
+      .pipe(map(response => this.normalizeMaxGameCardFirstCard(response, gameId, callListId, inning)));
   }
 
   getCallListDropdownOptions(): Observable<LookupOption[]> {
@@ -127,10 +171,39 @@ export class BingoGameService {
     };
   }
 
-  checkForWinner(gameId: number): Observable<BingoWinnerResult> {
-    return this.http.get<unknown>(`${this.checkForWinnerApiBaseUrl}/${gameId}`).pipe(
-      map(response => this.normalizeWinnerResult(response, gameId))
-    );
+  /**
+   * `GET …/Check_ForWinner/{Game_ID}/{Call_List_ID}/{Inning}` — requires valid call list + inning.
+   */
+  checkForWinner(
+    gameId: number,
+    callListId: number | null,
+    inning: number | null
+  ): Observable<BingoWinnerResult> {
+    return this.requestWinnerCheckWithGci(this.checkForWinnerApiBaseUrl, gameId, callListId, inning);
+  }
+
+  checkForWinner2Lines(
+    gameId: number,
+    callListId: number | null,
+    inning: number | null
+  ): Observable<BingoWinnerResult> {
+    return this.requestWinnerCheckWithGci(this.checkForWinner2LinesApiBaseUrl, gameId, callListId, inning);
+  }
+
+  checkForWinner4Corners(
+    gameId: number,
+    callListId: number | null,
+    inning: number | null
+  ): Observable<BingoWinnerResult> {
+    return this.requestWinnerCheckWithGci(this.checkForWinner4CornersApiBaseUrl, gameId, callListId, inning);
+  }
+
+  checkForWinnerBlackout(
+    gameId: number,
+    callListId: number | null,
+    inning: number | null
+  ): Observable<BingoWinnerResult> {
+    return this.requestWinnerCheckWithGci(this.checkForWinnerBlackoutApiBaseUrl, gameId, callListId, inning);
   }
 
   callSongByNumber(
@@ -140,21 +213,39 @@ export class BingoGameService {
     inning?: number | null
   ): Observable<Song | null> {
     const queryParts = [`Game_ID=${gameId}`];
+    const queryParams: Record<string, number> = { Game_ID: gameId, Song_ID: songId };
 
     if (typeof callListId === 'number' && Number.isFinite(callListId)) {
       queryParts.push(`Call_List_ID=${callListId}`);
+      queryParams['Call_List_ID'] = callListId;
     }
 
     if (typeof inning === 'number' && Number.isFinite(inning)) {
       queryParts.push(`Inning=${inning}`);
+      queryParams['Inning'] = inning;
     }
 
     queryParts.push(`Song_ID=${songId}`);
 
     const url = `${this.callSongApiUrl}?${queryParts.join('&')}`;
-    return this.http.get<unknown>(url).pipe(
-      map(response => this.normalizeSongResponse(response, songId))
-    );
+    return defer(() => {
+      if (environment.debugLogging) {
+        console.log(
+          '[BingoGameService] Call_TheSongNumber — single outbound GET (one Song_ID; no JSON body)',
+          JSON.stringify(
+            {
+              method: 'GET',
+              url,
+              body: null,
+              queryParams
+            },
+            null,
+            2
+          )
+        );
+      }
+      return this.http.get<unknown>(url);
+    }).pipe(map(response => this.normalizeSongResponse(response, songId)));
   }
 
   insertCallListSong(payload: BingoCallListSongInsert): Observable<BingoCallListSongInsert> {
@@ -174,11 +265,60 @@ export class BingoGameService {
 
     return {
       GameID: this.asNullableNumber(record['GameID'] ?? record['gameId']) ?? fallbackGameId,
+      CallListID: this.asNullableNumber(record['CallListID'] ?? record['Call_List_ID'] ?? record['callListId']),
+      Inning: this.asNullableNumber(record['Inning'] ?? record['inning']),
       WinningCardID: this.asNullableNumber(record['WinningCardID'] ?? record['winningCardId']),
       WinningPattern: (record['WinningPattern'] ?? record['winningPattern'] ?? null) as string | null,
       PlayerName: (record['PlayerName'] ?? record['playerName'] ?? null) as string | null,
       PlayerEmail: (record['PlayerEmail'] ?? record['playerEmail'] ?? null) as string | null,
+      WinningLineCount: this.asNullableNumber(
+        record['WinningLineCount'] ?? record['winningLineCount'] ?? record['Winning_Line_Count']
+      ),
       Result: (record['Result'] ?? record['result'] ?? null) as string | null
+    };
+  }
+
+  /**
+   * All `Check_ForWinner*` endpoints use `GET {base}/{Game_ID}/{Call_List_ID}/{Inning}` and the same
+   * `BingoWinnerResult` shape (including `Result` with a bingo message when applicable).
+   */
+  private requestWinnerCheckWithGci(
+    apiBaseUrl: string,
+    gameId: number,
+    callListId: number | null,
+    inning: number | null
+  ): Observable<BingoWinnerResult> {
+    if (
+      typeof callListId !== 'number' ||
+      !Number.isInteger(callListId) ||
+      callListId <= 0 ||
+      typeof inning !== 'number' ||
+      !Number.isInteger(inning) ||
+      inning <= 0
+    ) {
+      return of(this.emptyWinnerCheckResult(gameId, callListId, inning));
+    }
+
+    return this.http
+      .get<unknown>(`${apiBaseUrl}/${gameId}/${callListId}/${inning}`)
+      .pipe(map(response => this.normalizeWinnerResult(response, gameId)));
+  }
+
+  private emptyWinnerCheckResult(
+    gameId: number,
+    callListId: number | null,
+    inning: number | null
+  ): BingoWinnerResult {
+    return {
+      GameID: gameId,
+      CallListID: callListId,
+      Inning: inning,
+      WinningCardID: null,
+      WinningPattern: null,
+      PlayerName: null,
+      PlayerEmail: null,
+      WinningLineCount: null,
+      Result: null
     };
   }
 
@@ -301,6 +441,98 @@ export class BingoGameService {
       Inning: this.asNullableNumber(record?.['Inning'] ?? record?.['inning']) ?? fallbackInning ?? null,
       ReturnValue: this.asNullableNumber(record?.['ReturnValue'] ?? record?.['returnValue']) ?? 0
     };
+  }
+
+  private normalizeSongsCalledCalculateByGci(
+    response: unknown,
+    fallbackGameId: number,
+    fallbackCallListId: number,
+    fallbackInning: number
+  ): BingoSongsCalledCalculateByGci {
+    const record = this.unwrapRecord(response) ?? {};
+
+    const rawList = record['CalledSongs'] ?? record['calledSongs'];
+    let calledSongs: BingoCalledSongFromGci[] | undefined;
+    if (Array.isArray(rawList)) {
+      calledSongs = rawList
+        .map(item => this.mapGciCalledSongRow(item))
+        .filter((row): row is BingoCalledSongFromGci => row !== null);
+    }
+
+    return {
+      SongsCalled: this.asNullableNumber(record['SongsCalled'] ?? record['songsCalled']) ?? 0,
+      TotalSongs: this.asNullableNumber(record['TotalSongs'] ?? record['totalSongs']) ?? 0,
+      SongsRemaining: this.asNullableNumber(record['SongsRemaining'] ?? record['songsRemaining']) ?? 0,
+      Game_ID: this.asNullableNumber(record['Game_ID'] ?? record['GameID'] ?? record['gameId']) ?? fallbackGameId,
+      Call_List_ID:
+        this.asNullableNumber(record['Call_List_ID'] ?? record['CallListID'] ?? record['callListId']) ??
+        fallbackCallListId,
+      Inning: this.asNullableNumber(record['Inning'] ?? record['inning']) ?? fallbackInning,
+      CalledSongs: calledSongs
+    };
+  }
+
+  private mapGciCalledSongRow(item: unknown): BingoCalledSongFromGci | null {
+    const row = this.asRecord(item);
+    if (!row) {
+      return null;
+    }
+
+    const songId = this.asNullableNumber(row['song_id'] ?? row['Song_ID'] ?? row['SongID']);
+    if (songId === null) {
+      return null;
+    }
+
+    const inning = this.asNullableNumber(row['Inning'] ?? row['inning']) ?? 0;
+    const callListId = this.asNullableNumber(row['Call_List_ID'] ?? row['CallListID'] ?? row['callListId']) ?? 0;
+
+    return {
+      Inning: inning,
+      Call_List_ID: callListId,
+      song_id: songId,
+      title: this.asString(row['title'] ?? row['Title'], ''),
+      artist: this.asString(row['artist'] ?? row['Artist'], ''),
+      DateTimeStamp: this.asNullableString(row['DateTimeStamp'] ?? row['dateTimeStamp']),
+      ThisNumberAWinner: this.asString(row['ThisNumberAWinner'] ?? row['thisNumberAWinner'], 'False')
+    };
+  }
+
+  private normalizeMaxGameCardFirstCard(
+    response: unknown,
+    fallbackGameId: number,
+    fallbackCallListId: number,
+    fallbackInning: number
+  ): BingoMaxGameCardFirstCard {
+    const r = this.unwrapRecord(response) ?? {};
+    const cols = ['B', 'I', 'N', 'G', 'O'] as const;
+    const rows = [1, 2, 3, 4, 5] as const;
+
+    const header: BingoMaxGameCardHeader = {
+      Card_ID: this.asNullableNumber(r['Card_ID'] ?? r['CardID'] ?? r['cardId']) ?? 0,
+      Game_ID: this.asNullableNumber(r['Game_ID'] ?? r['GameID'] ?? r['gameId']) ?? fallbackGameId,
+      Call_List_ID:
+        this.asNullableNumber(r['Call_List_ID'] ?? r['CallListID'] ?? r['callListId']) ?? fallbackCallListId,
+      Inning: this.asNullableNumber(r['Inning'] ?? r['inning']) ?? fallbackInning,
+      Card_Date_Create: this.asNullableString(r['Card_Date_Create'] ?? r['CardDateCreate'] ?? r['cardDateCreate']),
+      Card_PlayerName: this.asNullableString(r['Card_PlayerName'] ?? r['CardPlayerName'] ?? r['cardPlayerName']),
+      Card_PlayerEmail: this.asNullableString(r['Card_PlayerEmail'] ?? r['CardPlayerEmail'] ?? r['cardPlayerEmail']),
+      PlayCount: this.asNullableNumber(r['PlayCount'] ?? r['playCount']) ?? 0,
+      Card_IsWinner: this.asBoolean(r['Card_IsWinner'] ?? r['CardIsWinner'] ?? r['cardIsWinner']),
+      Card_SeedKey: this.asNullableString(r['Card_SeedKey'] ?? r['CardSeedKey'] ?? r['cardSeedKey']),
+      Card_PrintedAt: this.asNullableString(r['Card_PrintedAt'] ?? r['CardPrintedAt'] ?? r['cardPrintedAt'])
+    };
+
+    const squares: Record<string, number | boolean | null> = {};
+    for (const c of cols) {
+      for (const n of rows) {
+        const songKey = `Sq_${c}${n}`;
+        const calledKey = `${songKey}_Called`;
+        squares[songKey] = this.asNullableNumber(r[songKey]);
+        squares[calledKey] = this.asBoolean(r[calledKey]);
+      }
+    }
+
+    return { ...header, ...squares } as BingoMaxGameCardFirstCard;
   }
 
   private normalizeCalledSongs(response: unknown): BingoCalledSong[] {

@@ -123,20 +123,20 @@
     </div>
     <div class="stats-row">
       <div class="stat-card">
-        <div class="stat-value">{{ playlist().length }}</div>
+        <div class="stat-value">{{ playlistCountDisplay() }}</div>
         <div class="stat-label">In Playlist</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{{ calledCount() }}</div>
-        <div class="stat-label">Called</div>
+        <div class="stat-value">{{ calledCountDisplay() }}</div>
+        <div class="stat-label">{{ gciStatsForContext() ? 'Called' : (playlist().length ? 'Called (list)' : 'Called') }}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{{ remainingCount() }}</div>
+        <div class="stat-value">{{ remainingCountDisplay() }}</div>
         <div class="stat-label">Remaining</div>
       </div>
       <div class="stat-card">
         <div class="stat-value">{{ roundNumber() }}</div>
-        <div class="stat-label">Round</div>
+        <div class="stat-label">Inning</div>
       </div>
     </div>
   </section>
@@ -209,8 +209,66 @@
         }
       </div>
 
+      <div class="winner-check-group" role="group" aria-label="Bingo winner check rule">
+        <div class="winner-check-group__title">Winner check (one rule per inning)</div>
+        <div class="winner-check-options">
+          <label
+            class="winner-check-option"
+            [class.winner-check-option--selected]="winnerCheckMode() === 'standard'"
+          >
+            <input
+              type="checkbox"
+              class="winner-check-option__input"
+              [checked]="winnerCheckMode() === 'standard'"
+              (click)="selectWinnerCheckMode('standard', $event)"
+              (keydown.space)="selectWinnerCheckMode('standard', $event)"
+            />
+            <span class="winner-check-option__name">Check_ForWinner</span>
+          </label>
+          <label
+            class="winner-check-option"
+            [class.winner-check-option--selected]="winnerCheckMode() === 'twoLines'"
+          >
+            <input
+              type="checkbox"
+              class="winner-check-option__input"
+              [checked]="winnerCheckMode() === 'twoLines'"
+              (click)="selectWinnerCheckMode('twoLines', $event)"
+              (keydown.space)="selectWinnerCheckMode('twoLines', $event)"
+            />
+            <span class="winner-check-option__name">Check_ForWinner_2Lines</span>
+          </label>
+          <label
+            class="winner-check-option"
+            [class.winner-check-option--selected]="winnerCheckMode() === 'fourCorners'"
+          >
+            <input
+              type="checkbox"
+              class="winner-check-option__input"
+              [checked]="winnerCheckMode() === 'fourCorners'"
+              (click)="selectWinnerCheckMode('fourCorners', $event)"
+              (keydown.space)="selectWinnerCheckMode('fourCorners', $event)"
+            />
+            <span class="winner-check-option__name">Check_ForWinner_4Corners</span>
+          </label>
+          <label
+            class="winner-check-option"
+            [class.winner-check-option--selected]="winnerCheckMode() === 'blackout'"
+          >
+            <input
+              type="checkbox"
+              class="winner-check-option__input"
+              [checked]="winnerCheckMode() === 'blackout'"
+              (click)="selectWinnerCheckMode('blackout', $event)"
+              (keydown.space)="selectWinnerCheckMode('blackout', $event)"
+            />
+            <span class="winner-check-option__name">Check_ForWinner_Blackout</span>
+          </label>
+        </div>
+      </div>
+
       <!-- Winner Result Area -->
-      <div class="winner-result-area" [class.winner-result-area--bingo]="winnerResult()?.Result === 'BINGO!'" [class.winner-result-area--empty]="!winnerResult()">
+      <div class="winner-result-area" [class.winner-result-area--bingo]="isBingoWinnerResult(winnerResult())" [class.winner-result-area--empty]="!winnerResult()">
         @if (winnerResult(); as winner) {
           <div class="winner-result__headline">{{ winner.Result ?? 'No winner yet' }}</div>
           <div class="winner-result__grid">
@@ -218,6 +276,18 @@
               <span class="winner-result__label">Game ID</span>
               <span class="winner-result__value">{{ winner.GameID }}</span>
             </div>
+            @if (winner.CallListID != null) {
+              <div class="winner-result__row">
+                <span class="winner-result__label">Call list ID</span>
+                <span class="winner-result__value">{{ winner.CallListID }}</span>
+              </div>
+            }
+            @if (winner.Inning != null) {
+              <div class="winner-result__row">
+                <span class="winner-result__label">Inning</span>
+                <span class="winner-result__value">{{ winner.Inning }}</span>
+              </div>
+            }
             <div class="winner-result__row">
               <span class="winner-result__label">Winning Card</span>
               <span class="winner-result__value">{{ winner.WinningCardID ?? '—' }}</span>
@@ -226,6 +296,12 @@
               <span class="winner-result__label">Pattern</span>
               <span class="winner-result__value">{{ winner.WinningPattern ?? '—' }}</span>
             </div>
+            @if (winner.WinningLineCount != null) {
+              <div class="winner-result__row">
+                <span class="winner-result__label">Winning line count</span>
+                <span class="winner-result__value">{{ winner.WinningLineCount }}</span>
+              </div>
+            }
             <div class="winner-result__row">
               <span class="winner-result__label">Player</span>
               <span class="winner-result__value">{{ winner.PlayerName ?? '—' }}</span>
@@ -249,18 +325,22 @@
               <th>Song ID</th>
               <th>Title</th>
               <th>Artist</th>
+              <th>Called at</th>
+              <th>Winner?</th>
             </tr>
           </thead>
           <tbody>
-            @for (song of calledSongs(); track song.song_id; let i = $index) {
+            @for (song of calledSongsForDisplay(); track $index) {
               <tr>
-                <td class="col-num">{{ i + 1 }}</td>
+                <td class="col-num">{{ $index + 1 }}</td>
                 <td class="col-id">{{ song.song_id }}</td>
                 <td class="col-title">{{ song.title }}</td>
                 <td class="col-artist">{{ song.artist }}</td>
+                <td class="col-called-at">{{ formatCalledTimeStamp(song.calledTimeStamp) }}</td>
+                <td class="col-winner">{{ formatWinnerFlag(song.thisNumberAWinner) }}</td>
               </tr>
             } @empty {
-              <tr><td colspan="4" class="empty-msg">No songs called yet.</td></tr>
+              <tr><td colspan="6" class="empty-msg">No songs called yet.</td></tr>
             }
           </tbody>
         </table>
@@ -276,6 +356,16 @@
           <button class="filter-btn danger" (click)="clearPlaylist()" [disabled]="playlist().length === 0">Clear</button>
         </div>
       </div>
+      <div class="playlist-context-bar" aria-label="Playlist uses this call list and inning">
+        <div class="playlist-context-item">
+          <span class="playlist-context-label">Call_List_ID</span>
+          <span class="playlist-context-value">{{ callListId() ?? '—' }}</span>
+        </div>
+        <div class="playlist-context-item">
+          <span class="playlist-context-label">Inning</span>
+          <span class="playlist-context-value">{{ inning() ?? '—' }}</span>
+        </div>
+      </div>
       <div class="song-list">
         @if (playlistLoading()) {
           <div class="empty-msg">Loading playlist songs...</div>
@@ -289,6 +379,8 @@
                 <span class="song-title">{{ song.title }}</span>
                 <span class="song-artist">{{ song.artist }}</span>
                 <span class="song-meta-small">
+                  <span class="song-meta-id">{{ song.song_id }}</span>
+                  <span class="song-meta-small__separator">|</span>
                   {{ song.genre || 'Unknown Genre' }}
                   <span class="song-meta-small__separator">|</span>
                   {{ song.era || 'Unknown Era' }}
@@ -317,6 +409,32 @@
     <!-- Top Cards -->
     <section class="panel top-cards-panel">
       <h2>Top Cards</h2>
+      <div class="call-song-controls top-cards-controls" aria-label="Top cards use this call list and inning">
+        <label class="call-song-field">
+          <span class="call-song-label">Call List ID</span>
+          <input
+            type="number"
+            min="1"
+            [ngModel]="callListId()"
+            (ngModelChange)="updateCallListId($event)"
+            class="filter-input call-id-input"
+            placeholder="Pick Call List ID"
+            aria-label="Call List ID"
+          />
+        </label>
+        <label class="call-song-field">
+          <span class="call-song-label">Inning</span>
+          <input
+            type="number"
+            min="1"
+            [ngModel]="inning()"
+            (ngModelChange)="updateInning($event)"
+            class="filter-input call-id-input"
+            placeholder="Inning"
+            aria-label="Inning"
+          />
+        </label>
+      </div>
       <div class="song-list">
         @for (card of topCards(); track card.CardID; let i = $index) {
           <div class="song-row history-row">

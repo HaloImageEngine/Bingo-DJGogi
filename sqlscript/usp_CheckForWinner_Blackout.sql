@@ -1,3 +1,10 @@
+USE [haloimag_djgogi]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_CheckForWinner_Blackout]    Script Date: 5/13/2026 9:15:28 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- ============================================================
 -- Stored Procedure : dbo.usp_CheckForWinner_Blackout
 -- Database         : haloimag_djgogi
@@ -19,6 +26,8 @@
 -- PARAMETERS:
 --   @Game_ID        INT  -- The Game to check. Must exist in
 --                        -- the Game table.
+--   @Call_List_ID   INT  -- The Call List to filter by
+--   @Inning         INT  -- The Inning to filter by
 --
 -- HOW IT WORKS:
 --   A single WHERE clause checks that all 25 squares on each
@@ -67,7 +76,7 @@
 -- USAGE:
 --   -- Call after every usp_CallSong execution as a Blackout variant:
 --   EXEC dbo.usp_CallSong                  @Game_ID = 1, @Song_ID = 42;
---   EXEC dbo.usp_CheckForWinner_Blackout   @Game_ID = 1;
+--   EXEC dbo.usp_CheckForWinner_Blackout   @Game_ID = 1, @Call_List_ID = 5, @Inning = 3;
 --
 -- RETURNS:
 --   One row per winning card:
@@ -95,9 +104,12 @@
 --
 -- CHANGE LOG:
 --   April 29, 2026 - Initial version created
+--   May 13, 2026   - Added Call_List_ID and Inning parameters
 -- ============================================================
-CREATE PROCEDURE [dbo].[usp_CheckForWinner_Blackout]
-    @Game_ID  INT
+ALTER PROCEDURE [dbo].[usp_CheckForWinner_Blackout]
+    @Game_ID      INT,
+    @Call_List_ID INT,
+    @Inning       INT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -118,6 +130,8 @@ BEGIN
     --   Sq_N3 (FREE) is always 1 so effectively 24 songs
     --   need to land on a single card for a Blackout win.
     --   Grouped by column below for readability.
+    --   
+    --   Now also filters by Call_List_ID and Inning.
     ------------------------------------------------------------
     DECLARE @BlackoutWinners TABLE (
         Card_ID  INT
@@ -127,6 +141,8 @@ BEGIN
     SELECT Card_ID
     FROM   dbo.Cards
     WHERE  Game_ID       = @Game_ID
+      AND  Call_List_ID  = @Call_List_ID
+      AND  Inning        = @Inning
       -- Col B
       AND  Sq_B1_Called  = 1
       AND  Sq_B2_Called  = 1

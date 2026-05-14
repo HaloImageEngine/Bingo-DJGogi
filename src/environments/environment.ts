@@ -3,7 +3,7 @@ const apiBaseUrl = 'https://api.getgogi.com/api/';
 export const environment = {
   production: false,
   debugLogging: true,
-  version: '26.04.16.T', // Update this value as needed
+  version: '26.05.14.T', // Update this value as needed
   ordersRefreshIntervalSeconds: 20,
   slidecardRefreshIntervalSeconds: 30,
   useMockMenuApi: false,
@@ -35,10 +35,15 @@ export const environment = {
   bingoTopCardsApiBaseUrl: `${apiBaseUrl}Bingo/Bingo/Get_Top_Cards`,
   bingoCallSongApiUrl: `${apiBaseUrl}Bingo/Bingo/Call_TheSongNumber`,
   bingoCheckForWinnerApiBaseUrl: `${apiBaseUrl}Bingo/Bingo/Check_ForWinner`,
+  bingoCheckForWinner2LinesApiBaseUrl: `${apiBaseUrl}Bingo/Bingo/Check_ForWinner_2Lines`,
+  bingoCheckForWinner4CornersApiBaseUrl: `${apiBaseUrl}Bingo/Bingo/Check_ForWinner_4Corners`,
+  bingoCheckForWinnerBlackoutApiBaseUrl: `${apiBaseUrl}Bingo/Bingo/Check_ForWinner_Blackout`,
   bingoCalledSongsApiUrl: `${apiBaseUrl}Bingo/Bingo/Get_Called_Songs`,
   bingoCallListMasterApiUrl: `${apiBaseUrl}Bingo/CallList/Get_All_CallList_Master`,
   bingoCallListSongsApiUrl: `${apiBaseUrl}Bingo/CallList/Get_All_CallList_Songs_by_CallList_ID`,
   bingoCallListSongsByGciApiUrl: `${apiBaseUrl}Bingo/CallList/Get_CallList_Songs_byGCI`,
+  bingoSongsCalledCalculateByGciApiBaseUrl: `${apiBaseUrl}Bingo/CallList/Get_Songs_Called_Calculate_by_GCI`,
+  bingoMaxGameCardFirstCardApiBaseUrl: `${apiBaseUrl}Bingo/CallList/Get_MaxGameCard_FirstCard`,
   bingoCallListDropdownApiUrl: `${apiBaseUrl}Bingo/CallList/Get_All_CallList_DropDown`,
   bingoInsertCallListMasterApiUrl: `${apiBaseUrl}Bingo/CallList/Create_CallList_Master`,
   bingoInsertCallListSongApiUrl: `${apiBaseUrl}Bingo/CallList/Insert_CallList_Song`,

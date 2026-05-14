@@ -93,6 +93,12 @@ export const routes: Routes = [
 		canActivate: [AuthGuard]
 	},
 	{
+		path: 'console/card-master',
+		loadComponent: () =>
+			import('./pages/card-master/card-master.component').then(m => m.CardMasterComponent),
+		canActivate: [AuthGuard]
+	},
+	{
 		path: 'console',
 		loadComponent: () =>
 			import('./pages/console/console.component').then(m => m.ConsoleComponent),
