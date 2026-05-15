@@ -74,6 +74,9 @@ export class SlidecardoneComponent {
 
   readonly card = computed(() => this.state().cards[0] ?? null);
 
+  readonly callListId = computed(() => this.consoleContext()?.Call_List_ID ?? null);
+  readonly inning = computed(() => this.consoleContext()?.Inning ?? null);
+
   constructor() {
     const ctx = this.consoleContext();
     const gameId = ctx?.Game_ID ?? null;
@@ -81,6 +84,16 @@ export class SlidecardoneComponent {
     const inning = ctx?.Inning ?? null;
 
     if (gameId === null || callListId === null || inning === null) {
+      return;
+    }
+
+    const storedWinningCardId = this.consoleContextService.getWinningCardIdForContext(
+      gameId,
+      callListId,
+      inning
+    );
+    if (storedWinningCardId !== null) {
+      this.cardId.set(storedWinningCardId);
       return;
     }
 

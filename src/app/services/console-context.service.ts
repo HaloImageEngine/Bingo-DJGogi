@@ -9,9 +9,18 @@ export interface BingoConsoleContext {
   Inning: number | null;
 }
 
+/** Last bingo winner card for the matching Game / Call List / Inning (`bingo_console_winning_card_v1`). */
+export interface BingoWinningCardHold {
+  Game_ID: number;
+  Call_List_ID: number;
+  Inning: number;
+  WinningCardID: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ConsoleContextService {
   private readonly storageKey = 'bingo_console_context_v1';
+  private readonly winningCardStorageKey = 'bingo_console_winning_card_v1';
   private readonly callListService = inject(CallListService);
 
   getContext(): BingoConsoleContext | null {
@@ -52,6 +61,83 @@ export class ConsoleContextService {
   clear(): void {
     if (typeof window === 'undefined') return;
     window.localStorage.removeItem(this.storageKey);
+    window.localStorage.removeItem(this.winningCardStorageKey);
+  }
+
+  /** Persists the winning card when bingo is declared for the current GCI. */
+  setWinningCard(hold: BingoWinningCardHold): void {
+    if (typeof window === 'undefined') return;
+
+    const gameId = this.normalizePositiveInt(hold.Game_ID);
+    const callListId = this.normalizePositiveInt(hold.Call_List_ID);
+    const inning = this.normalizePositiveInt(hold.Inning);
+    const winningCardId = this.normalizePositiveInt(hold.WinningCardID);
+
+    if (gameId === null || callListId === null || inning === null || winningCardId === null) {
+      return;
+    }
+
+    const payload: BingoWinningCardHold = {
+      Game_ID: gameId,
+      Call_List_ID: callListId,
+      Inning: inning,
+      WinningCardID: winningCardId
+    };
+
+    window.localStorage.setItem(this.winningCardStorageKey, JSON.stringify(payload));
+  }
+
+  getWinningCard(): BingoWinningCardHold | null {
+    if (typeof window === 'undefined') return null;
+
+    const raw = window.localStorage.getItem(this.winningCardStorageKey);
+    if (!raw) return null;
+
+    try {
+      const parsed = JSON.parse(raw) as Partial<BingoWinningCardHold>;
+      const gameId = this.normalizePositiveInt(parsed.Game_ID);
+      const callListId = this.normalizePositiveInt(parsed.Call_List_ID);
+      const inning = this.normalizePositiveInt(parsed.Inning);
+      const winningCardId = this.normalizePositiveInt(parsed.WinningCardID);
+
+      if (gameId === null || callListId === null || inning === null || winningCardId === null) {
+        return null;
+      }
+
+      return {
+        Game_ID: gameId,
+        Call_List_ID: callListId,
+        Inning: inning,
+        WinningCardID: winningCardId
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Returns the stored winning card ID only when it matches the given Game / Call List / Inning.
+   */
+  getWinningCardIdForContext(
+    gameId: number | null,
+    callListId: number | null,
+    inning: number | null
+  ): number | null {
+    const hold = this.getWinningCard();
+    if (!hold || gameId === null || callListId === null || inning === null) {
+      return null;
+    }
+
+    if (hold.Game_ID !== gameId || hold.Call_List_ID !== callListId || hold.Inning !== inning) {
+      return null;
+    }
+
+    return hold.WinningCardID;
+  }
+
+  clearWinningCard(): void {
+    if (typeof window === 'undefined') return;
+    window.localStorage.removeItem(this.winningCardStorageKey);
   }
 
   getGameId(): number | null {

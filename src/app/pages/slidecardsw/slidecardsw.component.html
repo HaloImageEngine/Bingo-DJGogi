@@ -101,6 +101,8 @@
 
       <div class="slidecardsw-page__meta surface-card">
         <span>GameID {{ gameId() }}</span>
+        <span>Call list ID {{ callListId() }}</span>
+        <span>Inning {{ inning() }}</span>
         <span>{{ state().cards.length }} cards loaded</span>
         <span>{{ slides().length }} slides</span>
       </div>
@@ -111,7 +113,7 @@
             type="button"
             class="slidecardsw-print__button"
             (click)="printAllCards()"
-            aria-label="Print all bingo card pairs"
+            aria-label="Print all bingo card pairs with Call list ID and Inning on each card"
           >
             Print All Cards
           </button>
@@ -120,7 +122,7 @@
             type="button"
             class="slidecardsw-print__button slidecardsw-print__button--secondary"
             (click)="printAllCardsWithMeta()"
-            aria-label="Print all bingo card pairs with GameID and CardID"
+            aria-label="Print all bingo card pairs with GameID, CardID, Call list ID, and Inning"
           >
             Print All Cards with GAMEID/CARDID
           </button>
@@ -157,6 +159,8 @@
     <ng-template #slidecardswMetaOnly>
       <div class="slidecardsw-page__meta surface-card">
         <span>GameID {{ gameId() }}</span>
+        <span>Call list ID {{ callListId() }}</span>
+        <span>Inning {{ inning() }}</span>
         <span>{{ state().cards.length }} cards loaded</span>
         <span>{{ slides().length }} slides</span>
       </div>
@@ -198,19 +202,26 @@
               </div>
               <div class="slidecardsw-banner-container__sponsor">
                 <p class="slidecardsw-card__print-sponsor-text">{{ sponsorBannerText() }}</p>
+                <p class="slidecardsw-card__print-gci">Call list ID {{ callListId() }} · Inning {{ inning() }}</p>
               </div>
             </div>
 
-            <header
-              class="slidecardsw-card__header slidecardsw-sponsor-container"
-              [class.slidecardsw-card__header--print-meta-hidden]="!showPrintCardMeta()"
-            >
-              <div class="slidecardsw-card__meta" [class.slidecardsw-card__meta--print-hidden]="!showPrintCardMeta()">
-                <p class="slidecardsw-card__eyebrow">GameID {{ card.GameID }}</p>
-                <h2>CardID {{ card.CardID }}</h2>
+            <header class="slidecardsw-card__header slidecardsw-sponsor-container">
+              <div class="slidecardsw-card__meta">
+                <div
+                  class="slidecardsw-card__ids"
+                  [class.slidecardsw-card__ids--print-hidden]="!showPrintCardMeta()"
+                >
+                  <p class="slidecardsw-card__eyebrow">GameID {{ card.GameID }}</p>
+                  <h2>CardID {{ card.CardID }}</h2>
+                </div>
+                <p class="slidecardsw-card__gci">Call list ID {{ callListId() }} · Inning {{ inning() }}</p>
               </div>
               <div class="slidecardsw-sponsor-area" aria-label="Sponsor area placeholder">
-                <div class="slidecardsw-sponsor-banner">{{ sponsorBannerText() }}</div>
+                <div class="slidecardsw-sponsor-banner">
+                  <span class="slidecardsw-sponsor-banner__label">{{ sponsorBannerText() }}</span>
+                  <span class="slidecardsw-sponsor-banner__gci">Call list ID {{ callListId() }} · Inning {{ inning() }}</span>
+                </div>
               </div>
             </header>
 

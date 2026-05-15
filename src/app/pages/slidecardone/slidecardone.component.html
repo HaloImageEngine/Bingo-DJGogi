@@ -29,6 +29,8 @@
 
     <div class="slidecardsw-page__meta surface-card" *ngIf="!state().loading && !state().error && card(); else slidecardoneMetaOnly">
       <span>CardID {{ cardId() }}</span>
+      <span>Call list ID {{ callListId() ?? '—' }}</span>
+      <span>Inning {{ inning() ?? '—' }}</span>
       <span>{{ state().cards.length }} cards loaded</span>
       <span>1 card displayed</span>
     </div>
@@ -36,6 +38,8 @@
     <ng-template #slidecardoneMetaOnly>
       <div class="slidecardsw-page__meta surface-card">
         <span>CardID {{ cardId() }}</span>
+        <span>Call list ID {{ callListId() ?? '—' }}</span>
+        <span>Inning {{ inning() ?? '—' }}</span>
         <span>{{ state().cards.length }} cards loaded</span>
         <span>{{ card() ? 1 : 0 }} card displayed</span>
       </div>
@@ -64,19 +68,26 @@
         </div>
         <div class="slidecardsw-banner-container__sponsor">
           <p class="slidecardsw-card__print-sponsor-text">Card ID {{ cardId() }}</p>
+          <p class="slidecardsw-card__print-gci">Call list ID {{ callListId() ?? '—' }} · Inning {{ inning() ?? '—' }}</p>
         </div>
       </div>
 
-      <header
-        class="slidecardsw-card__header slidecardsw-sponsor-container"
-        [class.slidecardsw-card__header--print-meta-hidden]="!showPrintCardMeta()"
-      >
-        <div class="slidecardsw-card__meta" [class.slidecardsw-card__meta--print-hidden]="!showPrintCardMeta()">
-          <p class="slidecardsw-card__eyebrow">GameID {{ displayedCard.GameID }}</p>
-          <h2>CardID {{ displayedCard.CardID }}</h2>
+      <header class="slidecardsw-card__header slidecardsw-sponsor-container">
+        <div class="slidecardsw-card__meta">
+          <div
+            class="slidecardsw-card__ids"
+            [class.slidecardsw-card__ids--print-hidden]="!showPrintCardMeta()"
+          >
+            <p class="slidecardsw-card__eyebrow">GameID {{ displayedCard.GameID }}</p>
+            <h2>CardID {{ displayedCard.CardID }}</h2>
+          </div>
+          <p class="slidecardsw-card__gci">Call list ID {{ callListId() ?? '—' }} · Inning {{ inning() ?? '—' }}</p>
         </div>
         <div class="slidecardsw-sponsor-area" aria-label="Card id display">
-          <div class="slidecardsw-sponsor-banner">Card ID {{ cardId() }}</div>
+          <div class="slidecardsw-sponsor-banner">
+            <span class="slidecardsw-sponsor-banner__label">Card ID {{ cardId() }}</span>
+            <span class="slidecardsw-sponsor-banner__gci">Call list ID {{ callListId() ?? '—' }} · Inning {{ inning() ?? '—' }}</span>
+          </div>
         </div>
       </header>
 

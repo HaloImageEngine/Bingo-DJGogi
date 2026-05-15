@@ -39,12 +39,12 @@ export class AppComponent implements OnInit {
       title: 'Operations',
       items: [
         { label: 'Console', helper: 'Bingo game console', path: '/console', accent: 'rose', icon: 'BC' },
-        { label: 'Card Master', helper: 'Review printed cards by game', path: '/console/card-master', accent: 'teal', icon: 'CM' },
         { label: 'Create CallList Master', helper: 'Pick songs into a custom list', path: '/console/create-master-withsonglist', accent: 'rose', icon: 'CL' },
         { label: 'Edit CallList Master', helper: 'Edit an existing call list', path: '/console/edit-song-list', accent: 'rose', icon: 'EL' },
         { label: 'Review Call List', helper: 'Review the call list with songs', path: '/console/create-call-list', accent: 'rose', icon: 'RL' },
         { label: 'Slide Cards', helper: 'Landscape swipe card pairs', path: '/slidecards', accent: 'teal', icon: 'SC' },
         { label: 'Slide Card One', helper: 'Single printed bingo card', path: '/slidecardone', accent: 'teal', icon: 'S1' },
+        { label: 'Card Master', helper: 'Review printed cards by game', path: '/console/card-master', accent: 'teal', icon: 'CM' },
         { label: 'Songs', helper: 'Browse bingo song library', path: '/console/songs', accent: 'teal', icon: 'SG' },
         { label: 'Insert Song', helper: 'Add one song with lookup dropdowns', path: '/console/insert-song-single', accent: 'amber', icon: 'IS' },
         { label: 'Bulk Insert', helper: 'Paste JSON to add many songs', path: '/console/insert-song-bulk', accent: 'amber', icon: 'BI' },

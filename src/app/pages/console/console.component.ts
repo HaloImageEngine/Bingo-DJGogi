@@ -477,6 +477,31 @@ export class ConsoleComponent {
     return text.toLowerCase().includes('bingo');
   }
 
+  /** Saves winning card to `bingo_console_winning_card_v1` for Slide Card One default. */
+  private persistWinningCardIfBingo(gameId: number, winner: BingoWinnerResult | null): void {
+    if (!this.isBingoWinnerResult(winner)) {
+      return;
+    }
+
+    const winningCardId = winner?.WinningCardID;
+    if (typeof winningCardId !== 'number' || !Number.isFinite(winningCardId) || winningCardId <= 0) {
+      return;
+    }
+
+    const callListId = this.callListId();
+    const inning = this.inning();
+    if (callListId === null || inning === null) {
+      return;
+    }
+
+    this.consoleContextService.setWinningCard({
+      Game_ID: gameId,
+      Call_List_ID: callListId,
+      Inning: inning,
+      WinningCardID: winningCardId
+    });
+  }
+
   pauseGame(): void {
     this.gameStatus.set('paused');
     this.activeGameService.setActive(false);
@@ -568,6 +593,7 @@ export class ConsoleComponent {
             )
             .subscribe(winner => {
               this.winnerResult.set(winner);
+              this.persistWinningCardIfBingo(gameId, winner);
             });
 
           this.bingoGameService
