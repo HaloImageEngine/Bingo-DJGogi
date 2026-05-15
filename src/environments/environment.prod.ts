@@ -3,7 +3,7 @@ const apiBaseUrl = 'https://api.getgogi.com/api/';
 export const environment = {
   production: true,
   debugLogging: false,
-  version: '26.05.14.P', // Update this value as needed
+  version: '26.05.15.13.P', // Update this value as needed
   ordersRefreshIntervalSeconds: 20,
   slidecardRefreshIntervalSeconds: 30,
   useMockMenuApi: false,
@@ -38,6 +38,7 @@ export const environment = {
   bingoCheckForWinner2LinesApiBaseUrl: `${apiBaseUrl}Bingo/Bingo/Check_ForWinner_2Lines`,
   bingoCheckForWinner4CornersApiBaseUrl: `${apiBaseUrl}Bingo/Bingo/Check_ForWinner_4Corners`,
   bingoCheckForWinnerBlackoutApiBaseUrl: `${apiBaseUrl}Bingo/Bingo/Check_ForWinner_Blackout`,
+  bingoUpsertCallListWinnerApiBaseUrl: `${apiBaseUrl}Bingo/Bingo/Upsert_CallList_Winner`,
   bingoCalledSongsApiUrl: `${apiBaseUrl}Bingo/Bingo/Get_Called_Songs`,
   bingoCallListMasterApiUrl: `${apiBaseUrl}Bingo/CallList/Get_All_CallList_Master`,
   bingoCallListSongsApiUrl: `${apiBaseUrl}Bingo/CallList/Get_All_CallList_Songs_by_CallList_ID`,

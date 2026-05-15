@@ -15,6 +15,8 @@ import {
   BingoMaxGameCardHeader,
   BingoSongsCalledCalculateByGci,
   BingoTopCard,
+  BingoUpsertCallListWinnerParams,
+  BingoUpsertCallListWinnerResult,
   BingoWinnerResult
 } from '../models/bingo-game.model';
 import { LookupOption } from '../models/lookup-option.model';
@@ -31,6 +33,7 @@ export class BingoGameService {
   private readonly checkForWinner2LinesApiBaseUrl = environment.bingoCheckForWinner2LinesApiBaseUrl;
   private readonly checkForWinner4CornersApiBaseUrl = environment.bingoCheckForWinner4CornersApiBaseUrl;
   private readonly checkForWinnerBlackoutApiBaseUrl = environment.bingoCheckForWinnerBlackoutApiBaseUrl;
+  private readonly upsertCallListWinnerApiBaseUrl = environment.bingoUpsertCallListWinnerApiBaseUrl;
   private readonly calledSongsApiUrl = environment.bingoCalledSongsApiUrl;
   private readonly callListMasterApiUrl = environment.bingoCallListMasterApiUrl;
   private readonly callListSongsByGciApiUrl = environment.bingoCallListSongsByGciApiUrl;
@@ -172,38 +175,86 @@ export class BingoGameService {
   }
 
   /**
-   * `GET …/Check_ForWinner/{Game_ID}/{Call_List_ID}/{Inning}` — requires valid call list + inning.
+   * `GET …/Check_ForWinner/{Game_ID}/{Call_List_ID}/{Inning}/{NumOfSongsCalled}` — requires valid GCI + songs-called count.
    */
   checkForWinner(
     gameId: number,
     callListId: number | null,
-    inning: number | null
+    inning: number | null,
+    numOfSongsCalled: number
   ): Observable<BingoWinnerResult> {
-    return this.requestWinnerCheckWithGci(this.checkForWinnerApiBaseUrl, gameId, callListId, inning);
+    return this.requestWinnerCheckWithGci(
+      this.checkForWinnerApiBaseUrl,
+      gameId,
+      callListId,
+      inning,
+      numOfSongsCalled
+    );
   }
 
   checkForWinner2Lines(
     gameId: number,
     callListId: number | null,
-    inning: number | null
+    inning: number | null,
+    numOfSongsCalled: number
   ): Observable<BingoWinnerResult> {
-    return this.requestWinnerCheckWithGci(this.checkForWinner2LinesApiBaseUrl, gameId, callListId, inning);
+    return this.requestWinnerCheckWithGci(
+      this.checkForWinner2LinesApiBaseUrl,
+      gameId,
+      callListId,
+      inning,
+      numOfSongsCalled
+    );
   }
 
   checkForWinner4Corners(
     gameId: number,
     callListId: number | null,
-    inning: number | null
+    inning: number | null,
+    numOfSongsCalled: number
   ): Observable<BingoWinnerResult> {
-    return this.requestWinnerCheckWithGci(this.checkForWinner4CornersApiBaseUrl, gameId, callListId, inning);
+    return this.requestWinnerCheckWithGci(
+      this.checkForWinner4CornersApiBaseUrl,
+      gameId,
+      callListId,
+      inning,
+      numOfSongsCalled
+    );
   }
 
   checkForWinnerBlackout(
     gameId: number,
     callListId: number | null,
-    inning: number | null
+    inning: number | null,
+    numOfSongsCalled: number
   ): Observable<BingoWinnerResult> {
-    return this.requestWinnerCheckWithGci(this.checkForWinnerBlackoutApiBaseUrl, gameId, callListId, inning);
+    return this.requestWinnerCheckWithGci(
+      this.checkForWinnerBlackoutApiBaseUrl,
+      gameId,
+      callListId,
+      inning,
+      numOfSongsCalled
+    );
+  }
+
+  /**
+   * `POST …/Upsert_CallList_Winner/{Game_ID}/{Call_List_ID}/{Inning}/{Call_List_WinningCard}/{NumofSongsCalled}?winningPattern=…`
+   */
+  upsertCallListWinner(
+    gameId: number,
+    callListId: number,
+    inning: number,
+    callListWinningCard: number,
+    numOfSongsCalled: number,
+    winningPattern: string
+  ): Observable<BingoUpsertCallListWinnerResult> {
+    const params = new HttpParams().set('winningPattern', winningPattern.trim());
+    const url =
+      `${this.upsertCallListWinnerApiBaseUrl}/${gameId}/${callListId}/${inning}/${callListWinningCard}/${numOfSongsCalled}`;
+
+    return this.http.post<unknown>(url, null, { params }).pipe(
+      map(response => this.normalizeUpsertCallListWinnerResult(response))
+    );
   }
 
   callSongByNumber(
@@ -260,6 +311,15 @@ export class BingoGameService {
     );
   }
 
+  private normalizeUpsertCallListWinnerResult(response: unknown): BingoUpsertCallListWinnerResult {
+    const record = this.unwrapRecord(response) ?? {};
+    const message = record['Message'] ?? record['message'];
+
+    return {
+      Message: typeof message === 'string' && message.trim().length > 0 ? message.trim() : 'OK'
+    };
+  }
+
   private normalizeWinnerResult(response: unknown, fallbackGameId: number): BingoWinnerResult {
     const record = this.unwrapRecord(response) ?? {};
 
@@ -274,19 +334,23 @@ export class BingoGameService {
       WinningLineCount: this.asNullableNumber(
         record['WinningLineCount'] ?? record['winningLineCount'] ?? record['Winning_Line_Count']
       ),
+      NumOfSongsCalled: this.asNullableNumber(
+        record['NumOfSongsCalled'] ?? record['NumofSongsCalled'] ?? record['numOfSongsCalled']
+      ),
       Result: (record['Result'] ?? record['result'] ?? null) as string | null
     };
   }
 
   /**
-   * All `Check_ForWinner*` endpoints use `GET {base}/{Game_ID}/{Call_List_ID}/{Inning}` and the same
+   * All `Check_ForWinner*` endpoints use `GET {base}/{Game_ID}/{Call_List_ID}/{Inning}/{NumOfSongsCalled}` and the same
    * `BingoWinnerResult` shape (including `Result` with a bingo message when applicable).
    */
   private requestWinnerCheckWithGci(
     apiBaseUrl: string,
     gameId: number,
     callListId: number | null,
-    inning: number | null
+    inning: number | null,
+    numOfSongsCalled: number
   ): Observable<BingoWinnerResult> {
     if (
       typeof callListId !== 'number' ||
@@ -294,20 +358,23 @@ export class BingoGameService {
       callListId <= 0 ||
       typeof inning !== 'number' ||
       !Number.isInteger(inning) ||
-      inning <= 0
+      inning <= 0 ||
+      !Number.isInteger(numOfSongsCalled) ||
+      numOfSongsCalled < 0
     ) {
-      return of(this.emptyWinnerCheckResult(gameId, callListId, inning));
+      return of(this.emptyWinnerCheckResult(gameId, callListId, inning, numOfSongsCalled));
     }
 
     return this.http
-      .get<unknown>(`${apiBaseUrl}/${gameId}/${callListId}/${inning}`)
+      .get<unknown>(`${apiBaseUrl}/${gameId}/${callListId}/${inning}/${numOfSongsCalled}`)
       .pipe(map(response => this.normalizeWinnerResult(response, gameId)));
   }
 
   private emptyWinnerCheckResult(
     gameId: number,
     callListId: number | null,
-    inning: number | null
+    inning: number | null,
+    numOfSongsCalled: number | null = null
   ): BingoWinnerResult {
     return {
       GameID: gameId,
@@ -318,6 +385,7 @@ export class BingoGameService {
       PlayerName: null,
       PlayerEmail: null,
       WinningLineCount: null,
+      NumOfSongsCalled: numOfSongsCalled,
       Result: null
     };
   }

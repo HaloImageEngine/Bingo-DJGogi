@@ -456,15 +456,16 @@ export class ConsoleComponent {
   private checkWinnerForActiveMode(gameId: number): Observable<BingoWinnerResult> {
     const callListId = this.callListId();
     const inning = this.inning();
+    const numOfSongsCalled = this.numOfSongsCalledForWinnerUpsert();
     switch (this.winnerCheckMode()) {
       case 'standard':
-        return this.bingoGameService.checkForWinner(gameId, callListId, inning);
+        return this.bingoGameService.checkForWinner(gameId, callListId, inning, numOfSongsCalled);
       case 'twoLines':
-        return this.bingoGameService.checkForWinner2Lines(gameId, callListId, inning);
+        return this.bingoGameService.checkForWinner2Lines(gameId, callListId, inning, numOfSongsCalled);
       case 'fourCorners':
-        return this.bingoGameService.checkForWinner4Corners(gameId, callListId, inning);
+        return this.bingoGameService.checkForWinner4Corners(gameId, callListId, inning, numOfSongsCalled);
       case 'blackout':
-        return this.bingoGameService.checkForWinnerBlackout(gameId, callListId, inning);
+        return this.bingoGameService.checkForWinnerBlackout(gameId, callListId, inning, numOfSongsCalled);
     }
   }
 
@@ -477,7 +478,24 @@ export class ConsoleComponent {
     return text.toLowerCase().includes('bingo');
   }
 
-  /** Saves winning card to `bingo_console_winning_card_v1` for Slide Card One default. */
+  /** Songs-called count for `Upsert_CallList_Winner` (`NumofSongsCalled`). */
+  private numOfSongsCalledForWinnerUpsert(): number {
+    const gci = this.gciStatsForContext();
+    if (gci && Number.isFinite(gci.SongsCalled) && gci.SongsCalled >= 0) {
+      return gci.SongsCalled;
+    }
+
+    const displayed = this.calledSongsForDisplay();
+    if (displayed.length > 0) {
+      return displayed.length;
+    }
+
+    return this.calledSongs().length;
+  }
+
+  /**
+   * On bingo: save winning card for Slide Card One, then `Upsert_CallList_Winner` for `CallList_Winner` table.
+   */
   private persistWinningCardIfBingo(gameId: number, winner: BingoWinnerResult | null): void {
     if (!this.isBingoWinnerResult(winner)) {
       return;
@@ -500,6 +518,22 @@ export class ConsoleComponent {
       Inning: inning,
       WinningCardID: winningCardId
     });
+
+    const winningPattern =
+      winner?.WinningPattern?.trim() || winner?.Result?.trim() || 'Bingo';
+    const numOfSongsCalled = this.numOfSongsCalledForWinnerUpsert();
+
+    this.bingoGameService
+      .upsertCallListWinner(gameId, callListId, inning, winningCardId, numOfSongsCalled, winningPattern)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: result => {
+          if (environment.debugLogging) {
+            console.log('[Console] Upsert_CallList_Winner', result.Message);
+          }
+        },
+        error: err => console.error('Upsert_CallList_Winner failed', err)
+      });
   }
 
   pauseGame(): void {

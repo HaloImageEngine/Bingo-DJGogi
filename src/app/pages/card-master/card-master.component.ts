@@ -5,9 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { catchError, finalize, of } from 'rxjs';
 
-import { PrintedCard } from '../../models/printed-card.model';
+import { PrintedCard, PrintedCardSquare } from '../../models/printed-card.model';
 import { ConsoleContextService } from '../../services/console-context.service';
 import { PrintedCardsService } from '../../services/printed-cards.service';
+
+export type CardMasterTab = 'tab1' | 'tab2' | 'tab3';
 
 @Component({
   selector: 'app-card-master',
@@ -32,8 +34,48 @@ export class CardMasterComponent implements OnInit {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly hasQueried = signal(false);
+  readonly activeTab = signal<CardMasterTab>('tab1');
+  readonly expandedCardId = signal<number | null>(null);
 
   readonly trackByCardId = (_index: number, card: PrintedCard) => card.CardID;
+
+  selectTab(tab: CardMasterTab): void {
+    this.activeTab.set(tab);
+  }
+
+  toggleCardRow(card: PrintedCard, event?: Event): void {
+    event?.stopPropagation();
+    this.expandedCardId.update(id => (id === card.CardID ? null : card.CardID));
+  }
+
+  isCardExpanded(cardId: number): boolean {
+    return this.expandedCardId() === cardId;
+  }
+
+  /** 5×5 rows in `SquarePosition` order (1–25). */
+  getSquareGrid(card: PrintedCard): PrintedCardSquare[][] {
+    const sorted = [...card.Squares].sort((a, b) => a.SquarePosition - b.SquarePosition);
+    const grid: PrintedCardSquare[][] = [];
+
+    for (let i = 0; i < sorted.length; i += 5) {
+      grid.push(sorted.slice(i, i + 5));
+    }
+
+    return grid;
+  }
+
+  songNumberLabel(square: PrintedCardSquare): string {
+    if (square.IsFreeSpace) {
+      return 'FREE';
+    }
+
+    const songId = square.Song?.SongID;
+    if (typeof songId === 'number' && Number.isFinite(songId)) {
+      return String(songId);
+    }
+
+    return '—';
+  }
 
   setGameIdFromInput(value: unknown): void {
     const n = typeof value === 'string' ? Number.parseInt(value, 10) : Number(value);
@@ -95,6 +137,8 @@ export class CardMasterComponent implements OnInit {
     this.error.set(null);
     this.loading.set(true);
     this.hasQueried.set(true);
+    this.expandedCardId.set(null);
+    this.activeTab.set('tab1');
 
     this.printedCardsService
       .getPrintedCardsByGameId(gid, {

@@ -13,7 +13,7 @@ export interface BingoTopCard {
 
 export interface BingoWinnerResult {
   GameID: number;
-  /** Present when API returns `Check_ForWinner/{Game}/{CallList}/{Inning}` payload. */
+  /** Present when API returns `Check_ForWinner/{Game}/{CallList}/{Inning}/{NumOfSongsCalled}` payload. */
   CallListID?: number | null;
   Inning?: number | null;
   WinningCardID: number | null;
@@ -21,7 +21,29 @@ export interface BingoWinnerResult {
   PlayerName: string | null;
   PlayerEmail: string | null;
   WinningLineCount?: number | null;
+  NumOfSongsCalled?: number | null;
   Result: string | null;
+}
+
+/**
+ * Path/query mapping for `Upsert_CallList_Winner`:
+ * `{Game_ID}/{Call_List_ID}/{Inning}/{Call_List_WinningCard}/{NumofSongsCalled}?winningPattern={Call_List_WinningPattern}`
+ */
+export interface BingoUpsertCallListWinnerParams {
+  Game_ID: number;
+  Call_List_ID: number;
+  Inning: number;
+  Call_List_WinningCard: number;
+  Call_List_WinningPattern: string;
+  NumofSongsCalled: number;
+}
+
+/**
+ * Response from `Upsert_CallList_Winner/{Game_ID}/{Call_List_ID}/{Inning}/{Call_List_WinningCard}/{NumofSongsCalled}?winningPattern=…`
+ * Maps to `CallList_Winner`: Game_ID, Call_List_ID, Inning, Call_List_WinningCard, Call_List_WinningPattern, NumofSongsCalled.
+ */
+export interface BingoUpsertCallListWinnerResult {
+  Message: string;
 }
 
 export interface BingoCalledSong {

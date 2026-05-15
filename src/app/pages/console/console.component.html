@@ -27,21 +27,6 @@
     </div>
   </header>
 
-  <!-- Now Playing -->
-  <section class="now-playing" *ngIf="currentSong() as song">
-    <div class="now-playing-label">NOW PLAYING</div>
-    <div class="now-playing-info">
-      <span class="now-playing-title">{{ song.title }}</span>
-      <span class="now-playing-artist">{{ song.artist }}</span>
-    </div>
-    <div class="now-playing-meta">
-      <span class="meta-chip">{{ song.genre }}</span>
-      <span class="meta-chip">{{ song.decade }}</span>
-      <span class="meta-chip">{{ song.bingo_category }}</span>
-      <span class="meta-chip">{{ formatDuration(song.duration_seconds) }}</span>
-    </div>
-  </section>
-
   <!-- Game Controls -->
   <section class="game-controls">
     <div class="control-row">
@@ -122,6 +107,17 @@
       </div>
     </div>
     <div class="stats-row">
+      <section class="now-playing" [class.now-playing--empty]="!currentSong()">
+        <span class="now-playing-label">Now Playing</span>
+        @if (currentSong(); as song) {
+          <span class="now-playing-main">
+            <span class="now-playing-title" [title]="song.title">{{ song.title }}</span>
+            <span class="now-playing-artist" [title]="song.artist">{{ song.artist }}</span>
+          </span>
+        } @else {
+          <span class="now-playing-idle">—</span>
+        }
+      </section>
       <div class="stat-card">
         <div class="stat-value">{{ playlistCountDisplay() }}</div>
         <div class="stat-label">In Playlist</div>
@@ -267,50 +263,32 @@
         </div>
       </div>
 
-      <!-- Winner Result Area -->
-      <div class="winner-result-area" [class.winner-result-area--bingo]="isBingoWinnerResult(winnerResult())" [class.winner-result-area--empty]="!winnerResult()">
+      <!-- Bingo Alert -->
+      <div
+        class="winner-result-area"
+        role="status"
+        aria-label="Bingo alert"
+        [class.winner-result-area--bingo]="isBingoWinnerResult(winnerResult())"
+        [class.winner-result-area--empty]="!winnerResult()"
+      >
         @if (winnerResult(); as winner) {
-          <div class="winner-result__headline">{{ winner.Result ?? 'No winner yet' }}</div>
-          <div class="winner-result__grid">
-            <div class="winner-result__row">
-              <span class="winner-result__label">Game ID</span>
+          <section class="winner-result__table">
+            <section class="winner-result__headings" aria-hidden="true">
+              <span class="winner-result__heading">Game Id</span>
+              <span class="winner-result__heading">Call List ID</span>
+              <span class="winner-result__heading">Inning</span>
+              <span class="winner-result__heading">Winning Card</span>
+              <span class="winner-result__heading">Pattern</span>
+            </section>
+            <section class="winner-result__values">
               <span class="winner-result__value">{{ winner.GameID }}</span>
-            </div>
-            @if (winner.CallListID != null) {
-              <div class="winner-result__row">
-                <span class="winner-result__label">Call list ID</span>
-                <span class="winner-result__value">{{ winner.CallListID }}</span>
-              </div>
-            }
-            @if (winner.Inning != null) {
-              <div class="winner-result__row">
-                <span class="winner-result__label">Inning</span>
-                <span class="winner-result__value">{{ winner.Inning }}</span>
-              </div>
-            }
-            <div class="winner-result__row">
-              <span class="winner-result__label">Winning Card</span>
+              <span class="winner-result__value">{{ winner.CallListID ?? '—' }}</span>
+              <span class="winner-result__value">{{ winner.Inning ?? '—' }}</span>
               <span class="winner-result__value">{{ winner.WinningCardID ?? '—' }}</span>
-            </div>
-            <div class="winner-result__row">
-              <span class="winner-result__label">Pattern</span>
               <span class="winner-result__value">{{ winner.WinningPattern ?? '—' }}</span>
-            </div>
-            @if (winner.WinningLineCount != null) {
-              <div class="winner-result__row">
-                <span class="winner-result__label">Winning line count</span>
-                <span class="winner-result__value">{{ winner.WinningLineCount }}</span>
-              </div>
-            }
-            <div class="winner-result__row">
-              <span class="winner-result__label">Player</span>
-              <span class="winner-result__value">{{ winner.PlayerName ?? '—' }}</span>
-            </div>
-            <div class="winner-result__row">
-              <span class="winner-result__label">Email</span>
-              <span class="winner-result__value">{{ winner.PlayerEmail ?? '—' }}</span>
-            </div>
-          </div>
+            </section>
+            <p class="winner-result__status">{{ winner.Result ?? 'No winner yet' }}</p>
+          </section>
         } @else {
           <span class="winner-result__placeholder">Winner check results will appear here after calling a song.</span>
         }
