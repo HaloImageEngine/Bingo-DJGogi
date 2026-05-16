@@ -1,0 +1,113 @@
+<section class="clsong-review-page">
+  <header class="clsong-review-page__header">
+    <section class="clsong-review-page__hero">
+      <a routerLink="/console" class="clsong-review-page__back">&larr; Back to Console</a>
+      <h1>Call List Song Review</h1>
+      <p class="clsong-review-page__copy">
+        Load all call-list songs grouped by inning. Game_ID and Call_List_ID drive the API; Inning highlights the
+        active column.
+      </p>
+    </section>
+  </header>
+
+  <section class="clsong-review-controls">
+    <section class="clsong-review-controls__grid">
+      <label class="clsong-review-field">
+        <span>Game_ID</span>
+        <input
+          type="number"
+          min="1"
+          step="1"
+          [ngModel]="gameId()"
+          (ngModelChange)="setGameIdFromInput($event)"
+          aria-label="Game ID" />
+      </label>
+      <label class="clsong-review-field">
+        <span>Call_List_ID</span>
+        <input
+          type="number"
+          min="1"
+          step="1"
+          [ngModel]="callListId() ?? ''"
+          (ngModelChange)="setCallListIdFromInput($event)"
+          placeholder="Required"
+          aria-label="Call List ID" />
+      </label>
+      <label class="clsong-review-field">
+        <span>Inning</span>
+        <input
+          type="number"
+          min="1"
+          max="4"
+          step="1"
+          [ngModel]="inning()"
+          (ngModelChange)="setInningFromInput($event); applyInningHighlight()"
+          aria-label="Inning" />
+      </label>
+      <section class="clsong-review-controls__actions">
+        <button
+          type="button"
+          class="clsong-review-btn clsong-review-btn--primary"
+          (click)="loadSongs()"
+          [disabled]="loading()">
+          {{ loading() ? 'Loading…' : 'Load Songs' }}
+        </button>
+      </section>
+    </section>
+    <p class="clsong-review-controls__hint">
+      API: <code>Get_Call_List_Songs_by4Inning/{{ gameId() }}/{{ callListId() ?? '…' }}</code>
+    </p>
+  </section>
+
+  @if (error(); as err) {
+    <p class="clsong-review-message clsong-review-message--error">{{ err }}</p>
+  }
+  @if (!error() && loadMessage(); as msg) {
+    <p class="clsong-review-message clsong-review-message--success">{{ msg }}</p>
+  }
+
+  <section class="clsong-review-board" aria-label="Songs by inning">
+    @if (loading()) {
+      <p class="clsong-review-board__state">Loading call list songs…</p>
+    } @else if (!hasLoaded()) {
+      <p class="clsong-review-board__state">Enter Game_ID and Call_List_ID, then load songs.</p>
+    }
+    @if (!loading() && hasLoaded() && columnView(); as view) {
+      <div class="clsong-review-columns">
+        @for (column of view.columns; track trackByColumn($index, column)) {
+          <section
+            class="clsong-review-column"
+            [class.clsong-review-column--active]="column.isActive"
+            [attr.aria-label]="column.label">
+            <header class="clsong-review-column__head">
+              <h2>{{ column.label }}</h2>
+              <span class="clsong-review-column__count">{{ column.songCount }} songs</span>
+            </header>
+            <div class="clsong-review-column__body">
+              @if (column.songs.length === 0) {
+                <p class="clsong-review-column__empty">No songs in this inning.</p>
+              } @else {
+                <ul class="clsong-review-song-list">
+                  @for (song of column.songs; track trackBySong($index, song)) {
+                    <li class="clsong-review-song">
+                      <span class="clsong-review-song__id">#{{ song.songId }}</span>
+                      <strong class="clsong-review-song__title">{{ song.title }}</strong>
+                      <span class="clsong-review-song__detail">{{ song.detailLine }}</span>
+                      <span class="clsong-review-song__meta">
+                        <span class="clsong-review-chip">{{ song.genre || 'Unknown genre' }}</span>
+                        <span class="clsong-review-chip clsong-review-chip--muted">
+                          {{ song.lastPlayed ? (song.lastPlayed | date: 'MM/dd/yy') : 'Not played' }}
+                        </span>
+                      </span>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </section>
+        }
+      </div>
+    }
+  </section>
+</section>
+

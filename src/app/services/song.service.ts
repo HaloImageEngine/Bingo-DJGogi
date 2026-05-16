@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
 import { environment } from '../../environments/environment';
+import { BingoCallListSong, BingoCallListSongsBy4Inning } from '../models/bingo-game.model';
 import { LookupOption } from '../models/lookup-option.model';
 import { ModelSongDisplay } from '../models/model-song-display.model';
 import { ModelSongInsertResult } from '../models/model-song-insert-result.model';
@@ -21,6 +22,16 @@ export class SongService {
   private readonly eraUrl = environment.bingoEraApiUrl;
   private readonly streamingEraUrl = environment.bingoStreamingEraApiUrl;
   private readonly difficultyUrl = environment.bingoDifficultyApiUrl;
+  private readonly callListSongsBy4InningApiBaseUrl = environment.bingoCallListSongsBy4InningApiBaseUrl;
+
+  /**
+   * `GET …/Get_Call_List_Songs_by4Inning/{Game_ID}/{Call_List_ID}`
+   */
+  getCallListSongsBy4Inning(gameId: number, callListId: number): Observable<BingoCallListSongsBy4Inning> {
+    return this.http
+      .get<unknown>(`${this.callListSongsBy4InningApiBaseUrl}/${gameId}/${callListId}`)
+      .pipe(map(response => this.normalizeCallListSongsBy4Inning(response)));
+  }
 
   getSongs(): Observable<ModelSongDisplay[]> {
     return this.http.get(this.getAllSongsUrl, { responseType: 'text' }).pipe(
@@ -108,6 +119,57 @@ export class SongService {
     } catch {
       return [];
     }
+  }
+
+  private normalizeCallListSongsBy4Inning(response: unknown): BingoCallListSongsBy4Inning {
+    const record = this.asRecord(response) ?? {};
+
+    return {
+      Inning1: this.normalizeCallListSongs(record['Inning1']),
+      Inning2: this.normalizeCallListSongs(record['Inning2']),
+      Inning3: this.normalizeCallListSongs(record['Inning3']),
+      Inning4: this.normalizeCallListSongs(record['Inning4'])
+    };
+  }
+
+  private normalizeCallListSongs(response: unknown): BingoCallListSong[] {
+    const items = Array.isArray(response) ? response : this.extractCollection(response);
+
+    return items
+      .map(item => this.mapCallListSong(item))
+      .filter((item): item is BingoCallListSong => item !== null);
+  }
+
+  private mapCallListSong(item: unknown): BingoCallListSong | null {
+    const record = this.asRecord(item);
+
+    if (!record) {
+      return null;
+    }
+
+    const songId = this.asNullableNumber(record['song_id'] ?? record['SongID'] ?? record['Song_ID']);
+    const callListId = this.asNullableNumber(record['Call_List_ID'] ?? record['CallListID']);
+
+    if (songId === null || callListId === null) {
+      return null;
+    }
+
+    return {
+      song_id: songId,
+      Call_List_ID: callListId,
+      inning: this.asNullableNumber(record['inning'] ?? record['Inning']),
+      title: this.asString(record['title'] ?? record['Title']),
+      artist: this.asString(record['artist'] ?? record['Artist']),
+      featured_artist: this.asCallListNullableString(record['featured_artist'] ?? record['FeaturedArtist']),
+      lead_vocalist: this.asCallListNullableString(record['lead_vocalist'] ?? record['LeadVocalist']),
+      artist_type: this.asCallListNullableString(record['artist_type'] ?? record['ArtistType']),
+      genre: this.asCallListNullableString(record['genre'] ?? record['Genre']),
+      explicit: this.asBoolean(record['explicit'] ?? record['Explicit']),
+      release_year: this.asNullableNumber(record['release_year'] ?? record['ReleaseYear']),
+      decade: this.asCallListNullableString(record['decade'] ?? record['Decade']),
+      era: this.asCallListNullableString(record['era'] ?? record['Era']),
+      last_played: this.asCallListNullableString(record['last_played'] ?? record['LastPlayed'])
+    };
   }
 
   private normalizeLookupOptions(response: unknown): LookupOption[] {
@@ -294,8 +356,20 @@ export class SongService {
     return value !== null && typeof value === 'object' ? value as Record<string, unknown> : null;
   }
 
+  private asString(value: unknown, fallback = ''): string {
+    return typeof value === 'string' ? value : fallback;
+  }
+
   private asNullableString(value: unknown): string | null {
     return typeof value === 'string' && value.trim().length > 0 ? value : null;
+  }
+
+  private asCallListNullableString(value: unknown): string | null {
+    if (value === null) {
+      return null;
+    }
+
+    return typeof value === 'string' ? value : null;
   }
 
   private asNullableNumber(value: unknown): number | null {

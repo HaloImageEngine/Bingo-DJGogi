@@ -99,6 +99,18 @@ export const routes: Routes = [
 		canActivate: [AuthGuard]
 	},
 	{
+		path: 'console/game-master',
+		loadComponent: () =>
+			import('./pages/game-master/game-master.component').then(m => m.GameMasterComponent),
+		canActivate: [AuthGuard]
+	},
+	{
+		path: 'console/clsong-review',
+		loadComponent: () =>
+			import('./pages/clsong-review/clsong-review.component').then(m => m.ClsongReviewComponent),
+		canActivate: [AuthGuard]
+	},
+	{
 		path: 'console',
 		loadComponent: () =>
 			import('./pages/console/console.component').then(m => m.ConsoleComponent),

@@ -186,6 +186,14 @@ export interface BingoCallListSongByGci {
   last_played: string | null;
 }
 
+/** `GET …/Get_Call_List_Songs_by4Inning/{Game_ID}/{Call_List_ID}` */
+export interface BingoCallListSongsBy4Inning {
+  Inning1: BingoCallListSong[];
+  Inning2: BingoCallListSong[];
+  Inning3: BingoCallListSong[];
+  Inning4: BingoCallListSong[];
+}
+
 export interface CallListBuildResult {
   master: BingoCallListMaster;
   songs: BingoCallListSong[];
